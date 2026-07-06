@@ -262,6 +262,14 @@
 .reveal .handshake .msg.s2c { align-self: flex-end; text-align: right; background: var(--surface); border: 1px solid var(--hairline); color: var(--ink-muted); }
 .reveal .handshake .msg.get { background: rgba(230,96,0,0.12); border-color: rgba(230,96,0,0.38); color: #a5430b; font-weight: 700; }
 
+/* ---- Attempt timeline: dots on an axis with time + attempt labels ---- */
+.reveal .timeline { position: relative; height: 82px; margin: 1.1em 0 0.3em; }
+.reveal .timeline .base { position: absolute; left: 1%; right: 1%; top: 44px; height: 2px; background: var(--hairline); }
+.reveal .timeline .m { position: absolute; top: 37px; transform: translateX(-50%); text-align: center; }
+.reveal .timeline .m .dot { width: 15px; height: 15px; border-radius: 50%; background: var(--accent); margin: 0 auto; border: 2px solid var(--surface); box-shadow: 0 0 0 1px rgba(230,96,0,0.4); }
+.reveal .timeline .m .t { font-size: 0.42em; color: var(--ink-muted); margin-top: 8px; white-space: nowrap; }
+.reveal .timeline .m .a { font-size: 0.42em; font-weight: 700; color: var(--accent); white-space: nowrap; position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); }
+
 /* ---- Proxy hop chain: annotated nodes with "who sees what" ---- */
 .reveal .hops { display: flex; flex-direction: column; gap: 30px; margin-top: 0.5em; }
 .reveal .hops .hlabel { font-size: 0.52em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 12px; }

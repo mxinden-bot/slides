@@ -113,6 +113,7 @@
     <ul>
       <li>The 250 ms Connection Attempt Delay is coarse; a smaller base with back-off works better in practice.</li>
       <li>Would a shared, deterministic <strong>test suite</strong> for the algorithm help?</li>
+      <li>Deployment surfaces spec-adjacent questions: shuffling equal-priority SVCB records, and how racing interacts with <strong>connection coalescing</strong> across resolved addresses.</li>
       <li>Open: <strong>proxy awareness</strong> (MASQUE connect-udp vs HTTP CONNECT ordering), WebSocket / WebTransport EXTENDED CONNECT.</li>
     </ul>
   </section>

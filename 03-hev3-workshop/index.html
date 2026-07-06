@@ -75,7 +75,15 @@
         </ul>
       </div>
     </div>
-    <p class="small muted">The single 250 ms default is too coarse in practice; we ship a smaller base with exponential back-off.</p>
+    <div class="timeline">
+      <div class="base"></div>
+      <div class="m" style="left:3%;"><div class="dot"></div><div class="t">0 ms</div></div>
+      <div class="m" style="left:9%;"><div class="dot"></div><div class="t">50</div></div>
+      <div class="m" style="left:21%;"><div class="dot"></div><div class="t">150</div></div>
+      <div class="m" style="left:45%;"><div class="dot"></div><div class="t">350</div></div>
+      <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
+    </div>
+    <p class="small muted">Each dot is a staggered connection attempt: a 50 ms base with a &times;2 back-off, versus the draft&rsquo;s single 250 ms.</p>
   </section>
 
   <!-- 5. The library -->
@@ -180,6 +188,19 @@ fn connection_attempt_delay() {
       <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
     </ul>
     <p class="small muted">Implementation choices, not draft changes: practical input for the working group.</p>
+  </section>
+
+  <!-- 11b. The tail -->
+  <section>
+    <h2>The tail: real-world edge cases</h2>
+    <ul class="small">
+      <li>Connection <strong>coalescing</strong>: we registered only the winning IP, not all resolved addresses (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051851">1851</a>).</li>
+      <li><strong>DNS fallback</strong>: no fallback to native DNS when all DoH-resolved addresses fail (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051614">1614</a>); a transient DNS failure sticks across reload (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052794">2794</a>).</li>
+      <li>Same-priority SVCB records were not <strong>shuffled</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2039248">9248</a>).</li>
+      <li>Web standards: <code>dnsLookupEnd</code> no longer matches the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">7648</a>).</li>
+      <li>Site breakage: di.fm (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2050384">0384</a>); a site whose Alt-Svc pointed at a <code>.onion</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052534">2534</a>).</li>
+    </ul>
+    <p class="small muted">From the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a> dependency tree: 17 open of 80.</p>
   </section>
 
   <!-- 12. Lessons -->
