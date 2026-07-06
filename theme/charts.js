@@ -100,8 +100,9 @@
       };
     });
     chart.setOption({
+      animation: false,
       color: PALETTE,
-      grid: Object.assign({}, baseGrid, { right: endLabels ? 96 : 24 }),
+      grid: Object.assign({}, baseGrid, { right: endLabels ? 128 : 24 }),
       tooltip: tooltip({ valueFormatter: o.yFormatter }),
       legend: legend(multi && !endLabels),
       xAxis: Object.assign(axisCommon(o.xName), {
@@ -138,6 +139,7 @@
       };
     });
     chart.setOption({
+      animation: false,
       color: PALETTE,
       grid: baseGrid,
       tooltip: tooltip({ trigger: 'axis', axisPointer: { type: 'shadow' },
@@ -158,6 +160,7 @@
   function barH(el, o) {
     const chart = make(el);
     chart.setOption({
+      animation: false,
       color: PALETTE,
       grid: Object.assign({}, baseGrid, { left: 8 }),
       tooltip: tooltip({ trigger: 'axis', axisPointer: { type: 'shadow' },
@@ -188,6 +191,7 @@
         borderColor: SURFACE, borderWidth: 2 },
     }));
     chart.setOption({
+      animation: false,
       tooltip: Object.assign(tooltip({ trigger: 'item' }),
         { formatter: o.tooltipFormatter || '{b}: {d}%' }),
       legend: Object.assign(legend(true), { top: 'middle', right: 0, orient: 'vertical',
@@ -231,6 +235,7 @@
       };
     });
     chart.setOption({
+      animation: false,
       color: PALETTE,
       grid: baseGrid,
       tooltip: tooltip({ valueFormatter: o.yFormatter }),

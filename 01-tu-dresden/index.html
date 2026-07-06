@@ -95,7 +95,7 @@
   <section>
     <h2>DoH performance</h2>
     <div class="chart" id="c-dohperf"></div>
-    <figcaption>DNS resolution time, ms, P75. United States and Canada. <em>Illustrative - pending STMO pull.</em></figcaption>
+    <figcaption>DNS resolution time, ms, P95. United States and Canada. Firefox telemetry (past 12 months).</figcaption>
   </section>
 
   <!-- 6. DoH adoption -->
@@ -153,7 +153,7 @@
   <section>
     <h2>HTTP/3 adoption</h2>
     <div class="chart" id="c-h3adopt"></div>
-    <figcaption>HTTP/3 share of Firefox responses. <em>Illustrative - pending STMO pull.</em></figcaption>
+    <figcaption>HTTP/3 share of Firefox desktop responses. Firefox telemetry (past 12 months).</figcaption>
   </section>
 
   <!-- 11. QUIC handshake -->
@@ -216,7 +216,7 @@
   <section>
     <h2>Time to request start, by protocol</h2>
     <div class="chart" id="c-ttrs"></div>
-    <figcaption>Time to request start, ms, P75. Firefox for Android. <em>Illustrative - pending STMO pull.</em></figcaption>
+    <figcaption>Time to request start, ms, P75. Firefox for Android. Firefox telemetry.</figcaption>
   </section>
 
   <!-- 13. WebTransport -->
@@ -399,10 +399,10 @@
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
 
   Charts.register('c-dohperf', (el) => Charts.line(el, {
-    x: D.dohPerf.months, yName: 'ms (P75)', yMax: 40,
+    x: D.months, yName: 'ms (P95)', yMax: 100,
     series: [
-      { name: 'OS resolver', data: D.dohPerf.osResolver, color: Charts.other },
       { name: 'DoH', data: D.dohPerf.doh },
+      { name: 'OS resolver', data: D.dohPerf.osResolver, color: Charts.other },
     ],
   }));
 
@@ -415,7 +415,7 @@
   }));
 
   Charts.register('c-h3adopt', (el) => Charts.line(el, {
-    x: D.h3Adoption.months, yName: 'share of responses', yMax: 40,
+    x: D.months, yName: 'share of responses', yMax: 30,
     yFormatter: (v) => v + '%',
     series: [{ name: 'HTTP/3', data: D.h3Adoption.pct, area: true }],
   }));

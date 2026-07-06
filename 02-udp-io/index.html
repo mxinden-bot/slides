@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modern UDP I/O for Firefox in Rust</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Modern UDP I/O for Firefox in Rust</h1>
+    <p class="subtitle">recvmmsg, GRO and GSO across four platforms, with a no-alloc receive path</p>
+    <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Why UDP I/O -->
+  <section>
+    <h2>Why UDP I/O matters for Firefox</h2>
+    <ul>
+      <li>A large and growing share of Firefox HTTP traffic is <strong>HTTP/3 over QUIC</strong>, i.e. UDP.</li>
+      <li>QUIC lives in <strong>user space</strong>; the kernel hands us raw datagrams.</li>
+      <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong>-based UDP I/O with a modern Rust stack.</li>
+      <li>Goal: close the gap to heavily optimized, in-kernel TCP.</li>
+    </ul>
+  </section>
+
+  <!-- 3. The problem -->
+  <section>
+    <h2>Userspace QUIC on UDP is expensive</h2>
+    <div class="cols">
+      <div class="col-60">
+        <p>An un-optimized userspace transport on top of UDP may do:</p>
+        <ul>
+          <li><strong>One syscall per datagram</strong></li>
+          <li>&lt; 1500 byte MTU for Internet traffic</li>
+          <li>ACK up to every second packet</li>
+          <li>de Bruijn et al.: &ldquo;<strong>3.5&times; the CPU cycles per byte</strong>&rdquo;</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="flow-row">
+          <span class="tag">One datagram</span>
+          <div class="flow">
+            <div class="node">app<div class="pkts"><span class="pkt"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">OS<div class="pkts"><span class="pkt"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">NIC<div class="pkts"><span class="pkt"></span></div></div>
+          </div>
+        </div>
+        <p class="tiny">One syscall carries one packet across the boundary.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Segmentation offload -->
+  <section>
+    <h2>Segmentation offload: GSO / GRO</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>.</li>
+          <li>One syscall carries <em>many</em> packets; the NIC/stack splits or coalesces.</li>
+          <li>Firefox Nightly (Linux GRO): P75 read syscall reads <strong>&ge;2 packets</strong>, P95 <strong>&ge;10</strong>.</li>
+          <li>P75 read <strong>2.4 KiB</strong>, P95 <strong>12 KiB</strong> per syscall.</li>
+          <li>Close to the 1 Gbit/s loopback benchmark ceiling.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="flow-row">
+          <span class="tag">Segmented (GSO)</span>
+          <div class="flow">
+            <div class="node">app<div class="pkts"><span class="pkt big"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">OS<div class="pkts"><span class="pkt big"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">NIC<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+          </div>
+        </div>
+        <div class="chart short" id="c-gro"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Multi-message syscalls -->
+  <section>
+    <h2>Multi-message syscalls</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>.</li>
+          <li>macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented).</li>
+          <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
+          <li><strong>~11%</strong> improvement on an OS loopback transfer.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="flow-row">
+          <span class="tag">Batch (mmsg)</span>
+          <div class="flow">
+            <div class="node">app<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">OS<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+            <span class="arrow">&rarr;</span>
+            <div class="node">NIC<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+          </div>
+        </div>
+        <p class="tiny">One syscall, many datagrams.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. quinn-udp -->
+  <section>
+    <h2>quinn-udp: one abstraction, four platforms</h2>
+    <ul>
+      <li>QUIC UDP I/O in Rust via <strong>quinn-udp</strong>, shared with the Quinn project.</li>
+      <li>Abstracts GSO/GRO, USO/URO, <code>sendmmsg</code>/<code>recvmmsg</code>, <code>sendmsg_x</code>/<code>recvmsg_x</code> behind one API.</li>
+      <li>Integrated into Mozilla&rsquo;s <strong>neqo</strong> QUIC stack.</li>
+      <li>Reads auxiliary IP metadata (ECN) from the same control messages.</li>
+    </ul>
+  </section>
+
+  <!-- 7. Memory management -->
+  <section>
+    <h2>No-alloc receive path</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections.</li>
+          <li>No per-datagram allocation on the hot receive path.</li>
+          <li>Soundness of the shared buffer checked <strong>at compile time</strong> by Rust&rsquo;s borrow checker.</li>
+          <li>Significant CPU-time reduction on large transfers.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="stat"><span class="num">64 KiB</span><span class="lbl">one buffer, all connections, zero receive-path allocation</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. ECN -->
+  <section>
+    <h2>Ancillary win: ECN</h2>
+    <ul>
+      <li>Modern syscalls expose <strong>control messages</strong>: we can read IP metadata like ECN.</li>
+      <li>Firefox Nightly: ~<strong>50%</strong> of paths are ECN-capable outbound.</li>
+      <li>P75 of QUIC connections see <strong>&ge; 0.6%</strong> CE marks on the receive path.</li>
+      <li>Enables congestion signalling without loss, and readiness for L4S.</li>
+    </ul>
+  </section>
+
+  <!-- 9. Results -->
+  <section>
+    <h2>Result: &lt; 1 &rarr; 4 Gbit/s</h2>
+    <div class="chart" id="c-throughput"></div>
+    <figcaption>CPU-bound throughput benchmark, NSPR baseline vs the Rust stack with offload.</figcaption>
+  </section>
+
+  <!-- 10. OS idiosyncrasies -->
+  <section>
+    <h2>OS idiosyncrasies (war stories)</h2>
+    <ul>
+      <li><strong>Windows:</strong> URO fails on ARM64 with WSL (no segment size); USO rolled back over packet loss and driver crashes.</li>
+      <li><strong>macOS:</strong> no segmentation offload; <code>sendmsg_x</code>/<code>recvmsg_x</code> undocumented; a 10.15 non-IP edge case.</li>
+      <li><strong>Linux:</strong> GSO/GRO first; one socket per connection; sandbox and runtime GSO checks.</li>
+      <li><strong>Android:</strong> x86 32-bit uses <code>socketcall</code>; API &le; 25 returns <code>EINVAL</code> with ECN (retry without); GSO single-segment errors.</li>
+    </ul>
+  </section>
+
+  <!-- 11. What's next -->
+  <section>
+    <h2>What&rsquo;s next</h2>
+    <ul>
+      <li>Rolling out <strong>PLPMTUD</strong> (RFC 8899), <strong>ECN</strong>, and QUIC <strong>ACK frequency</strong>.</li>
+      <li>Send-path optimizations: GSO, USO, <code>sendmsg_x</code>, a long-lived send buffer.</li>
+      <li>From Nightly toward Beta and Release.</li>
+    </ul>
+  </section>
+
+  <!-- 12. Get involved -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Get involved</p>
+    <h2 style="color:#ffffff;">Make Firefox faster</h2>
+    <ul style="color:#d8d4e2;">
+      <li>neqo: <span class="muted" style="color:#b3adc4;">github.com/mozilla/neqo</span></li>
+      <li>quinn-udp: <span class="muted" style="color:#b3adc4;">github.com/quinn-rs/quinn</span></li>
+      <li>Matrix: <span class="muted" style="color:#b3adc4;">#neqo:mozilla.org</span> &middot; mail@max-inden.de</li>
+    </ul>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+
+  Charts.register('c-throughput', (el) => Charts.bar(el, {
+    x: D.throughput.labels, yName: 'Gbit/s', yMax: 4.6, barLabels: true,
+    barLabelFormatter: (p) => D.throughput.labelText[p.dataIndex],
+    series: [{ name: 'throughput', data: D.throughput.gbit }],
+  }));
+
+  Charts.register('c-gro', (el) => Charts.bar(el, {
+    x: D.gro.p, yName: 'packets / read syscall', barLabels: true,
+    series: [{ name: 'packets', data: D.gro.packets }],
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => window.Charts && Charts.renderAll();
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
