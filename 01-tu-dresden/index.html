@@ -372,19 +372,28 @@
   <!-- 19. What we don't see -->
   <section>
     <h2>What do we <em>not</em> see happening?</h2>
-    <ul>
-      <li>Old protocols (IPv4, DNS53, HTTP/1 &amp; HTTP/2) going away.</li>
-      <li>An anonymous colleague: &ldquo;Hopefully no HTTP/4.&rdquo;</li>
-    </ul>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Old protocols (IPv4, DNS53, HTTP/1 &amp; HTTP/2) going away.</li>
+          <li>Still ~<strong>3 in 4</strong> successful Firefox connections use <strong>IPv4</strong>, not IPv6.</li>
+          <li>An anonymous colleague: &ldquo;Hopefully no HTTP/4.&rdquo;</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-ipconn"></div>
+        <figcaption>Successful Firefox connections by IP version. <a href="https://glam.telemetry.mozilla.org/fog/probe/network_ipv4_and_ipv6_address_connectivity/explore">GLAM</a>.</figcaption>
+      </div>
+    </div>
   </section>
 
   <!-- 20. What can you do -->
   <section>
     <h2>What can you do for a healthy Internet?</h2>
     <ul>
-      <li>If you use a browser: <strong>enable DoH</strong>.</li>
+      <li>If you use a browser: <strong>enable DoH</strong> (Firefox: Settings &rarr; Privacy &amp; Security &rarr; DNS over HTTPS &rarr; Max Protection).</li>
       <li>If you operate DNS infra: <strong>expose a DoH endpoint</strong>.</li>
-      <li>If you operate a website: <strong>serve it over HTTP/3</strong> and add <strong>ECH</strong>.</li>
+      <li>If you operate a website: <strong>serve it over HTTP/3</strong>, <strong>publish an HTTPS record</strong>, and add <strong>ECH</strong>.</li>
     </ul>
   </section>
 
@@ -395,6 +404,7 @@
       <li>Resolve the site over <strong>DNS over HTTPS</strong>; its HTTPS record returns IPv6, <code>h3</code> and ECH.</li>
       <li class="fragment">Connect with a <strong>0-RTT QUIC</strong> handshake over IPv6, with ECH: no wasted round trip.</li>
       <li class="fragment">Fetch the page over <strong>HTTP/3</strong>, on that same first connection.</li>
+      <li class="fragment">Stay responsive under load: <strong>ECN / L4S</strong> keep latency low, and <strong>ECH</strong> kept the SNI private the whole time.</li>
     </ol>
   </section>
 
@@ -458,6 +468,10 @@
   Charts.register('c-hev3', (el) => Charts.bar(el, {
     x: D.hev3Latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
     yFormatter: ms, series: [{ name: 'latency', data: D.hev3Latency.ms }],
+  }));
+
+  Charts.register('c-ipconn', (el) => Charts.donut(el, {
+    data: D.ipConnectivity, centerValue: '74%', centerLabel: 'IPv4',
   }));
 
   const CS = [{ id: 'C', label: 'client' }, { id: 'S', label: 'server' }];

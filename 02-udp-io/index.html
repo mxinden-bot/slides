@@ -20,20 +20,20 @@
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Modern UDP I/O for Firefox in Rust</h1>
-    <p class="subtitle">recvmmsg, GRO and GSO across every platform, with a no-alloc receive path</p>
+    <p class="subtitle">Closing the gap to in-kernel TCP</p>
     <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
 
   <!-- 2. Why UDP I/O -->
   <section>
-    <h2>Why UDP I/O matters for Firefox</h2>
+    <h2>Why Firefox rebuilt its UDP I/O</h2>
     <ul>
       <li>~<strong>20%</strong> of Firefox HTTP traffic is HTTP/3 over QUIC, i.e. UDP.</li>
-      <li>QUIC lives in <strong>user space</strong>; the kernel hands us raw datagrams.</li>
+      <li>Firefox&rsquo;s QUIC implementation lives in <strong>user space</strong>; the kernel hands us raw datagrams.</li>
       <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong> UDP I/O (one <code>sendto</code>/<code>recvfrom</code> per datagram) with a modern Rust stack.</li>
       <li>Goal: close the gap to heavily optimized, in-kernel TCP.</li>
     </ul>
-    <p class="small muted">Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1901292">Bugzilla 1901292: [meta] Fast UDP for Firefox</a>. Background: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de</a>.</p>
+    <p class="small muted">Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1901292">Bugzilla 1901292: [meta] Fast UDP for Firefox</a>. Background: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</p>
   </section>
 
   <!-- 3. The problem -->
@@ -131,7 +131,7 @@
       <p class="muted" style="margin-top:0.9em; font-size:0.85em; max-width:22em; margin-left:auto; margin-right:auto;">
         Roughly <strong>4&times;</strong> on CPU-bound transfers. Afterwards, CPU time is dominated by I/O syscalls and cryptography, not per-datagram overhead.</p>
     </div>
-    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de</a>.</figcaption>
+    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->

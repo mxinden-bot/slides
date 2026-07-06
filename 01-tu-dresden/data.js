@@ -53,4 +53,11 @@ window.DECK_DATA = {
     h2: [128, 137, 138, 142, 132, 131, 129, 128, 127, 130, 132, 129, 125],
     h3: [64, 61, 63, 70, 65, 64, 64, 64, 64, 64, 63, 63, 66],
   },
+
+  // REAL GLAM network_ipv4_and_ipv6_address_connectivity: of successful Firefox
+  // connections, the split by IP version (IPv4 66.6% vs IPv6 23.1% of attempts).
+  ipConnectivity: [
+    { name: 'IPv4', value: 74 },
+    { name: 'IPv6', value: 26, color: '#1baf7a' },
+  ],
 };
