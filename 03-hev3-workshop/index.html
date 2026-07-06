@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rollout of Happy Eyeballs v3 in Firefox</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Rollout of Happy Eyeballs v3 in Firefox</h1>
+    <p class="subtitle">A modern connection-establishment state machine, in production</p>
+    <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. The problem -->
+  <section>
+    <h2>A cardinality explosion</h2>
+    <div class="cols">
+      <div class="col-60">
+        <p>Connecting to a modern origin means choosing among:</p>
+        <ul>
+          <li>IPv4 <em>or</em> IPv6</li>
+          <li>TCP + TLS <em>or</em> QUIC</li>
+          <li>DNS A, AAAA <em>or</em> HTTPS records</li>
+          <li>Alt-Svc header, HTTPS-record ALPN</li>
+          <li>WebSocket <em>or</em> WebTransport</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <p>Firefox&rsquo;s old logic grew organically. We replaced it with one state machine based on the <strong>Happy Eyeballs v3</strong> IETF draft.</p>
+        <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3-04</a>, HAPPY WG.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. What HEv3 does -->
+  <section>
+    <h2>What Happy Eyeballs v3 does</h2>
+    <ol>
+      <li>Fire DNS queries together: <strong>HTTPS, AAAA, A</strong>.</li>
+      <li><strong>Group and sort</strong> endpoints: by protocol + security (ALPN, ECH), then service priority, then RFC 6724, interleaving address families.</li>
+      <li><strong>Race</strong> connection attempts one at a time, staggered; first success wins, the rest are cancelled.</li>
+    </ol>
+    <p class="small muted">Default preference: IPv6 &gt; IPv4, QUIC &gt; TCP. HTTPS records let QUIC/h3 be discovered at resolution time, no Alt-Svc round trip.</p>
+  </section>
+
+  <!-- 4. Timers -->
+  <section>
+    <h2>Two timers do the work</h2>
+    <div class="cols">
+      <div>
+        <h3>Resolution Delay</h3>
+        <ul>
+          <li>How long to wait for the preferred family / SVCB before committing.</li>
+          <li>Draft default <strong>50 ms</strong>. Firefox: 50 ms.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Connection Attempt Delay</h3>
+        <ul>
+          <li>Stagger between successive attempts.</li>
+          <li>Draft default <strong>250 ms</strong>. Firefox: <strong>50 ms with a &times;2 multiplier</strong> (50, 150, 350, 750 ms &hellip;).</li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">The single 250 ms default is too coarse in practice; we ship a smaller base with exponential back-off.</p>
+  </section>
+
+  <!-- 5. The library -->
+  <section>
+    <h2>A reusable library: mozilla/happy-eyeballs</h2>
+    <ul>
+      <li>A <strong>deterministic, sans-I/O state machine</strong>: no network, no clock. The caller drives all I/O and passes <code>now</code> explicitly.</li>
+      <li>No dependency on Firefox; embeds in Necko&rsquo;s C++ event loop.</li>
+      <li>Permissive license (MIT OR Apache-2.0). Input and contributions welcome.</li>
+      <li>Tested as scenario scripts against the state machine, plus <strong>cargo-mutants</strong> mutation testing.</li>
+    </ul>
+  </section>
+
+  <!-- 6. Testability -->
+  <section>
+    <h2>Deterministic, so easy to formalize</h2>
+    <pre><code class="language-rust" data-trim data-noescape>#[test]
+fn connection_attempt_delay() {
+    let (mut now, mut he) = setup();
+    // Each tuple is (input event, expected next action):
+    he.expect(vec![
+        (None, Some(out_send_dns_https(Id::from(0)))),
+        (None, Some(out_send_dns_aaaa(Id::from(1)))),
+        (None, Some(out_send_dns_a(Id::from(2)))),
+        (Some(in_dns_https_positive_no_alpn(Id::from(0))), Some(out_resolution_delay())),
+        (Some(in_dns_aaaa_positive(Id::from(1))),          Some(out_attempt_v6(Id::from(3)))),
+        (Some(in_dns_a_positive(Id::from(2))),             Some(out_connection_attempt_delay())),
+    ], now);
+    now += CONNECTION_ATTEMPT_DELAY; // move time forward, next attempt fires
+}</code></pre>
+    <p class="small muted">Could a shared test suite like this help the working group?</p>
+  </section>
+
+  <!-- 7. Rollout -->
+  <section>
+    <h2>Enabled in Firefox Nightly</h2>
+    <ul>
+      <li>Pref <code>network.http.happy_eyeballs_enabled</code>, default on in <strong>Nightly</strong>.</li>
+      <li>Public Glean telemetry, aligned with Mozilla&rsquo;s privacy stance.</li>
+      <li>Metrics: DNS resolution time by record type, connection-attempt count, end-to-end time, h3 discovery, HTTPS-RR features.</li>
+      <li>Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</li>
+    </ul>
+  </section>
+
+  <!-- 8. Latency -->
+  <section>
+    <h2>Connection-establishment latency</h2>
+    <div class="chart" id="c-latency"></div>
+    <figcaption>HEv3 end-to-end connection latency, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
+  </section>
+
+  <!-- 9. Discovery -->
+  <section>
+    <h2>How do connections learn about h3?</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+      </div>
+      <div class="col-60">
+        <ul>
+          <li><strong>22%</strong> of connections learned h3 <strong>only via Alt-Svc</strong>: they paid a round trip they didn&rsquo;t need to.</li>
+          <li>Only <strong>4.7%</strong> via an HTTPS record alone; <strong>8%</strong> via both.</li>
+          <li>The Alt-Svc-only slice is exactly the gap an HTTPS record would close.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption><a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
+  </section>
+
+  <!-- 10. RR features -->
+  <section>
+    <h2>What HTTPS records carry in the wild</h2>
+    <div class="chart" id="c-features"></div>
+    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
+  </section>
+
+  <!-- 11. Draft changes -->
+  <section>
+    <h2>What we fed back into the draft</h2>
+    <ul>
+      <li>Interleave <strong>both protocol variant and address family</strong>, not just family, so QUIC and the other family are both reached within the first attempts.</li>
+      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off), so implementers can drop below the 250 ms default safely.</li>
+      <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
+    </ul>
+    <p class="small muted">Practical deployment experience turning into working-group text.</p>
+  </section>
+
+  <!-- 12. Lessons -->
+  <section>
+    <h2>Lessons and open questions</h2>
+    <ul>
+      <li>The 250 ms attempt delay is too coarse: real deployments want a smaller base with back-off.</li>
+      <li>The Alt-Svc-vs-HTTPS-RR gap is measurable and costs round trips: publish HTTPS records.</li>
+      <li>Still open: <strong>proxy awareness</strong> (MASQUE connect-udp vs HTTP CONNECT ordering) and WebSocket / WebTransport EXTENDED CONNECT.</li>
+    </ul>
+  </section>
+
+  <!-- 13. Closing -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Discussion</p>
+    <h2 style="color:#ffffff;">Where should the racing heuristics go next?</h2>
+    <p class="small" style="color:#b3adc4;">github.com/mozilla/happy-eyeballs &middot; Bugzilla 1953459 &middot; mail@max-inden.de</p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+
+  Charts.register('c-latency', (el) => Charts.bar(el, {
+    x: D.latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
+    yFormatter: ms, series: [{ name: 'latency', data: D.latency.ms }],
+  }));
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '22%', centerLabel: 'Alt-Svc only',
+  }));
+  Charts.register('c-features', (el) => Charts.barH(el, {
+    y: D.rrFeatures.labels, data: D.rrFeatures.pct, colorByIndex: false,
+    valueFormatter: (v) => v + '%', xMax: 100,
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
