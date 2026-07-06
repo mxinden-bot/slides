@@ -124,7 +124,26 @@ fn connection_attempt_delay() {
   <section>
     <h2>Connection-establishment latency</h2>
     <div class="chart" id="c-latency"></div>
-    <figcaption>HEv3 end-to-end connection latency, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
+    <figcaption>HEv3 end-to-end latency of successful connects, Firefox Nightly. Failures resolve by ~50 ms (P75) or hit the 10 s cap. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
+  </section>
+
+  <!-- 8b. Racing is cheap -->
+  <section>
+    <h2>Racing is cheap</h2>
+    <div class="cols" style="gap:1.2em;">
+      <div class="stat"><span class="num">94%</span><span class="lbl">the first attempt wins</span></div>
+      <div class="stat"><span class="num">89%</span><span class="lbl">succeed on attempt #1</span></div>
+      <div class="stat"><span class="num">95%</span><span class="lbl">cancel no attempts</span></div>
+      <div class="stat"><span class="num">27 ms</span><span class="lbl">to the first attempt (P75)</span></div>
+    </div>
+    <p class="small muted">Most connections need a single attempt; the staggered racing rarely fires a second. From <code>winning_attempt_index</code>, <code>connection_attempt_count</code>, <code>cancelled_attempt_count</code>, <code>time_to_first_attempt</code> (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM</a>).</p>
+  </section>
+
+  <!-- 8c. DNS by record type -->
+  <section>
+    <h2>DNS resolution time, by record type</h2>
+    <div class="chart" id="c-dns"></div>
+    <figcaption>DNS resolution time (ms), P75 and P95, by record type. HTTPS records resolve as fast as A/AAAA. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM</a>.</figcaption>
   </section>
 
   <!-- 9. Discovery -->
@@ -149,7 +168,7 @@ fn connection_attempt_delay() {
   <section>
     <h2>What HTTPS records carry in the wild</h2>
     <div class="chart" id="c-features"></div>
-    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
+    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Also broken down by DoH vs native resolver (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">by_resolver</a>). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
   </section>
 
   <!-- 11. Beyond the draft (in the library) -->
@@ -204,6 +223,13 @@ fn connection_attempt_delay() {
   Charts.register('c-features', (el) => Charts.barH(el, {
     y: D.rrFeatures.labels, data: D.rrFeatures.pct, colorByIndex: false,
     valueFormatter: (v) => v + '%', xMax: 100,
+  }));
+  Charts.register('c-dns', (el) => Charts.bar(el, {
+    x: D.dnsRes.types, yName: 'ms', yMax: 130,
+    series: [
+      { name: 'P75', data: D.dnsRes.p75 },
+      { name: 'P95', data: D.dnsRes.p95 },
+    ],
   }));
 
   Reveal.initialize({
