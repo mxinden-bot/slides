@@ -166,14 +166,13 @@ fn connection_attempt_delay() {
         <li>HTTPS-RR features, by resolver</li>
       </ul>
     </div>
-    <p class="small muted">Every one is public in GLAM: the rest of this talk walks through them. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</p>
+    <p class="small muted">Definitions in <code>netwerk/protocol/http/metrics.yaml</code>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</p>
   </section>
 
   <!-- METRICS SECTION divider -->
   <section class="divider" data-background-color="#20123a">
-    <p class="kicker" style="color:#ff9d5c;">What the telemetry shows</p>
-    <h2 style="color:#ffffff;">Ten metrics, one per slide</h2>
-    <p class="small" style="color:#b3adc4;">All from Firefox Nightly, all public in GLAM. This is what Firefox can bring to the working group.</p>
+    <h2 style="color:#ffffff;">The <code style="color:#ff9d5c;">happy_eyeballs_*</code> metrics</h2>
+    <p class="small" style="color:#b3adc4;">Firefox Nightly, Glean, read from GLAM. Ten metrics follow.</p>
   </section>
 
   <!-- M1. end_to_end_time_succeeded -->
@@ -254,7 +253,7 @@ fn connection_attempt_delay() {
   <section>
     <h2>10. HTTPS-RR features, by resolver</h2>
     <div class="chart" id="c-byresolver"></div>
-    <figcaption>Same SvcParams, split by DoH vs the OS resolver. DoH sees slightly more address hints; <strong>ECH shows up more over the OS resolver</strong> (52% vs 32%), a split worth the working group&rsquo;s attention. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
+    <figcaption>Same SvcParams, split by DoH vs the OS resolver. DoH: 98/96/96/32% (h3/v4/v6/ECH). OS resolver: 96/90/89/<strong>52%</strong>. ECH shows up more over the OS resolver. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
   <!-- 11. How Firefox deviates from the draft -->
@@ -293,9 +292,8 @@ fn connection_attempt_delay() {
 
   <!-- 13. Closing -->
   <section class="divider" data-background-color="#20123a">
-    <p class="kicker" style="color:#ff9d5c;">Discussion</p>
-    <h2 style="color:#ffffff;">What should the draft recommend next?</h2>
-    <p class="small" style="color:#b3adc4;">Delay defaults, the Alt-Svc / HTTPS-RR gap, the ECH-by-resolver split: measured, and on the table.</p>
+    <h2 style="color:#ffffff;">Discussion</h2>
+    <p class="small" style="color:#b3adc4;">Attempt-delay defaults, the Alt-Svc / HTTPS-RR discovery gap, the ECH-by-resolver split.</p>
     <p class="small" style="color:#8f8f9d;">github.com/mozilla/happy-eyeballs &middot; Bugzilla 1953459 &middot; mail@max-inden.de</p>
   </section>
 

@@ -47,9 +47,8 @@
 
   <!-- TELEMETRY divider -->
   <section class="divider" data-background-color="#20123a">
-    <p class="kicker" style="color:#ff9d5c;">Telemetry</p>
-    <h2 style="color:#ffffff;">Ten metrics from the field</h2>
-    <p class="small" style="color:#b3adc4;">All from Firefox Nightly, all public in GLAM. Data the working group can build on.</p>
+    <h2 style="color:#ffffff;">The <code style="color:#ff9d5c;">happy_eyeballs_*</code> metrics</h2>
+    <p class="small" style="color:#b3adc4;">Firefox Nightly, Glean, read from GLAM. Ten metrics follow.</p>
   </section>
 
   <!-- M1. end_to_end_time_succeeded -->
@@ -130,7 +129,7 @@
   <section>
     <h2>HTTPS-RR features, by resolver</h2>
     <div class="chart" id="c-byresolver"></div>
-    <figcaption>Same SvcParams, DoH vs the OS resolver. DoH sees slightly more address hints; <strong>ECH appears more over the OS resolver</strong> (52% vs 32%), a split worth the WG&rsquo;s attention. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
+    <figcaption>Same SvcParams, DoH vs the OS resolver. DoH: 98/96/96/32% (h3/v4/v6/ECH). OS resolver: 96/90/89/<strong>52%</strong>. ECH appears more over the OS resolver. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
   <!-- 6. Library changes -->
