@@ -56,12 +56,20 @@
   <!-- 5. Upgrade path -->
   <section>
     <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
-    <ul>
-      <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
-      <li>Firefox Nightly: <strong>22%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a wasted round trip (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>).</li>
-      <li>HTTPS records (RFC 9460) are ~15% adopted, and ~70% of those are one CDN&rsquo;s defaults (<a href="https://arxiv.org/html/2403.15672v2">IMC 2024</a>).</li>
-      <li><strong>ECH depends on the HTTPS record</strong>: it is now a privacy lever, not just a perf one.</li>
-    </ul>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
+          <li><strong>22%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, a wasted round trip.</li>
+          <li>HTTPS records (RFC 9460) are ~15% adopted; ~70% one CDN&rsquo;s defaults (<a href="https://arxiv.org/html/2403.15672v2">IMC 2024</a>).</li>
+          <li><strong>ECH depends on the HTTPS record</strong>: now a privacy lever, not just perf.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+        <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>.</figcaption>
+      </div>
+    </div>
     <p class="small muted">Do we deprecate Alt-Svc, or bridge it (draft-thomson-httpbis-alt-svcb)?</p>
   </section>
 
@@ -112,6 +120,9 @@
     yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
     refLine: 30, refLineLabel: '30%',
     series: [{ name: 'share', data: D.denominators.pct }],
+  }));
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '22%', centerLabel: 'Alt-Svc only',
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
