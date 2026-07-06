@@ -81,6 +81,25 @@
   max-height: 100%;
 }
 
+/* Light syntax theme: overrides the vendored dark monokai so code blocks
+   sit on the light slides. theme.css loads after monokai.css, and these
+   selectors are more specific, so they win. */
+.reveal pre code.hljs {
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+}
+.reveal .hljs-comment, .reveal .hljs-quote { color: var(--ink-faint); font-style: italic; }
+.reveal .hljs-keyword, .reveal .hljs-selector-tag, .reveal .hljs-meta-keyword { color: #a626a4; }
+.reveal .hljs-title, .reveal .hljs-title.function_, .reveal .hljs-section { color: #2a78d6; }
+.reveal .hljs-string, .reveal .hljs-regexp, .reveal .hljs-symbol { color: #1baf7a; }
+.reveal .hljs-number, .reveal .hljs-literal, .reveal .hljs-bullet { color: #eb6834; }
+.reveal .hljs-type, .reveal .hljs-built_in, .reveal .hljs-class .hljs-title { color: #e34948; }
+.reveal .hljs-attr, .reveal .hljs-attribute, .reveal .hljs-variable, .reveal .hljs-template-variable { color: #4a3aa7; }
+.reveal .hljs-meta, .reveal .hljs-punctuation, .reveal .hljs-operator { color: var(--ink-muted); }
+.reveal .hljs-emphasis { font-style: italic; }
+.reveal .hljs-strong { font-weight: 700; }
+
 /* A thin brand rule top-left as a quiet identity marker */
 .reveal .slides section::before {
   content: "";
@@ -165,6 +184,20 @@
   text-transform: uppercase; color: var(--accent); margin: 0 0 0.3em;
 }
 .reveal .card ul { margin: 0; }
+
+/* Placeholder box for pending assets (e.g. a flamegraph screenshot) */
+.reveal .placeholder {
+  border: 2px dashed var(--hairline); border-radius: 10px;
+  background: repeating-linear-gradient(45deg, var(--surface-2), var(--surface-2) 10px, transparent 10px, transparent 20px);
+  min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 1em; gap: 0.3em;
+}
+.reveal .placeholder p { margin: 0; color: var(--ink-muted); font-size: 0.72em; line-height: 1.35; }
+.reveal .placeholder .ph-tag {
+  font-size: 0.6em; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.2em 0.7em; margin-bottom: 0.4em;
+}
+.reveal .placeholder .ph-sub { color: var(--ink-faint); font-size: 0.62em; font-style: italic; }
 
 /* Chart shared type/colors (SVG inherits these via classes) */
 .reveal svg { max-width: 100%; height: auto; }

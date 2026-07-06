@@ -102,18 +102,27 @@
   <!-- 8. Result -->
   <section>
     <h2>Result</h2>
-    <div class="center" style="margin-top:0.6em;">
-      <div style="display:flex; align-items:baseline; justify-content:center; gap:0.35em; font-weight:800; letter-spacing:-0.03em;">
-        <span style="font-size:1.5em; color:var(--ink-faint);">&lt; 1</span>
-        <span style="font-size:0.9em; color:var(--ink-faint);">Gbit/s</span>
-        <span style="font-size:1.4em; color:var(--accent); margin:0 0.15em;">&rarr;</span>
-        <span style="font-size:3em; color:var(--accent); line-height:1;">4</span>
-        <span style="font-size:1.1em; color:var(--accent);">Gbit/s</span>
+    <div class="cols" style="align-items:center; gap:1.4em;">
+      <div class="col-40 center">
+        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.3em; font-weight:800; letter-spacing:-0.03em;">
+          <span style="font-size:1.3em; color:var(--ink-faint);">&lt; 1</span>
+          <span style="font-size:0.8em; color:var(--ink-faint);">Gbit/s</span>
+          <span style="font-size:1.2em; color:var(--accent); margin:0 0.1em;">&rarr;</span>
+          <span style="font-size:2.6em; color:var(--accent); line-height:1;">4</span>
+          <span style="font-size:1em; color:var(--accent);">Gbit/s</span>
+        </div>
+        <p class="muted" style="margin-top:0.8em; font-size:0.8em;">
+          Roughly <strong>4&times;</strong> on CPU-bound transfers. Afterwards, CPU time is dominated by cryptography, not per-datagram I/O overhead.</p>
       </div>
-      <p class="muted" style="margin-top:0.9em; font-size:0.85em; max-width:22em; margin-left:auto; margin-right:auto;">
-        Roughly <strong>4&times;</strong> on CPU-bound transfers. Afterwards, CPU time is dominated by I/O syscalls and cryptography, not per-datagram overhead.</p>
+      <div class="col-60">
+        <div class="placeholder">
+          <span class="ph-tag">Flamegraph &middot; TODO</span>
+          <p>Client CPU flamegraph, 640&nbsp;MiB QUIC download<br>(neqo CI, samply / Firefox Profiler)</p>
+          <p class="ph-sub">Hot path now dominated by crypto, not UDP syscalls</p>
+        </div>
+      </div>
     </div>
-    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
+    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. Profile: neqo <code>Profile</code> CI (<code>neqo-client --cc cubic -Q1 .../671088640</code>). <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->
