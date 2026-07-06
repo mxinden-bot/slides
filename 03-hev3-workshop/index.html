@@ -20,7 +20,7 @@
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Rollout of Happy Eyeballs v3 in Firefox</h1>
-    <p class="subtitle">A modern connection-establishment state machine, in production</p>
+    <p class="subtitle">Taming the cardinality explosion through connection racing</p>
     <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
 
@@ -39,19 +39,44 @@
         </ul>
       </div>
       <div class="col-40">
-        <p>Firefox&rsquo;s old logic grew organically. We replaced it with one state machine based on the <strong>Happy Eyeballs v3</strong> IETF draft.</p>
-        <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3-04</a>, HAPPY WG.</p>
+        <p>Multiplied out, that is dozens of possible ways to open one connection. Pick wrong and you pay a round trip, or fail on a broken path.</p>
+        <p>Firefox now makes that choice with a single state machine, built on <strong>Happy Eyeballs v3</strong>.</p>
+        <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
       </div>
     </div>
   </section>
 
-  <!-- 3. What HEv3 does -->
+  <!-- 3a. What HEv3 does: Resolution -->
   <section>
-    <h2>What Happy Eyeballs v3 does</h2>
+    <h2>Part 1: Resolution</h2>
+    <p>Fire the DNS queries together (<strong>HTTPS, AAAA, A</strong>), then move on as soon as <em>one</em> of these holds:</p>
+    <div class="cols" style="gap:1.4em;">
+      <div class="card">
+        <p class="tag">Either</p>
+        <ul class="small">
+          <li>some positive address answers are in, <strong>and</strong></li>
+          <li>the <strong>preferred family</strong> has answered (positive or negative), <strong>and</strong></li>
+          <li>the <strong>HTTPS/SVCB</strong> answer is in (or negative).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="tag">Or</p>
+        <ul class="small">
+          <li>some positive address answers are in, <strong>and</strong></li>
+          <li>the <strong>Resolution Delay</strong> has passed with nothing more arriving.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">The elegant part of the draft: wait for the good answer, but never wait forever. Source: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3, &sect;4.2</a>.</p>
+  </section>
+
+  <!-- 3b. What HEv3 does: Connection attempts -->
+  <section>
+    <h2>Part 2: Connection attempts</h2>
     <ol>
-      <li>Fire DNS queries together: <strong>HTTPS, AAAA, A</strong>.</li>
-      <li><strong>Group and sort</strong> endpoints: by protocol + security (ALPN, ECH), then service priority, then RFC 6724, interleaving address families.</li>
-      <li><strong>Race</strong> connection attempts one at a time, staggered; first success wins, the rest are cancelled.</li>
+      <li><strong>Sort</strong> the endpoints: by protocol + security (ALPN, ECH), then service priority, then RFC 6724, interleaving address families.</li>
+      <li><strong>Race</strong> attempts one at a time, staggered by the Connection Attempt Delay.</li>
+      <li>First success wins; the rest are cancelled.</li>
     </ol>
     <p class="small muted">Default preference: IPv6 &gt; IPv4, QUIC &gt; TCP. HTTPS records let QUIC/h3 be discovered at resolution time, no Alt-Svc round trip.</p>
   </section>
@@ -64,7 +89,7 @@
         <h3>Resolution Delay</h3>
         <ul>
           <li>How long to wait for the preferred family / SVCB before committing.</li>
-          <li>Draft default <strong>50 ms</strong>. Firefox: 50 ms.</li>
+          <li>Draft default <strong>50 ms</strong>. Firefox: <strong>25 ms</strong> (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>).</li>
         </ul>
       </div>
       <div>
@@ -88,13 +113,14 @@
 
   <!-- 5. The library -->
   <section>
-    <h2>A reusable library: mozilla/happy-eyeballs</h2>
+    <h2>A reusable library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a></h2>
     <ul>
-      <li>A <strong>deterministic, sans-I/O state machine</strong>: no network, no clock. The caller drives all I/O and passes <code>now</code> explicitly.</li>
+      <li>A <strong>deterministic, sans-I/O state machine</strong>: no network, no clock. The caller drives all I/O and passes <strong>time</strong> in explicitly.</li>
       <li>No dependency on Firefox; embeds in Necko&rsquo;s C++ event loop.</li>
       <li>Permissive license (MIT OR Apache-2.0). Input and contributions welcome.</li>
-      <li>Tested as scenario scripts against the state machine, plus <strong>cargo-mutants</strong> mutation testing.</li>
+      <li>Every scenario is a plain unit test, so behaviour is easy to pin down and easy to review.</li>
     </ul>
+    <p class="small muted"><a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
   <!-- 6. Testability -->
@@ -103,18 +129,19 @@
     <pre><code class="language-rust" data-trim data-noescape>#[test]
 fn connection_attempt_delay() {
     let (mut now, mut he) = setup();
-    // Each tuple is (input event, expected next action):
-    he.expect(vec![
-        (None, Some(out_send_dns_https(Id::from(0)))),
-        (None, Some(out_send_dns_aaaa(Id::from(1)))),
-        (None, Some(out_send_dns_a(Id::from(2)))),
-        (Some(in_dns_https_positive_no_alpn(Id::from(0))), Some(out_resolution_delay())),
-        (Some(in_dns_aaaa_positive(Id::from(1))),          Some(out_attempt_v6(Id::from(3)))),
-        (Some(in_dns_a_positive(Id::from(2))),             Some(out_connection_attempt_delay())),
-    ], now);
-    now += CONNECTION_ATTEMPT_DELAY; // move time forward, next attempt fires
+    expect_initial_dns_queries(&mut he, now);
+
+    he.input(in_dns_https_positive_no_alpn(Id::from(0)), now);
+    he.expect(out_resolution_delay(), now);
+    he.input(in_dns_aaaa_positive(Id::from(1)), now);
+    he.expect(out_attempt_v6_h1_h2(Id::from(3)), now);   // preferred family first
+    he.input(in_dns_a_positive(Id::from(2)), now);
+    he.expect(out_connection_attempt_delay(), now);
+
+    now += CONNECTION_ATTEMPT_DELAY;                     // time is an argument
+    he.expect(out_attempt_v4_h1_h2(Id::from(4)), now);   // the staggered second attempt
 }</code></pre>
-    <p class="small muted">Could a shared test suite like this help the working group?</p>
+    <p class="small muted">Feed inputs, assert the next action, advance time by hand. Could a shared suite like this help the working group?</p>
   </section>
 
   <!-- 7. Rollout -->
@@ -122,72 +149,123 @@ fn connection_attempt_delay() {
     <h2>Enabled in Firefox Nightly</h2>
     <ul>
       <li>Pref <code>network.http.happy_eyeballs_enabled</code>, default on in <strong>Nightly</strong>.</li>
-      <li>Public Glean telemetry, aligned with Mozilla&rsquo;s privacy stance.</li>
-      <li>Metrics: DNS resolution time by record type, connection-attempt count, end-to-end time, h3 discovery, HTTPS-RR features.</li>
-      <li>Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</li>
+      <li>Public Glean telemetry, aligned with Mozilla&rsquo;s privacy stance. Ten metrics:</li>
     </ul>
-  </section>
-
-  <!-- 8. Latency -->
-  <section>
-    <h2>Connection-establishment latency</h2>
-    <div class="chart" id="c-latency"></div>
-    <figcaption>HEv3 end-to-end latency of successful connects, Firefox Nightly. Failures resolve by ~50 ms (P75) or hit the 10 s cap. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
-  </section>
-
-  <!-- 8b. Racing is cheap -->
-  <section>
-    <h2>Racing is cheap</h2>
-    <div class="cols" style="gap:1.2em;">
-      <div class="stat"><span class="num">94%</span><span class="lbl">the first attempt wins</span></div>
-      <div class="stat"><span class="num">89%</span><span class="lbl">succeed on attempt #1</span></div>
-      <div class="stat"><span class="num">95%</span><span class="lbl">cancel no attempts</span></div>
-      <div class="stat"><span class="num">27 ms</span><span class="lbl">to the first attempt (P75)</span></div>
+    <div class="cols small" style="gap:1.6em; margin:0.2em 0 0 1.2em;">
+      <ul>
+        <li>end-to-end time (succeeded / failed)</li>
+        <li>winning attempt index</li>
+        <li>connection attempt count</li>
+        <li>cancelled attempt count</li>
+        <li>time to first attempt</li>
+      </ul>
+      <ul>
+        <li>DNS resolution time, by record type</li>
+        <li>h3 discovery method</li>
+        <li>HTTPS-RR features</li>
+        <li>HTTPS-RR features, by resolver</li>
+      </ul>
     </div>
-    <p class="small muted">Most connections need a single attempt; the staggered racing rarely fires a second. From <code>winning_attempt_index</code>, <code>connection_attempt_count</code>, <code>cancelled_attempt_count</code>, <code>time_to_first_attempt</code> (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM</a>).</p>
+    <p class="small muted">Every one is public in GLAM: the rest of this talk walks through them. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</p>
   </section>
 
-  <!-- 8c. DNS by record type -->
+  <!-- METRICS SECTION divider -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">What the telemetry shows</p>
+    <h2 style="color:#ffffff;">Ten metrics, one per slide</h2>
+    <p class="small" style="color:#b3adc4;">All from Firefox Nightly, all public in GLAM. This is what Firefox can bring to the working group.</p>
+  </section>
+
+  <!-- M1. end_to_end_time_succeeded -->
   <section>
-    <h2>DNS resolution time, by record type</h2>
+    <h2>1. End-to-end time, succeeded</h2>
+    <div class="chart" id="c-e2eok"></div>
+    <figcaption>Time from first DNS query to a connected socket, successful connects. Median <strong>74 ms</strong>, P95 <strong>603 ms</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM: end_to_end_time_succeeded</a>.</figcaption>
+  </section>
+
+  <!-- M2. end_to_end_time_failed -->
+  <section>
+    <h2>2. End-to-end time, failed</h2>
+    <div class="chart" id="c-e2efail"></div>
+    <figcaption>When a connection fails, it fails fast (P75 <strong>50 ms</strong>, an immediate refusal) or grinds to the <strong>10 s</strong> cap. Few failures sit in between. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore">GLAM: end_to_end_time_failed</a>.</figcaption>
+  </section>
+
+  <!-- M3. winning_attempt_index -->
+  <section>
+    <h2>3. Winning attempt index</h2>
+    <div class="chart" id="c-winidx"></div>
+    <figcaption>Which staggered attempt actually connected. <strong>84%</strong> of connections win on the very first attempt; the racing tail is thin. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM: winning_attempt_index</a>.</figcaption>
+  </section>
+
+  <!-- M4. connection_attempt_count -->
+  <section>
+    <h2>4. Connection attempt count</h2>
+    <div class="chart" id="c-attemptcount"></div>
+    <figcaption>How many attempts were opened before one succeeded. <strong>87%</strong> need just one. Racing is cheap: it rarely fires a second attempt. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_connection_attempt_count/explore">GLAM: connection_attempt_count</a>.</figcaption>
+  </section>
+
+  <!-- M5. cancelled_attempt_count -->
+  <section>
+    <h2>5. Cancelled attempt count</h2>
+    <div class="chart" id="c-cancelcount"></div>
+    <figcaption>Attempts started, then cancelled once a winner appeared: wasted work. <strong>92%</strong> cancel nothing. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_cancelled_attempt_count/explore">GLAM: cancelled_attempt_count</a>.</figcaption>
+  </section>
+
+  <!-- M6. time_to_first_attempt -->
+  <section>
+    <h2>6. Time to first attempt</h2>
+    <div class="chart" id="c-firstattempt"></div>
+    <figcaption>How long before the first connection attempt fires: mostly the DNS answer arriving. Median <strong>3 ms</strong>, P75 <strong>27 ms</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_time_to_first_attempt/explore">GLAM: time_to_first_attempt</a>.</figcaption>
+  </section>
+
+  <!-- M7. dns_resolution_time -->
+  <section>
+    <h2>7. DNS resolution time, by record type</h2>
     <div class="chart" id="c-dns"></div>
-    <figcaption>DNS resolution time (ms), P75 and P95, by record type. HTTPS records resolve as fast as A/AAAA. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM</a>.</figcaption>
+    <figcaption>Per record type, log scale. HTTPS records resolve <strong>as fast as</strong> A/AAAA, so asking for them costs no latency. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM: dns_resolution_time</a>.</figcaption>
   </section>
 
-  <!-- 9. Discovery -->
+  <!-- M8. h3_discovery -->
   <section>
-    <h2>How do connections learn about h3?</h2>
+    <h2>8. How connections learn about h3</h2>
     <div class="cols">
       <div class="col-40">
         <div class="chart short" id="c-discovery"></div>
       </div>
       <div class="col-60">
         <ul>
-          <li><strong>22%</strong> of connections learned h3 <strong>only via Alt-Svc</strong>: they paid a round trip they didn&rsquo;t need to.</li>
-          <li>Only <strong>4.7%</strong> via an HTTPS record alone; <strong>8%</strong> via both.</li>
+          <li><strong>29%</strong> of connections learned h3 <strong>only via Alt-Svc</strong>: a round trip they need not have paid.</li>
+          <li><strong>21%</strong> via an HTTPS record alone, <strong>19%</strong> via both: no round trip.</li>
           <li>The Alt-Svc-only slice is exactly the gap an HTTPS record would close.</li>
         </ul>
       </div>
     </div>
-    <figcaption><a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
+    <figcaption>Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
   </section>
 
-  <!-- 10. RR features -->
+  <!-- M9. https_rr_features -->
   <section>
-    <h2>What HTTPS records carry in the wild</h2>
+    <h2>9. What HTTPS records carry</h2>
     <div class="chart" id="c-features"></div>
-    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Also broken down by DoH vs native resolver (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">by_resolver</a>). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
+    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Nearly all advertise h3; about half carry <strong>ECH</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
   </section>
 
-  <!-- 11. Beyond the draft (in the library) -->
+  <!-- M10. https_rr_features_by_resolver -->
   <section>
-    <h2>Where the implementation goes further</h2>
+    <h2>10. HTTPS-RR features, by resolver</h2>
+    <div class="chart" id="c-byresolver"></div>
+    <figcaption>Same SvcParams, split by DoH vs the OS resolver. DoH sees slightly more address hints; <strong>ECH shows up more over the OS resolver</strong> (52% vs 32%), a split worth the working group&rsquo;s attention. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
+  </section>
+
+  <!-- 11. How Firefox deviates from the draft -->
+  <section>
+    <h2>How Firefox deviates from the draft</h2>
     <ul>
-      <li>The draft interleaves address families; the library also interleaves <strong>protocol variants</strong>, so QUIC and the other family are both reached within the first attempts.</li>
-      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off): Firefox runs 50 ms &times;2, not the draft&rsquo;s 250 ms default.</li>
-      <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
+      <li><strong>Attempt delay</strong>: the draft recommends a flat 250 ms. Firefox uses a smaller 50 ms base with a <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), so the second attempt fires far sooner while the tail still backs off.</li>
+      <li><strong>Resolution delay</strong>: draft 50 ms, Firefox <strong>25 ms</strong> (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
+      <li><strong>Interleaving</strong>: the draft interleaves address families; the library also interleaves <strong>protocol variants</strong>, so QUIC and the other family are both reached early. A library choice, not fed back into the draft.</li>
     </ul>
-    <p class="small muted">Implementation choices, not draft changes: practical input for the working group.</p>
+    <p class="small muted">The delay tuning is exactly the kind of input the working group can fold back into the recommended defaults.</p>
   </section>
 
   <!-- 11b. The tail -->
@@ -216,8 +294,9 @@ fn connection_attempt_delay() {
   <!-- 13. Closing -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Discussion</p>
-    <h2 style="color:#ffffff;">Where should the racing heuristics go next?</h2>
-    <p class="small" style="color:#b3adc4;">github.com/mozilla/happy-eyeballs &middot; Bugzilla 1953459 &middot; mail@max-inden.de</p>
+    <h2 style="color:#ffffff;">What should the draft recommend next?</h2>
+    <p class="small" style="color:#b3adc4;">Delay defaults, the Alt-Svc / HTTPS-RR gap, the ECH-by-resolver split: measured, and on the table.</p>
+    <p class="small" style="color:#8f8f9d;">github.com/mozilla/happy-eyeballs &middot; Bugzilla 1953459 &middot; mail@max-inden.de</p>
   </section>
 
 </div>
@@ -234,22 +313,68 @@ fn connection_attempt_delay() {
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
 
-  Charts.register('c-latency', (el) => Charts.bar(el, {
-    x: D.latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
-    yFormatter: ms, series: [{ name: 'latency', data: D.latency.ms }],
+  const pctLabel = (p) => p.value + '%';
+
+  // 1. end-to-end succeeded (log, ms)
+  Charts.register('c-e2eok', (el) => Charts.bar(el, {
+    x: D.e2eOk.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
+    yFormatter: ms, series: [{ name: 'succeeded', data: D.e2eOk.ms }],
   }));
+  // 2. end-to-end failed (linear, ms): fail fast or hit the 10 s cap
+  Charts.register('c-e2efail', (el) => Charts.bar(el, {
+    x: D.e2eFail.p, yName: 'ms', yMax: 11000, yFormatter: ms,
+    barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'failed', data: D.e2eFail.ms }],
+  }));
+  // 3. winning attempt index (%)
+  Charts.register('c-winidx', (el) => Charts.bar(el, {
+    x: D.winIdx.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.winIdx.pct }],
+  }));
+  // 4. connection attempt count (%)
+  Charts.register('c-attemptcount', (el) => Charts.bar(el, {
+    x: D.attemptCount.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.attemptCount.pct }],
+  }));
+  // 5. cancelled attempt count (%)
+  Charts.register('c-cancelcount', (el) => Charts.bar(el, {
+    x: D.cancelCount.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.cancelCount.pct }],
+  }));
+  // 6. time to first attempt (log, ms)
+  Charts.register('c-firstattempt', (el) => Charts.bar(el, {
+    x: D.firstAttempt.p, yName: 'ms (log)', yType: 'log', yMin: 1, yMax: 1000,
+    yFormatter: ms, barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'ms', data: D.firstAttempt.ms }],
+  }));
+  // 7. DNS resolution time by record type (log, grouped)
+  Charts.register('c-dns', (el) => Charts.bar(el, {
+    x: D.dnsRes.p, yName: 'ms (log)', yType: 'log', yMin: 10, yMax: 12000, yFormatter: ms,
+    series: [
+      { name: 'A', data: D.dnsRes.a },
+      { name: 'AAAA', data: D.dnsRes.aaaa },
+      { name: 'HTTPS', data: D.dnsRes.https },
+    ],
+  }));
+  // 8. h3 discovery (donut)
   Charts.register('c-discovery', (el) => Charts.donut(el, {
-    data: D.discovery, centerValue: '22%', centerLabel: 'Alt-Svc only',
+    data: D.discovery, centerValue: '29%', centerLabel: 'Alt-Svc only',
   }));
+  // 9. HTTPS-RR features (barH, %)
   Charts.register('c-features', (el) => Charts.barH(el, {
     y: D.rrFeatures.labels, data: D.rrFeatures.pct, colorByIndex: false,
     valueFormatter: (v) => v + '%', xMax: 100,
   }));
-  Charts.register('c-dns', (el) => Charts.bar(el, {
-    x: D.dnsRes.types, yName: 'ms', yMax: 130,
+  // 10. HTTPS-RR features by resolver (grouped, %)
+  Charts.register('c-byresolver', (el) => Charts.bar(el, {
+    x: D.rrByResolver.labels, yName: '% carrying', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
     series: [
-      { name: 'P75', data: D.dnsRes.p75 },
-      { name: 'P95', data: D.dnsRes.p95 },
+      { name: 'DoH', data: D.rrByResolver.doh },
+      { name: 'OS resolver', data: D.rrByResolver.native },
     ],
   }));
 

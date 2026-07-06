@@ -155,6 +155,17 @@
 }
 .reveal .pill.on { background: rgba(1,122,61,0.12); color: var(--good); border-color: rgba(1,122,61,0.25); }
 
+/* Bordered card (used for the resolution move-on conditions) */
+.reveal .card {
+  background: var(--surface-2); border: 1px solid var(--hairline);
+  border-radius: 10px; padding: 0.7em 0.9em;
+}
+.reveal .card .tag {
+  display: inline-block; font-size: 0.62em; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 0.3em;
+}
+.reveal .card ul { margin: 0; }
+
 /* Chart shared type/colors (SVG inherits these via classes) */
 .reveal svg { max-width: 100%; height: auto; }
 .reveal svg text { font-family: var(--font-sans); fill: var(--ink); }
