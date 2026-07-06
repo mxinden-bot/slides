@@ -8,8 +8,8 @@
  * plus figures from prior Firefox telemetry decks (adoption, scheme, HEv3).
  */
 window.DECK_DATA = {
-  // 13 monthly points, Jul 2025 .. Jul 2026
-  months: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+  // 13 monthly points, Jul 2025 .. Jul 2026 (year shown at the boundaries)
+  months: ["Jul '25", 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', "Jan '26", 'Feb', 'Mar', 'Apr', 'May', 'Jun', "Jul '26"],
 
   // REAL - DoH adoption (Global DNS resolution method)
   dohAdoption: [
