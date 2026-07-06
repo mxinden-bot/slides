@@ -81,13 +81,11 @@
       </div>
       <div class="col-40">
         <div class="protostack">
-          <div class="top">DNS query</div>
-          <div class="cols">
-            <div class="col"><div class="box">HTTP/1.1</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
-            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
-            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
-          </div>
-          <div class="base">IPv4 / IPv6</div>
+          <div class="box span">DNS query</div>
+          <div class="box">HTTP/1.1</div><div class="box">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box">TLS 1.2+</div><div class="box">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box">TCP</div><div class="box">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
         </div>
       </div>
     </div>
@@ -141,13 +139,11 @@
       </div>
       <div class="col-40">
         <div class="protostack">
-          <div class="top">HTTP semantics</div>
-          <div class="cols">
-            <div class="col"><div class="box">HTTP/1.1</div><div class="box faint">TLS (opt)</div><div class="box">TCP</div></div>
-            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
-            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
-          </div>
-          <div class="base">IPv4 / IPv6</div>
+          <div class="box span">HTTP semantics</div>
+          <div class="box">HTTP/1.1</div><div class="box">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS/SSL (optional)</div><div class="box">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box">TCP</div><div class="box">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
         </div>
       </div>
     </div>
@@ -162,10 +158,58 @@
 
   <!-- 11. QUIC handshake -->
   <section>
-    <h2>Fewer round trips</h2>
-    <div class="chart short" id="c-handshake"></div>
-    <figcaption>Round trips to first request, by transport setup.</figcaption>
-    <aside class="notes">TCP+TLS1.3 is 2-RTT, QUIC 1-RTT, QUIC 0-RTT on resumption sends the request with the first flight.</aside>
+    <h2>QUIC handshake: fewer round trips</h2>
+    <div class="handshake">
+      <div class="panel">
+        <div class="phead"><span class="name">TCP + TLS 1.3</span><span class="rtt">2-RTT</span></div>
+        <div class="lanes"><span>client</span><span>server</span></div>
+        <div class="seq">
+          <div class="msg c2s">SYN</div>
+          <div class="msg s2c">SYN, ACK</div>
+          <div class="msg c2s">ACK, ClientHello</div>
+          <div class="msg s2c">ServerHello</div>
+          <div class="msg c2s get">Fin, GET request</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phead"><span class="name">QUIC</span><span class="rtt">1-RTT</span></div>
+        <div class="lanes"><span>client</span><span>server</span></div>
+        <div class="seq">
+          <div class="msg c2s">Init, ClientHello</div>
+          <div class="msg s2c">Init, ServerHello</div>
+          <div class="msg c2s get">Fin, GET request</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phead"><span class="name">QUIC resumption</span><span class="rtt">0-RTT</span></div>
+        <div class="lanes"><span>client</span><span>server</span></div>
+        <div class="seq">
+          <div class="msg c2s get">Init, ClientHello, GET request</div>
+          <div class="msg s2c">Response</div>
+        </div>
+      </div>
+    </div>
+    <figcaption>Round trips before the first HTTP response, by transport setup.</figcaption>
+  </section>
+
+  <!-- 11b. Save a round trip / savearoundtrip.com -->
+  <section>
+    <h2>Save a round trip: HTTPS RR &gt; Alt-Svc</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Many sites send <code>Alt-Svc: h3=":443"</code> but publish <strong>no HTTPS RR</strong>.</li>
+          <li>The browser connects over HTTP/2, reads the header, and only <em>then</em> learns it could use HTTP/3, on the <em>next</em> connection.</li>
+          <li>Publish an <strong>HTTPS RR</strong> (RFC 9460) with <code>alpn="h3"</code>: the client goes straight to QUIC on connection #1.</li>
+          <li>Bonus: IP hints and ECH config ride along in the same record.</li>
+        </ul>
+      </div>
+      <div class="col-40 center">
+        <div class="stat"><span class="num">1</span><span class="lbl">round trip saved on the first connection</span></div>
+        <p style="margin-top:1.1em; font-size:1.05em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong></p>
+        <p class="tiny">Live HTTPS-RR lookup, and the numbers measured in Firefox.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 12. Time to request start -->
@@ -188,11 +232,11 @@
       </div>
       <div class="col-40">
         <div class="protostack">
-          <div class="top accent">WebTransport</div>
-          <div class="cols">
-            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
-          </div>
-          <div class="base">IPv4 / IPv6</div>
+          <div class="box span accent">WebTransport</div>
+          <div class="box faint">HTTP/1.1</div><div class="box faint">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS 1.2+</div><div class="box faint">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box faint">TCP</div><div class="box faint">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
         </div>
       </div>
     </div>
@@ -212,12 +256,11 @@
       </div>
       <div class="col-40">
         <div class="protostack">
-          <div class="top accent">MASQUE (CONNECT-UDP / -IP)</div>
-          <div class="cols">
-            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
-            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
-          </div>
-          <div class="base">IPv4 / IPv6</div>
+          <div class="box span accent">MASQUE (CONNECT-UDP / -IP)</div>
+          <div class="box faint">HTTP/1.1</div><div class="box accent2">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS 1.2+</div><div class="box accent2">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box faint">TCP</div><div class="box accent2">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
         </div>
       </div>
     </div>
@@ -375,12 +418,6 @@
     x: D.h3Adoption.months, yName: 'share of responses', yMax: 40,
     yFormatter: (v) => v + '%',
     series: [{ name: 'HTTP/3', data: D.h3Adoption.pct, area: true }],
-  }));
-
-  Charts.register('c-handshake', (el) => Charts.bar(el, {
-    x: ['TCP + TLS 1.3', 'QUIC 1-RTT', 'QUIC 0-RTT'],
-    yName: 'round trips', yMax: 2.4, barLabels: true,
-    series: [{ name: 'RTT', data: [2, 1, 0] }],
   }));
 
   Charts.register('c-ttrs', (el) => Charts.bar(el, {
