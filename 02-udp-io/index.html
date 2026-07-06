@@ -103,23 +103,10 @@
   <!-- 8. Result -->
   <section>
     <h2>Result</h2>
-    <div class="cols" style="align-items:center; gap:1.4em;">
-      <div class="col-40 center">
-        <div style="display:flex; align-items:baseline; justify-content:center; gap:0.3em; font-weight:800; letter-spacing:-0.03em;">
-          <span style="font-size:1.3em; color:var(--ink-faint);">&lt; 1</span>
-          <span style="font-size:0.8em; color:var(--ink-faint);">Gbit/s</span>
-          <span style="font-size:1.2em; color:var(--accent); margin:0 0.1em;">&rarr;</span>
-          <span style="font-size:2.6em; color:var(--accent); line-height:1;">4</span>
-          <span style="font-size:1em; color:var(--accent);">Gbit/s</span>
-        </div>
-        <p class="muted" style="margin-top:0.8em; font-size:0.8em;">
-          Roughly <strong>4&times;</strong> on CPU-bound transfers. With per-datagram syscalls batched down, on-CPU time now splits between neqo&rsquo;s own packet handling, UDP I/O and crypto: <strong>AES-GCM decrypt is the single hottest function</strong>.</p>
-      </div>
-      <div class="col-60">
-        <div class="chart short" id="c-cpu"></div>
-      </div>
-    </div>
-    <figcaption class="center">On-CPU self time on Firefox&rsquo;s Socket Thread during a 2.3&nbsp;GB QUIC download, network wait excluded, by library. Profile: <a href="https://share.firefox.dev/4fmWsog">share.firefox.dev/4fmWsog</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
+    <p class="small muted" style="margin:0 0 0.3em;">
+      <strong style="color:var(--accent);">&lt;1 &rarr; 4 Gbit/s</strong> on CPU-bound transfers. With per-datagram syscalls batched down, the <strong>AES-GCM decrypt</strong> tower (left) now rivals UDP <code>sendmsg</code> / <code>recvmmsg</code>, instead of being dwarfed by I/O.</p>
+    <div id="c-flame" style="width:100%; height:400px;"></div>
+    <figcaption>Flamegraph of on-CPU stacks on Firefox&rsquo;s Socket Thread during a 2.3&nbsp;GB QUIC download (network wait excluded). <code>libxul.so</code> = neqo/Necko, symbols unresolved. Profile: <a href="https://share.firefox.dev/4fmWsog">share.firefox.dev/4fmWsog</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->
@@ -202,10 +189,7 @@
     data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
   }));
 
-  Charts.register('c-cpu', (el) => Charts.barH(el, {
-    y: D.cpuBreakdown.labels, data: D.cpuBreakdown.pct, colorByIndex: false,
-    valueFormatter: (v) => v + '%', xMax: 45,
-  }));
+  Flame.registerFlame('c-flame', D.flameFull);
 
   const AKN = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }];
   Seq.register('sq-single', (el) => Seq.render(el, { actors: AKN, messages: [
