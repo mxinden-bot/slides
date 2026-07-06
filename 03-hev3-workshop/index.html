@@ -152,15 +152,15 @@ fn connection_attempt_delay() {
     <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
   </section>
 
-  <!-- 11. Draft changes -->
+  <!-- 11. Beyond the draft (in the library) -->
   <section>
-    <h2>What we fed back into the draft</h2>
+    <h2>Where the implementation goes further</h2>
     <ul>
-      <li>Interleave <strong>both protocol variant and address family</strong>, not just family, so QUIC and the other family are both reached within the first attempts.</li>
-      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off), so implementers can drop below the 250 ms default safely.</li>
+      <li>The draft interleaves address families; the library also interleaves <strong>protocol variants</strong>, so QUIC and the other family are both reached within the first attempts.</li>
+      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off): Firefox runs 50 ms &times;2, not the draft&rsquo;s 250 ms default.</li>
       <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
     </ul>
-    <p class="small muted">Practical deployment experience turning into working-group text.</p>
+    <p class="small muted">Implementation choices, not draft changes: practical input for the working group.</p>
   </section>
 
   <!-- 12. Lessons -->

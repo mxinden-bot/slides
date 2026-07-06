@@ -30,7 +30,7 @@
 - ECH / SVCB-reliant handling: pend TLS/QUIC crypto until SVCB arrives under specific conditions.
 - Expanded IPv6-mostly/IPv6-only guidance (NAT64+DNS64, PREF64/RFC 8781, Last Resort Local Synthesis Delay 2 s, VPN split-DNS).
 - DNS-answer-change handling during racing; timer reschedule.
-- **Firefox-proposed alterations (via mozilla/happy-eyeballs):** interleave *both* protocol variant *and* address family; a configurable **connection-attempt-delay multiplier** (exponential back-off); a flag to **skip waiting for the preferred family**. (Inference: Mozilla experience feeding the WG; not all normative yet.)
+- **Library implementation choices that go beyond the draft (NOT fed into the draft):** interleave *both* protocol variant *and* address family (the draft only interleaves families); a configurable **connection-attempt-delay multiplier** (exponential back-off); a flag to **skip waiting for the preferred family**. These are `mozilla/happy-eyeballs` features / Firefox deviations, practical input for the WG, not draft text.
 
 **Open draft issues** (github.com/ietf-wg-happy/draft-happy-eyeballs-v3/issues): #117 DNS server selection; #116/#1 retransmission-based timing; #112 QUIC v4/v6; #105 pacing across concurrent HE procedures; #91 Section 8 rework; #89 "Connection Escalator"; #87/#42/#32 NAT64-synthesized-address; #6 ECH impact.
 
