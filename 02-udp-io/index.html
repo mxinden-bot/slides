@@ -39,41 +39,29 @@
   <!-- 3. The problem -->
   <section>
     <h2>Userspace QUIC on UDP is expensive</h2>
-    <div class="pipe" style="margin:0.3em 0 0.7em;">
-      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt"></span></div></div>
-      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
-      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt"></span></div></div>
-      <div class="arr"><span class="g">&rarr;</span><span>wire</span></div>
-      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span></div></div>
-    </div>
+    <div id="sq-single" style="margin-top:0.3em;"></div>
     <ul>
       <li><strong>One syscall per datagram</strong>, &lt; 1500 bytes each.</li>
-      <li>ACK up to every second packet.</li>
-      <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (Langley et al., SIGCOMM 2017; later optimized toward ~2&times;).</li>
+      <li>Default QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>) ACKs up to every second packet.</li>
+      <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (<a href="https://dl.acm.org/doi/10.1145/3098822.3098842">Langley et al., SIGCOMM 2017</a>; later optimized toward ~2&times;).</li>
     </ul>
   </section>
 
   <!-- 4. Segmentation offload -->
   <section>
     <h2>Segmentation offload: GSO / GRO</h2>
-    <div class="pipe" style="margin:0.3em 0 0.6em;">
-      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt big"></span></div></div>
-      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
-      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt big"></span></div></div>
-      <div class="arr"><span class="g">&rarr;</span><span>NIC splits</span></div>
-      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-    </div>
+    <div id="sq-gso" style="margin:0.2em 0 0.4em;"></div>
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the NIC splits (send) or coalesces (receive).</li>
-          <li>Real receive coalescing (GRO): median <strong>1</strong> datagram/read, but the P99 read pulls in <strong>14</strong>.</li>
+          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the NIC splits (send) or coalesces (receive) (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
+          <li>Real GRO coalescing on <strong>Android</strong>: median <strong>1</strong> datagram/read, but the P99 read pulls in <strong>14</strong> (P99.9: 46).</li>
           <li>Median received segment: <strong>1217 bytes</strong>.</li>
         </ul>
       </div>
       <div class="col-40">
         <div class="chart short" id="c-gro"></div>
-        <figcaption>Datagrams coalesced per receive syscall (GRO). <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM</a>.</figcaption>
+        <figcaption>Datagrams coalesced per receive syscall (GRO), Firefox for Android. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM</a>.</figcaption>
       </div>
     </div>
   </section>
@@ -81,25 +69,19 @@
   <!-- 5. Multi-message syscalls -->
   <section>
     <h2>Multi-message syscalls</h2>
-    <div class="pipe" style="margin:0.3em 0 0.7em;">
-      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
-      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-      <div class="arr"><span class="g">&rarr;</span><span>wire</span></div>
-      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-    </div>
+    <div id="sq-mmsg" style="margin-top:0.3em;"></div>
     <ul>
-      <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>; macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented).</li>
+      <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>; macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented, <a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
       <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
-      <li><strong>~11%</strong> improvement on an OS loopback transfer (FOSDEM 2025).</li>
+      <li><strong>~11%</strong> improvement on an OS loopback transfer (<a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
     </ul>
   </section>
 
   <!-- 6. quinn-udp platforms -->
   <section>
-    <h2>quinn-udp: one abstraction, every platform</h2>
+    <h2>quinn-udp: one abstraction, many platforms</h2>
     <ul>
-      <li>QUIC UDP I/O in Rust via <strong>quinn-udp</strong>, shared with the Quinn project.</li>
+      <li>QUIC UDP I/O in Rust via <strong><a href="https://github.com/quinn-rs/quinn/tree/main/quinn-udp">quinn-udp</a></strong>, shared with the Quinn project.</li>
       <li>Offload-optimized where Firefox ships: <strong>Linux, Windows, macOS, Android</strong>.</li>
       <li>The same abstraction compiles for <strong>iOS, FreeBSD, NetBSD, OpenBSD, DragonFly, Solaris, Redox</strong>, with a generic fallback path.</li>
       <li>Reads auxiliary IP metadata (ECN) from the same control messages.</li>
@@ -110,10 +92,10 @@
   <section>
     <h2>No-alloc receive path</h2>
     <ul>
-      <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections.</li>
+      <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections (<a href="https://github.com/mozilla/neqo/blob/main/neqo-udp/src/lib.rs">neqo-udp</a>).</li>
       <li>No per-datagram allocation on the hot receive path.</li>
       <li>The iterator hands out borrowed slices of that one buffer; Rust&rsquo;s <strong>borrow checker</strong> proves there is no aliasing or use-after-free, at compile time.</li>
-      <li>Significant CPU-time reduction on large transfers.</li>
+      <li>Significant CPU-time reduction on large transfers: most cycles now go to crypto, not I/O.</li>
     </ul>
   </section>
 
@@ -142,7 +124,8 @@
         <ul>
           <li>Modern syscalls expose IP metadata via <strong>control messages</strong>, including ECN.</li>
           <li><strong>58%</strong> of paths are ECN-capable; but <strong>33%</strong> <em>bleach</em> the bits (strip ECN in transit).</li>
-          <li>When we do see <strong>CE</strong> marks, Firefox reacts: classic-ECN congestion response, no packet loss required.</li>
+          <li>On a <strong>CE</strong> mark, Firefox does a <strong>reduced</strong> congestion response, no packet loss required (<a href="https://github.com/mozilla/neqo/pull/3233">neqo#3233</a>).</li>
+          <li><strong>1 in 5</strong> congestion responses is triggered by ECN CE, not loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM</a>).</li>
         </ul>
       </div>
       <div class="col-40">
@@ -157,7 +140,7 @@
     <h2>OS idiosyncrasies (war stories)</h2>
     <ul class="small">
       <li><strong>Windows:</strong> URO on ARM64 + WSL returns no segment size, disabled (<a href="https://github.com/quinn-rs/quinn/issues/2041">quinn#2041</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1916558">bug 1916558</a>); USO raised P95 loss to ~6.5% and crashed a driver, rolled back (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1979279">bug 1979279</a>).</li>
-      <li><strong>macOS:</strong> no offload; <code>sendmsg_x</code>/<code>recvmsg_x</code> undocumented, pref-gated and <em>not shipped</em> (<a href="https://github.com/mozilla/neqo/pull/2638">neqo#2638</a>); 10.15 unknown address family (<a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
+      <li><strong>macOS:</strong> no NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>); 10.15 unknown address family (<a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
       <li><strong>Linux:</strong> GSO can pass the probe but fail at send with EIO, resend individually (<a href="https://github.com/quinn-rs/quinn/issues/2399">quinn#2399</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049334">bug 2049334</a>).</li>
       <li><strong>Android:</strong> x86 <code>socketcall</code> crashes under seccomp (<a href="https://github.com/quinn-rs/quinn/pull/1966">quinn#1966</a>); API &le; 25 returns EINVAL with ECN, retry without (<a href="https://github.com/quinn-rs/quinn/pull/2079">quinn#2079</a>); single-segment GSO error (<a href="https://github.com/quinn-rs/quinn/pull/2050">quinn#2050</a>).</li>
     </ul>
@@ -165,25 +148,27 @@
 
   <!-- 11. Status -->
   <section>
-    <h2>Status: it rode the trains</h2>
+    <h2>Status: shipped to most users</h2>
     <ul>
       <li>The quinn-udp UDP path is on by default beyond Nightly: <strong>most of this has shipped to Release</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1910360">bug 1910360</a>).</li>
-      <li><strong>ECN</strong> shipped: marking, echoing, and CE-based congestion response.</li>
-      <li>Held back where the OS fights us: Windows <strong>USO/URO</strong> stay off; Apple <code>sendmsg_x</code> stays pref-gated.</li>
-      <li>Still to do: send-path offload hardening, and a long-lived send buffer.</li>
+      <li><strong>ECN</strong> shipped: marking, echoing, and a reduced CE-based congestion response.</li>
+      <li><strong>Send-path offload</strong> is in: GSO on Linux and Android, <code>sendmsg_x</code> on macOS (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>).</li>
+      <li>Windows <strong>USO/URO</strong> remain off (packet loss, driver crashes).</li>
+      <li>Still to do: a long-lived send buffer.</li>
     </ul>
   </section>
 
   <!-- 12. Closing -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Takeaways</p>
-    <h2 style="color:#ffffff;">One syscall should carry many packets</h2>
+    <h2 style="color:#ffffff;">Batching and offload matter, even on the client</h2>
     <ul style="color:#d8d4e2;">
+      <li>These are usually server-side optimizations; it is surprising how much they help a browser.</li>
       <li>Offload and batching close most of the gap to kernel TCP.</li>
       <li>The hard part is not the fast path: it is every OS&rsquo;s edge cases.</li>
       <li>Rust&rsquo;s borrow checker made the shared-buffer receive path safe by construction.</li>
     </ul>
-    <p class="small" style="color:#b3adc4;">neqo &middot; quinn-udp &middot; mail@max-inden.de</p>
+    <p class="small" style="color:#b3adc4;"><a href="https://github.com/mozilla/neqo" style="color:#ff9d5c;">neqo</a> &middot; <a href="https://github.com/quinn-rs/quinn/tree/main/quinn-udp" style="color:#ff9d5c;">quinn-udp</a> &middot; mail@max-inden.de</p>
   </section>
 
 </div>
@@ -195,6 +180,7 @@
 <script src="../lib/reveal/plugin/zoom/zoom.js"></script>
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
@@ -207,6 +193,23 @@
   Charts.register('c-ecn', (el) => Charts.donut(el, {
     data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
   }));
+
+  const AKN = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }];
+  Seq.register('sq-single', (el) => Seq.render(el, { actors: AKN, messages: [
+    { from: 'A', to: 'K', text: 'sendmsg (1 datagram)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
+    { from: 'A', to: 'K', text: 'sendmsg (1 datagram)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
+    { note: 'one syscall per datagram', over: ['A', 'N'] },
+  ] }));
+  Seq.register('sq-gso', (el) => Seq.render(el, { actors: AKN, messages: [
+    { from: 'A', to: 'K', text: 'sendmsg (64 KiB buffer)', hl: true },
+    { from: 'K', to: 'N', text: 'segment into MSS packets', dashed: true },
+    { note: 'one syscall, the NIC segments', over: ['A', 'N'] },
+  ] }));
+  Seq.register('sq-mmsg', (el) => Seq.render(el, { actors: AKN, messages: [
+    { from: 'A', to: 'K', text: 'sendmmsg (N datagrams)', hl: true },
+    { from: 'K', to: 'N', text: 'N packets', dashed: true },
+    { note: 'one syscall, a batch of datagrams', over: ['A', 'N'] },
+  ] }));
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
