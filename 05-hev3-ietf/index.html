@@ -29,7 +29,7 @@
     <h2>Since IETF 125</h2>
     <ul>
       <li>Happy Eyeballs v3 is now <strong>enabled by default in Firefox Nightly</strong>.</li>
-      <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3-04</a>. No major deviation.</li>
+      <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, with a couple of tuned delay deviations (see below).</li>
       <li>Public Glean telemetry is flowing.</li>
     </ul>
   </section>
@@ -45,33 +45,63 @@
     <p class="small muted">Enable DoH to get HTTPS records on all platforms.</p>
   </section>
 
-  <!-- 4. Latency -->
-  <section>
-    <h2>Connection-establishment latency</h2>
-    <div class="chart" id="c-latency"></div>
-    <figcaption>HEv3 end-to-end latency of successful connects, Firefox Nightly. Failures resolve by ~50 ms (P75) or hit the 10 s cap. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
+  <!-- TELEMETRY divider -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Telemetry</p>
+    <h2 style="color:#ffffff;">Ten metrics from the field</h2>
+    <p class="small" style="color:#b3adc4;">All from Firefox Nightly, all public in GLAM. Data the working group can build on.</p>
   </section>
 
-  <!-- 4b. Racing is cheap -->
+  <!-- M1. end_to_end_time_succeeded -->
   <section>
-    <h2>Racing is cheap</h2>
-    <div class="cols" style="gap:1.2em;">
-      <div class="stat"><span class="num">94%</span><span class="lbl">the first attempt wins</span></div>
-      <div class="stat"><span class="num">89%</span><span class="lbl">succeed on attempt #1</span></div>
-      <div class="stat"><span class="num">95%</span><span class="lbl">cancel no attempts</span></div>
-      <div class="stat"><span class="num">27 ms</span><span class="lbl">to the first attempt (P75)</span></div>
-    </div>
-    <p class="small muted">From <code>winning_attempt_index</code>, <code>connection_attempt_count</code>, <code>cancelled_attempt_count</code>, <code>time_to_first_attempt</code> (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM</a>).</p>
+    <h2>End-to-end time, succeeded</h2>
+    <div class="chart" id="c-e2eok"></div>
+    <figcaption>First DNS query to a connected socket, successful connects. Median <strong>74 ms</strong>, P95 <strong>603 ms</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM: end_to_end_time_succeeded</a>.</figcaption>
   </section>
 
-  <!-- 4c. DNS by record type -->
+  <!-- M2. end_to_end_time_failed -->
+  <section>
+    <h2>End-to-end time, failed</h2>
+    <div class="chart" id="c-e2efail"></div>
+    <figcaption>Failures either fail fast (P75 <strong>50 ms</strong>) or grind to the <strong>10 s</strong> cap; little in between. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore">GLAM: end_to_end_time_failed</a>.</figcaption>
+  </section>
+
+  <!-- M3. winning_attempt_index -->
+  <section>
+    <h2>Winning attempt index</h2>
+    <div class="chart" id="c-winidx"></div>
+    <figcaption>Which staggered attempt connected. <strong>84%</strong> win on the first attempt. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM: winning_attempt_index</a>.</figcaption>
+  </section>
+
+  <!-- M4. connection_attempt_count -->
+  <section>
+    <h2>Connection attempt count</h2>
+    <div class="chart" id="c-attemptcount"></div>
+    <figcaption>Attempts opened before success. <strong>87%</strong> need just one: racing rarely fires a second. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_connection_attempt_count/explore">GLAM: connection_attempt_count</a>.</figcaption>
+  </section>
+
+  <!-- M5. cancelled_attempt_count -->
+  <section>
+    <h2>Cancelled attempt count</h2>
+    <div class="chart" id="c-cancelcount"></div>
+    <figcaption>Attempts cancelled once a winner appeared: wasted work. <strong>92%</strong> cancel nothing. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_cancelled_attempt_count/explore">GLAM: cancelled_attempt_count</a>.</figcaption>
+  </section>
+
+  <!-- M6. time_to_first_attempt -->
+  <section>
+    <h2>Time to first attempt</h2>
+    <div class="chart" id="c-firstattempt"></div>
+    <figcaption>Time before the first attempt fires, mostly the DNS answer arriving. Median <strong>3 ms</strong>, P75 <strong>27 ms</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_time_to_first_attempt/explore">GLAM: time_to_first_attempt</a>.</figcaption>
+  </section>
+
+  <!-- M7. dns_resolution_time -->
   <section>
     <h2>DNS resolution time, by record type</h2>
     <div class="chart" id="c-dns"></div>
-    <figcaption>DNS resolution time (ms), P75 and P95. HTTPS records resolve as fast as A/AAAA. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM</a>.</figcaption>
+    <figcaption>Per record type, log scale. HTTPS records resolve <strong>as fast as</strong> A/AAAA. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM: dns_resolution_time</a>.</figcaption>
   </section>
 
-  <!-- 5. Discovery -->
+  <!-- M8. h3_discovery -->
   <section>
     <h2>How connections learn about h3</h2>
     <div class="cols">
@@ -80,30 +110,37 @@
       </div>
       <div class="col-60">
         <ul>
-          <li><strong>22%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay.</li>
-          <li>Only <strong>4.7%</strong> via an HTTPS record alone; <strong>8%</strong> via both.</li>
+          <li><strong>29%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay.</li>
+          <li><strong>21%</strong> via an HTTPS record alone, <strong>19%</strong> via both: no round trip.</li>
           <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
         </ul>
       </div>
     </div>
-    <figcaption><a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
+    <figcaption>Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
   </section>
 
-  <!-- 5b. RR features -->
+  <!-- M9. https_rr_features -->
   <section>
-    <h2>What HTTPS records carry in the wild</h2>
+    <h2>What HTTPS records carry</h2>
     <div class="chart" id="c-features"></div>
-    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam; also split by DoH vs native resolver (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">by_resolver</a>). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>.</figcaption>
+    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Nearly all advertise h3; about half carry <strong>ECH</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
+  </section>
+
+  <!-- M10. https_rr_features_by_resolver -->
+  <section>
+    <h2>HTTPS-RR features, by resolver</h2>
+    <div class="chart" id="c-byresolver"></div>
+    <figcaption>Same SvcParams, DoH vs the OS resolver. DoH sees slightly more address hints; <strong>ECH appears more over the OS resolver</strong> (52% vs 32%), a split worth the WG&rsquo;s attention. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
   <!-- 6. Library changes -->
   <section>
-    <h2>Changes to the library</h2>
+    <h2>How Firefox deviates from the draft</h2>
     <ul>
-      <li><strong>mozilla/happy-eyeballs</strong>: a deterministic, sans-I/O state machine, reusable outside Firefox.</li>
-      <li>Interleave <strong>protocol variant and address family</strong> together.</li>
-      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off): Firefox runs 50 ms base &times;2, not the 250 ms default.</li>
-      <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
+      <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: a deterministic, sans-I/O state machine, reusable outside Firefox.</li>
+      <li><strong>Attempt delay</strong>: a 50 ms base with <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), not the draft&rsquo;s flat 250 ms.</li>
+      <li><strong>Resolution delay</strong>: <strong>25 ms</strong>, not 50 ms (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
+      <li>Also interleaves <strong>protocol variant</strong> with address family; a flag can <strong>skip waiting for the preferred family</strong>.</li>
     </ul>
   </section>
 
@@ -148,20 +185,58 @@
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
-  Charts.register('c-latency', (el) => Charts.bar(el, {
-    x: D.latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
-    yFormatter: ms, series: [{ name: 'latency', data: D.latency.ms }],
+  const pctLabel = (p) => p.value + '%';
+  Charts.register('c-e2eok', (el) => Charts.bar(el, {
+    x: D.e2eOk.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
+    yFormatter: ms, series: [{ name: 'succeeded', data: D.e2eOk.ms }],
   }));
-  Charts.register('c-discovery', (el) => Charts.donut(el, {
-    data: D.discovery, centerValue: '22%', centerLabel: 'Alt-Svc only',
+  Charts.register('c-e2efail', (el) => Charts.bar(el, {
+    x: D.e2eFail.p, yName: 'ms', yMax: 11000, yFormatter: ms,
+    barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'failed', data: D.e2eFail.ms }],
+  }));
+  Charts.register('c-winidx', (el) => Charts.bar(el, {
+    x: D.winIdx.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.winIdx.pct }],
+  }));
+  Charts.register('c-attemptcount', (el) => Charts.bar(el, {
+    x: D.attemptCount.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.attemptCount.pct }],
+  }));
+  Charts.register('c-cancelcount', (el) => Charts.bar(el, {
+    x: D.cancelCount.x, yName: '% of connects', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [{ name: 'share', data: D.cancelCount.pct }],
+  }));
+  Charts.register('c-firstattempt', (el) => Charts.bar(el, {
+    x: D.firstAttempt.p, yName: 'ms (log)', yType: 'log', yMin: 1, yMax: 1000,
+    yFormatter: ms, barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'ms', data: D.firstAttempt.ms }],
   }));
   Charts.register('c-dns', (el) => Charts.bar(el, {
-    x: D.dnsRes.types, yName: 'ms', yMax: 130,
-    series: [{ name: 'P75', data: D.dnsRes.p75 }, { name: 'P95', data: D.dnsRes.p95 }],
+    x: D.dnsRes.p, yName: 'ms (log)', yType: 'log', yMin: 10, yMax: 12000, yFormatter: ms,
+    series: [
+      { name: 'A', data: D.dnsRes.a },
+      { name: 'AAAA', data: D.dnsRes.aaaa },
+      { name: 'HTTPS', data: D.dnsRes.https },
+    ],
+  }));
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '29%', centerLabel: 'Alt-Svc only',
   }));
   Charts.register('c-features', (el) => Charts.barH(el, {
     y: D.rrFeatures.labels, data: D.rrFeatures.pct, colorByIndex: false,
     valueFormatter: (v) => v + '%', xMax: 100,
+  }));
+  Charts.register('c-byresolver', (el) => Charts.bar(el, {
+    x: D.rrByResolver.labels, yName: '% carrying', yMax: 100,
+    barLabels: true, barLabelFormatter: pctLabel,
+    series: [
+      { name: 'DoH', data: D.rrByResolver.doh },
+      { name: 'OS resolver', data: D.rrByResolver.native },
+    ],
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
