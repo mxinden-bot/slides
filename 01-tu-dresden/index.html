@@ -56,11 +56,15 @@
           <strong>DoH</strong>, <strong>WebTransport</strong>, <strong>MASQUE</strong>.</p>
       </div>
       <div class="col-40">
-        <div class="stack">
-          <div class="layer"><div class="box">www</div><div class="box">mail</div><div class="box">video</div></div>
-          <div class="layer"><div class="box accent wide">HTTP</div></div>
-          <div class="layer"><div class="box">TCP + TLS</div><div class="box accent3">QUIC</div></div>
-          <div class="layer"><div class="box">IPv4</div><div class="box">IPv6</div></div>
+        <div class="hourglass">
+          <div class="caplbl">applications</div>
+          <div class="tier"><div class="box">www</div><div class="box">mail</div><div class="box">video</div><div class="box">chat</div></div>
+          <div class="funnel down"></div>
+          <div class="tier"><div class="box waist">HTTP</div></div>
+          <div class="funnel up"></div>
+          <div class="tier"><div class="box">TCP + TLS</div><div class="box">QUIC</div></div>
+          <div class="tier"><div class="box">IPv4</div><div class="box">IPv6</div></div>
+          <div class="caplbl">transports &middot; network</div>
         </div>
       </div>
     </div>
@@ -93,9 +97,9 @@
 
   <!-- 5. DoH performance -->
   <section>
-    <h2>DoH performance</h2>
+    <h2>DNS lookup time: DoH vs OS resolver</h2>
     <div class="chart" id="c-dohperf"></div>
-    <figcaption>DNS resolution time, ms, P95. United States and Canada. Firefox telemetry (past 12 months).</figcaption>
+    <figcaption>DNS lookup time, ms, US + Canada. P75 (solid), P95 (dashed). Firefox telemetry, past 12 months.</figcaption>
   </section>
 
   <!-- 6. DoH adoption -->
@@ -159,55 +163,80 @@
   <!-- 11. QUIC handshake -->
   <section>
     <h2>QUIC handshake: fewer round trips</h2>
-    <div class="handshake">
-      <div class="panel">
-        <div class="phead"><span class="name">TCP + TLS 1.3</span><span class="rtt">2-RTT</span></div>
-        <div class="lanes"><span>client</span><span>server</span></div>
-        <div class="seq">
-          <div class="msg c2s">SYN</div>
-          <div class="msg s2c">SYN, ACK</div>
-          <div class="msg c2s">ACK, ClientHello</div>
-          <div class="msg s2c">ServerHello</div>
-          <div class="msg c2s get">Fin, GET request</div>
-        </div>
+    <div class="cols" style="gap:22px; align-items:flex-start;">
+      <div>
+        <h3 class="center">TCP + TLS 1.3 &nbsp;<span class="pill">2-RTT</span></h3>
+        <div id="hs-tcp"></div>
       </div>
-      <div class="panel">
-        <div class="phead"><span class="name">QUIC</span><span class="rtt">1-RTT</span></div>
-        <div class="lanes"><span>client</span><span>server</span></div>
-        <div class="seq">
-          <div class="msg c2s">Init, ClientHello</div>
-          <div class="msg s2c">Init, ServerHello</div>
-          <div class="msg c2s get">Fin, GET request</div>
-        </div>
+      <div>
+        <h3 class="center">QUIC &nbsp;<span class="pill">1-RTT</span></h3>
+        <div id="hs-quic"></div>
       </div>
-      <div class="panel">
-        <div class="phead"><span class="name">QUIC resumption</span><span class="rtt">0-RTT</span></div>
-        <div class="lanes"><span>client</span><span>server</span></div>
-        <div class="seq">
-          <div class="msg c2s get">Init, ClientHello, GET request</div>
-          <div class="msg s2c">Response</div>
-        </div>
+      <div>
+        <h3 class="center">QUIC resumption &nbsp;<span class="pill on">0-RTT</span></h3>
+        <div id="hs-0rtt"></div>
       </div>
     </div>
-    <figcaption>Round trips before the first HTTP response, by transport setup.</figcaption>
+    <figcaption>Messages before the first HTTP response, by transport setup.</figcaption>
   </section>
 
-  <!-- 11b. Save a round trip / savearoundtrip.com -->
+  <!-- 11b. How does a browser learn h3? -->
   <section>
-    <h2>Save a round trip: HTTPS RR &gt; Alt-Svc</h2>
+    <h2>How does a browser learn a site speaks HTTP/3?</h2>
+    <p>HTTP/3 has to be <em>discovered</em>. Two mechanisms:</p>
+    <div class="cols">
+      <div>
+        <h3>Alt-Svc header &nbsp;<span class="pill">RFC 7838</span></h3>
+        <ul>
+          <li>An HTTP response header: <code>Alt-Svc: h3=":443"</code>.</li>
+          <li>Learned <strong>after</strong> a full HTTP/1.1 or HTTP/2 connection.</li>
+          <li>So the very first connection is <em>never</em> HTTP/3.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>HTTPS DNS record &nbsp;<span class="pill">RFC 9460</span></h3>
+        <ul>
+          <li>An <code>HTTPS</code> record carrying <code>alpn="h3"</code>.</li>
+          <li>Learned <strong>during DNS resolution</strong>, before connecting.</li>
+          <li>Also carries IP hints and the <strong>ECH</strong> key.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11c. The two flows -->
+  <section>
+    <h2>The wasted round trip</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11d. Save a round trip / savearoundtrip.com -->
+  <section>
+    <h2>Save a round trip</h2>
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>Many sites send <code>Alt-Svc: h3=":443"</code> but publish <strong>no HTTPS RR</strong>.</li>
-          <li>The browser connects over HTTP/2, reads the header, and only <em>then</em> learns it could use HTTP/3, on the <em>next</em> connection.</li>
-          <li>Publish an <strong>HTTPS RR</strong> (RFC 9460) with <code>alpn="h3"</code>: the client goes straight to QUIC on connection #1.</li>
-          <li>Bonus: IP hints and ECH config ride along in the same record.</li>
+          <li>Many sites send <code>Alt-Svc: h3</code> but publish <strong>no HTTPS record</strong>.</li>
+          <li>Every first visit then wastes a round trip: connect over HTTP/2, read the header, upgrade to HTTP/3 only <em>next</em> time.</li>
+          <li>Publish an HTTPS record with <code>alpn="h3"</code> and the client goes straight to QUIC on connection #1.</li>
+          <li>Bonus: the HTTPS record is the <strong>only</strong> way to deliver ECH.</li>
         </ul>
       </div>
       <div class="col-40 center">
         <div class="stat"><span class="num">1</span><span class="lbl">round trip saved on the first connection</span></div>
         <p style="margin-top:1.1em; font-size:1.05em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong></p>
-        <p class="tiny">Live HTTPS-RR lookup, and the numbers measured in Firefox.</p>
+        <p class="tiny">Live HTTPS-record checker, and the numbers measured in Firefox.</p>
       </div>
     </div>
   </section>
@@ -216,7 +245,7 @@
   <section>
     <h2>Time to request start, by protocol</h2>
     <div class="chart" id="c-ttrs"></div>
-    <figcaption>Time to request start, ms, P75. Firefox for Android. Firefox telemetry.</figcaption>
+    <figcaption>Time to request start, ms, P75, by HTTP version. Firefox desktop. Includes DNS lookup and connection setup.</figcaption>
   </section>
 
   <!-- 13. WebTransport -->
@@ -329,7 +358,7 @@
       </div>
       <div class="col-40">
         <div class="chart short" id="c-hev3"></div>
-        <figcaption>HEv3 connection-establishment latency in Firefox Nightly.</figcaption>
+        <figcaption>HEv3 end-to-end connection latency, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
       </div>
     </div>
   </section>
@@ -372,14 +401,14 @@
       <li class="fragment">IPv6, 0-RTT QUIC with ECH</li>
       <li class="fragment">Fetch the video player assets over HTTP/3</li>
       <li class="fragment">Open a WebTransport session for Media over QUIC</li>
-      <li class="fragment">Watch the recording of this very talk</li>
+      <li class="fragment">Watch the recording of the FOSDEM 2026 edition of this talk</li>
     </ol>
   </section>
 
   <!-- 26. Thank you -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
-    <h2 style="color:#ffffff;">Questions? Let&rsquo;s talk.</h2>
+    <h2 style="color:#ffffff;">Questions?</h2>
     <p style="color:#d8d4e2;">Help build a healthy Internet.</p>
     <p class="small" style="color:#b3adc4;">In person &middot; mail@max-inden.de &middot; @mxinden</p>
   </section>
@@ -393,16 +422,19 @@
 <script src="../lib/reveal/plugin/zoom/zoom.js"></script>
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
 
   Charts.register('c-dohperf', (el) => Charts.line(el, {
-    x: D.months, yName: 'ms (P95)', yMax: 100,
+    x: D.months, yName: 'ms', yMax: 100, endLabels: false,
     series: [
-      { name: 'DoH', data: D.dohPerf.doh },
-      { name: 'OS resolver', data: D.dohPerf.osResolver, color: Charts.other },
+      { name: 'DoH P75', data: D.dohPerf.dohP75, color: '#2a78d6' },
+      { name: 'OS resolver P75', data: D.dohPerf.osP75, color: '#8f8f9d' },
+      { name: 'DoH P95', data: D.dohPerf.dohP95, color: '#2a78d6', dashed: true },
+      { name: 'OS resolver P95', data: D.dohPerf.osP95, color: '#8f8f9d', dashed: true },
     ],
   }));
 
@@ -420,10 +452,14 @@
     series: [{ name: 'HTTP/3', data: D.h3Adoption.pct, area: true }],
   }));
 
-  Charts.register('c-ttrs', (el) => Charts.bar(el, {
-    x: D.ttrs.labels, yName: 'ms (P75)', barLabels: true,
-    barLabelFormatter: (p) => p.value + ' ms',
-    series: [{ name: 'time to request start', data: D.ttrs.ms }],
+  Charts.register('c-ttrs', (el) => Charts.line(el, {
+    x: D.months, yName: 'ms (P75)', yMax: 160, endLabels: false,
+    series: [
+      { name: 'HTTP/1.1', data: D.ttrs.h1, color: '#b8b8c0' },
+      { name: 'HTTP/2', data: D.ttrs.h2, color: '#8f8f9d' },
+      { name: 'Overall', data: D.ttrs.overall, color: '#5b5b66', dashed: true },
+      { name: 'HTTP/3', data: D.ttrs.h3, color: '#e66000' },
+    ],
   }));
 
   Charts.register('c-hev3', (el) => Charts.bar(el, {
@@ -431,12 +467,39 @@
     yFormatter: ms, series: [{ name: 'latency', data: D.hev3Latency.ms }],
   }));
 
+  const CS = [{ id: 'C', label: 'client' }, { id: 'S', label: 'server' }];
+  Seq.register('hs-tcp', (el) => Seq.render(el, { actors: CS, messages: [
+    { from: 'C', to: 'S', text: 'SYN' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
+    { from: 'C', to: 'S', text: 'ClientHello' }, { from: 'S', to: 'C', text: 'ServerHello', dashed: true },
+    { from: 'C', to: 'S', text: 'GET request', hl: true },
+  ] }));
+  Seq.register('hs-quic', (el) => Seq.render(el, { actors: CS, messages: [
+    { from: 'C', to: 'S', text: 'Initial, ClientHello' }, { from: 'S', to: 'C', text: 'Initial, ServerHello', dashed: true },
+    { from: 'C', to: 'S', text: 'GET request', hl: true },
+  ] }));
+  Seq.register('hs-0rtt', (el) => Seq.render(el, { actors: CS, messages: [
+    { from: 'C', to: 'S', text: 'Initial, ClientHello, GET', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
     hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
-  const render = () => window.Charts && Charts.renderAll();
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
   Reveal.on('ready', () => setTimeout(render, 0));
   Reveal.on('slidechanged', render);
   Reveal.on('resize', () => setTimeout(render, 60));
