@@ -1,0 +1,14 @@
+{
+  "name": "network-protocol-slides",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Max Inden's reveal.js decks on modern network protocols and Happy Eyeballs v3",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "pdf": "node export-pdf.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

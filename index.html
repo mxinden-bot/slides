@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talks: Modern Network Protocols</title>
+  <link rel="stylesheet" href="theme/theme.css">
+  <style>
+    body { margin: 0; background: #f5f5f7; color: var(--ink); font-family: var(--font-sans); }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 6vh 24px 12vh; }
+    .rule { width: 64px; height: 5px; background: var(--accent); border-radius: 3px; margin-bottom: 24px; }
+    h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+    .sub { color: var(--ink-muted); font-size: 19px; margin: 0 0 40px; }
+    .deck { display: block; text-decoration: none; color: inherit; background: #fff;
+      border: 1px solid var(--hairline); border-radius: 14px; padding: 20px 22px; margin-bottom: 14px;
+      transition: box-shadow .15s ease, transform .15s ease; }
+    a.deck:hover { box-shadow: 0 6px 24px rgba(0,0,0,.08); transform: translateY(-1px); }
+    .deck.todo { opacity: .62; }
+    .deck .top { display: flex; align-items: center; gap: 12px; }
+    .deck h2 { font-size: 22px; margin: 0; font-weight: 700; }
+    .deck p { margin: 6px 0 0; color: var(--ink-muted); font-size: 15px; }
+    .tag { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px; border: 1px solid var(--hairline); color: var(--ink-faint); }
+    .tag.live { color: var(--good); border-color: rgba(1,122,61,.3); background: rgba(1,122,61,.08); }
+    .tag.wip { color: var(--warn); border-color: rgba(164,127,0,.3); background: rgba(164,127,0,.08); }
+    .when { margin-left: auto; font-size: 14px; color: var(--ink-faint); white-space: nowrap; }
+    footer { margin-top: 40px; color: var(--ink-faint); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="rule"></div>
+    <h1>Modern Network Protocols &amp; Happy Eyeballs</h1>
+    <p class="sub">Talk decks. Press <kbd>S</kbd> for speaker notes, <kbd>E</kbd> then print for PDF, <kbd>?</kbd> for help.</p>
+
+    <a class="deck" href="01-tu-dresden/">
+      <div class="top"><h2>Modern Network Protocols &mdash; What&rsquo;s Next for Firefox and the Web?</h2>
+        <span class="when">TU Dresden</span></div>
+      <p><span class="tag wip">In progress</span> &nbsp; Overview talk: QUIC, HTTP/3, encrypted DNS, ECH, WebTransport, MASQUE, Happy Eyeballs v3.</p>
+    </a>
+
+    <div class="deck todo">
+      <div class="top"><h2>Modern UDP I/O for Firefox in Rust</h2>
+        <span class="when">HTTP Workshop</span></div>
+      <p><span class="tag">Planned</span> &nbsp; recvmmsg/GRO/GSO, no-alloc receive path, throughput and CPU gains.</p>
+    </div>
+
+    <div class="deck todo">
+      <div class="top"><h2>Rollout of Happy Eyeballs v3 in Firefox</h2>
+        <span class="when">HTTP Workshop</span></div>
+      <p><span class="tag">Planned</span> &nbsp; Telemetry from the Nightly rollout, library and draft changes, integration lessons.</p>
+    </div>
+
+    <div class="deck todo">
+      <div class="top"><h2>Discussion: Evolving HTTP/3 &amp; QUIC beyond 30%</h2>
+        <span class="when">HTTP Workshop</span></div>
+      <p><span class="tag">Planned</span> &nbsp; QUIC v2 rollout, alt-svc &rarr; HTTPS RR, optimistic QUIC.</p>
+    </div>
+
+    <div class="deck todo">
+      <div class="top"><h2>Happy Eyeballs v3 in Firefox &mdash; update</h2>
+        <span class="when">IETF &middot; HE WG</span></div>
+      <p><span class="tag">Planned</span> &nbsp; Since IETF 125: enabled in Nightly, telemetry, library changes, lessons.</p>
+    </div>
+
+    <footer>Built with reveal.js. Charts with ECharts. One repository, shared theme.</footer>
+  </div>
+</body>
+</html>

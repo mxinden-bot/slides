@@ -1,0 +1,168 @@
+/*
+ * Shared slide theme for Max Inden's network-protocol talks.
+ * Layered on top of reveal.js's reset.css + reveal.css.
+ * Palette is Firefox/Photon-inspired and deliberately restrained so that
+ * the graphs (not the chrome) carry the visual weight.
+ */
+
+:root {
+  /* Ink + surface */
+  --ink:        #1c1b22; /* Photon ink 80 */
+  --ink-muted:  #5b5b66;
+  --ink-faint:  #8f8f9d;
+  --surface:    #ffffff;
+  --surface-2:  #f5f5f7;
+  --hairline:   #d7d7db;
+
+  /* Brand + categorical accents (used across all decks for consistency) */
+  --accent:     #e66000; /* Firefox orange */
+  --accent-2:   #0060df; /* Photon blue 60 */
+  --accent-3:   #20123a; /* deep purple */
+  --accent-4:   #008787; /* teal */
+  --accent-5:   #d70022; /* red, use sparingly */
+  --good:       #017a3d;
+  --warn:       #a47f00;
+
+  /* Categorical series palette for charts. These are the dataviz skill's
+   * validated, CVD-safe hues (light surface). Order is the CVD-optimized order,
+   * do not reshuffle. Firefox orange lives in --accent (chrome only), kept out
+   * of data encoding on purpose. Sub-3:1 hues rely on direct series labels. */
+  --c1: #2a78d6; /* blue   */
+  --c2: #eb6834; /* orange */
+  --c3: #1baf7a; /* aqua   */
+  --c4: #4a3aa7; /* violet */
+  --c5: #e34948; /* red    */
+  --c6: #008300; /* green  */
+  --c7: #e87ba4; /* magenta */
+  --c-other: #8f8f9d; /* neutral, "Other" only, always with a label */
+
+  --font-sans: "Inter", "Helvetica Neue", -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+.reveal {
+  font-family: var(--font-sans);
+  font-size: 34px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.reveal .slides { text-align: left; }
+.reveal .slides section { height: 100%; }
+
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5em 0;
+  text-transform: none;
+  text-shadow: none;
+}
+.reveal h1 { font-size: 1.9em; }
+.reveal h2 { font-size: 1.35em; }
+.reveal h3 { font-size: 1.05em; color: var(--ink-muted); }
+
+.reveal p { line-height: 1.35; margin: 0 0 0.6em 0; }
+.reveal a { color: var(--accent-2); text-decoration: none; }
+.reveal strong { color: var(--accent); font-weight: 700; }
+.reveal em { font-style: normal; color: var(--accent-2); }
+
+.reveal ul, .reveal ol { display: block; margin: 0 0 0 1em; }
+.reveal li { line-height: 1.4; margin: 0.28em 0; }
+.reveal li::marker { color: var(--accent); }
+
+.reveal code { font-family: var(--font-mono); font-size: 0.85em; }
+.reveal pre { font-size: 0.6em; box-shadow: none; }
+.reveal pre code {
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  max-height: 100%;
+}
+
+/* A thin brand rule top-left as a quiet identity marker */
+.reveal .slides section::before {
+  content: "";
+  position: absolute;
+  top: -6%;
+  left: 0;
+  width: 64px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 3px;
+}
+/* ...but not on the cover or section dividers */
+.reveal .slides section.cover::before,
+.reveal .slides section.divider::before { content: none; }
+
+/* Slide footer with running title + page context */
+.reveal .slide-number {
+  color: var(--ink-faint);
+  background: transparent;
+  font-size: 15px;
+  font-family: var(--font-sans);
+}
+
+/* ---- Cover slide ---- */
+.reveal section.cover { display: flex; flex-direction: column; justify-content: center; }
+.reveal section.cover h1 { font-size: 2.1em; margin-bottom: 0.15em; }
+.reveal section.cover .subtitle { font-size: 1.1em; color: var(--ink-muted); font-weight: 500; }
+.reveal section.cover .venue {
+  margin-top: 1.2em; font-size: 0.7em; color: var(--ink-faint);
+  border-top: 2px solid var(--accent); padding-top: 0.6em; display: inline-block;
+}
+.reveal section.cover .cover-accent {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    radial-gradient(60% 80% at 100% 0%, rgba(230,96,0,0.10), transparent 60%),
+    radial-gradient(50% 70% at 0% 100%, rgba(0,96,223,0.08), transparent 60%);
+}
+
+/* ---- Section divider ---- */
+.reveal section.divider { display: flex; flex-direction: column; justify-content: center; }
+.reveal section.divider h2 { font-size: 2.2em; color: var(--accent-3); }
+.reveal section.divider .kicker {
+  font-size: 0.6em; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 0.4em;
+}
+
+/* ---- Utility layout ---- */
+.reveal .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+.reveal .cols > * { flex: 1; min-width: 0; }
+.reveal .col-40 { flex: 0 0 40%; }
+.reveal .col-60 { flex: 0 0 56%; }
+.reveal .center { text-align: center; }
+.reveal .muted { color: var(--ink-muted); }
+.reveal .small { font-size: 0.7em; }
+.reveal .tiny { font-size: 0.55em; color: var(--ink-faint); }
+.reveal .fill { width: 100%; height: auto; }
+
+/* Figure caption / data provenance line under a chart */
+.reveal figure { margin: 0; }
+.reveal figcaption { font-size: 0.5em; color: var(--ink-faint); margin-top: 0.4em; }
+
+/* Big number / stat callout */
+.reveal .stat { display: flex; flex-direction: column; align-items: center; }
+.reveal .stat .num { font-size: 2.4em; font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -0.03em; }
+.reveal .stat .lbl { font-size: 0.6em; color: var(--ink-muted); margin-top: 0.3em; text-align: center; }
+
+/* Pill / tag */
+.reveal .pill {
+  display: inline-block; font-size: 0.55em; font-weight: 600;
+  padding: 0.15em 0.6em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-muted); border: 1px solid var(--hairline);
+}
+.reveal .pill.on { background: rgba(1,122,61,0.12); color: var(--good); border-color: rgba(1,122,61,0.25); }
+
+/* Chart shared type/colors (SVG inherits these via classes) */
+.reveal svg { max-width: 100%; height: auto; }
+.reveal svg text { font-family: var(--font-sans); fill: var(--ink); }
+.reveal .axis text { fill: var(--ink-faint); font-size: 13px; }
+.reveal .axis line, .reveal .axis path { stroke: var(--hairline); stroke-width: 1; }
+.reveal .grid line { stroke: var(--hairline); stroke-dasharray: 2 4; }
+.reveal .lbl-series { font-size: 13px; font-weight: 600; }
+
+@media print {
+  .reveal section.cover .cover-accent { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
