@@ -20,7 +20,7 @@
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Modern UDP I/O for Firefox in Rust</h1>
-    <p class="subtitle">recvmmsg, GRO and GSO across four platforms, with a no-alloc receive path</p>
+    <p class="subtitle">recvmmsg, GRO and GSO across every platform, with a no-alloc receive path</p>
     <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
 
@@ -28,67 +28,52 @@
   <section>
     <h2>Why UDP I/O matters for Firefox</h2>
     <ul>
-      <li>A large and growing share of Firefox HTTP traffic is <strong>HTTP/3 over QUIC</strong>, i.e. UDP.</li>
+      <li>~<strong>20%</strong> of Firefox HTTP traffic is HTTP/3 over QUIC, i.e. UDP.</li>
       <li>QUIC lives in <strong>user space</strong>; the kernel hands us raw datagrams.</li>
-      <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong>-based UDP I/O with a modern Rust stack.</li>
+      <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong> UDP I/O (one <code>sendto</code>/<code>recvfrom</code> per datagram) with a modern Rust stack.</li>
       <li>Goal: close the gap to heavily optimized, in-kernel TCP.</li>
     </ul>
+    <p class="small muted">Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1901292">Bugzilla 1901292 &mdash; [meta] Fast UDP for Firefox</a>. Background: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de</a>.</p>
   </section>
 
   <!-- 3. The problem -->
   <section>
     <h2>Userspace QUIC on UDP is expensive</h2>
-    <div class="cols">
-      <div class="col-60">
-        <p>An un-optimized userspace transport on top of UDP may do:</p>
-        <ul>
-          <li><strong>One syscall per datagram</strong></li>
-          <li>&lt; 1500 byte MTU for Internet traffic</li>
-          <li>ACK up to every second packet</li>
-          <li>de Bruijn et al.: &ldquo;<strong>3.5&times; the CPU cycles per byte</strong>&rdquo;</li>
-        </ul>
-      </div>
-      <div class="col-40">
-        <div class="flow-row">
-          <span class="tag">One datagram</span>
-          <div class="flow">
-            <div class="node">app<div class="pkts"><span class="pkt"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">OS<div class="pkts"><span class="pkt"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">NIC<div class="pkts"><span class="pkt"></span></div></div>
-          </div>
-        </div>
-        <p class="tiny">One syscall carries one packet across the boundary.</p>
-      </div>
+    <div class="pipe" style="margin:0.3em 0 0.7em;">
+      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt"></span></div></div>
+      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
+      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt"></span></div></div>
+      <div class="arr"><span class="g">&rarr;</span><span>wire</span></div>
+      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span></div></div>
     </div>
+    <ul>
+      <li><strong>One syscall per datagram</strong>, &lt; 1500 bytes each.</li>
+      <li>ACK up to every second packet.</li>
+      <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (Langley et al., SIGCOMM 2017; later optimized toward ~2&times;).</li>
+    </ul>
   </section>
 
   <!-- 4. Segmentation offload -->
   <section>
     <h2>Segmentation offload: GSO / GRO</h2>
+    <div class="pipe" style="margin:0.3em 0 0.6em;">
+      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt big"></span></div></div>
+      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
+      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt big"></span></div></div>
+      <div class="arr"><span class="g">&rarr;</span><span>NIC splits</span></div>
+      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+    </div>
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>.</li>
-          <li>One syscall carries <em>many</em> packets; the NIC/stack splits or coalesces.</li>
-          <li>Firefox Nightly (Linux GRO): P75 read syscall reads <strong>&ge;2 packets</strong>, P95 <strong>&ge;10</strong>.</li>
-          <li>P75 read <strong>2.4 KiB</strong>, P95 <strong>12 KiB</strong> per syscall.</li>
-          <li>Close to the 1 Gbit/s loopback benchmark ceiling.</li>
+          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the NIC splits (send) or coalesces (receive).</li>
+          <li>Real receive coalescing (GRO): median <strong>1</strong> datagram/read, but the P99 read pulls in <strong>14</strong>.</li>
+          <li>Median received segment: <strong>1217 bytes</strong>.</li>
         </ul>
       </div>
       <div class="col-40">
-        <div class="flow-row">
-          <span class="tag">Segmented (GSO)</span>
-          <div class="flow">
-            <div class="node">app<div class="pkts"><span class="pkt big"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">OS<div class="pkts"><span class="pkt big"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">NIC<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-          </div>
-        </div>
         <div class="chart short" id="c-gro"></div>
+        <figcaption>Datagrams coalesced per receive syscall (GRO). <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM</a>.</figcaption>
       </div>
     </div>
   </section>
@@ -96,108 +81,109 @@
   <!-- 5. Multi-message syscalls -->
   <section>
     <h2>Multi-message syscalls</h2>
-    <div class="cols">
-      <div class="col-60">
-        <ul>
-          <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>.</li>
-          <li>macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented).</li>
-          <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
-          <li><strong>~11%</strong> improvement on an OS loopback transfer.</li>
-        </ul>
-      </div>
-      <div class="col-40">
-        <div class="flow-row">
-          <span class="tag">Batch (mmsg)</span>
-          <div class="flow">
-            <div class="node">app<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">OS<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-            <span class="arrow">&rarr;</span>
-            <div class="node">NIC<div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
-          </div>
-        </div>
-        <p class="tiny">One syscall, many datagrams.</p>
-      </div>
+    <div class="pipe" style="margin:0.3em 0 0.7em;">
+      <div class="stage"><div class="t">user space</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+      <div class="arr syscall"><span class="g">&rArr;</span><span>1 syscall</span></div>
+      <div class="stage"><div class="t">kernel &middot; NIC</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
+      <div class="arr"><span class="g">&rarr;</span><span>wire</span></div>
+      <div class="stage"><div class="t">Internet</div><div class="pkts"><span class="pkt"></span><span class="pkt"></span><span class="pkt"></span></div></div>
     </div>
+    <ul>
+      <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>; macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented).</li>
+      <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
+      <li><strong>~11%</strong> improvement on an OS loopback transfer (FOSDEM 2025).</li>
+    </ul>
   </section>
 
-  <!-- 6. quinn-udp -->
+  <!-- 6. quinn-udp platforms -->
   <section>
-    <h2>quinn-udp: one abstraction, four platforms</h2>
+    <h2>quinn-udp: one abstraction, every platform</h2>
     <ul>
       <li>QUIC UDP I/O in Rust via <strong>quinn-udp</strong>, shared with the Quinn project.</li>
-      <li>Abstracts GSO/GRO, USO/URO, <code>sendmmsg</code>/<code>recvmmsg</code>, <code>sendmsg_x</code>/<code>recvmsg_x</code> behind one API.</li>
-      <li>Integrated into Mozilla&rsquo;s <strong>neqo</strong> QUIC stack.</li>
+      <li>Offload-optimized where Firefox ships: <strong>Linux, Windows, macOS, Android</strong>.</li>
+      <li>The same abstraction compiles for <strong>iOS, FreeBSD, NetBSD, OpenBSD, DragonFly, Solaris, Redox</strong>, with a generic fallback path.</li>
       <li>Reads auxiliary IP metadata (ECN) from the same control messages.</li>
     </ul>
   </section>
 
-  <!-- 7. Memory management -->
+  <!-- 7. No-alloc receive path -->
   <section>
     <h2>No-alloc receive path</h2>
-    <div class="cols">
-      <div class="col-60">
-        <ul>
-          <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections.</li>
-          <li>No per-datagram allocation on the hot receive path.</li>
-          <li>Soundness of the shared buffer checked <strong>at compile time</strong> by Rust&rsquo;s borrow checker.</li>
-          <li>Significant CPU-time reduction on large transfers.</li>
-        </ul>
-      </div>
-      <div class="col-40">
-        <div class="stat"><span class="num">64 KiB</span><span class="lbl">one buffer, all connections, zero receive-path allocation</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 8. ECN -->
-  <section>
-    <h2>Ancillary win: ECN</h2>
     <ul>
-      <li>Modern syscalls expose <strong>control messages</strong>: we can read IP metadata like ECN.</li>
-      <li>Firefox Nightly: ~<strong>50%</strong> of paths are ECN-capable outbound.</li>
-      <li>P75 of QUIC connections see <strong>&ge; 0.6%</strong> CE marks on the receive path.</li>
-      <li>Enables congestion signalling without loss, and readiness for L4S.</li>
+      <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections.</li>
+      <li>No per-datagram allocation on the hot receive path.</li>
+      <li>The iterator hands out borrowed slices of that one buffer; Rust&rsquo;s <strong>borrow checker</strong> proves there is no aliasing or use-after-free, at compile time.</li>
+      <li>Significant CPU-time reduction on large transfers.</li>
     </ul>
   </section>
 
-  <!-- 9. Results -->
+  <!-- 8. Result -->
   <section>
-    <h2>Result: &lt; 1 &rarr; 4 Gbit/s</h2>
-    <div class="chart" id="c-throughput"></div>
-    <figcaption>CPU-bound throughput benchmark, NSPR baseline vs the Rust stack with offload.</figcaption>
+    <h2>Result</h2>
+    <div class="center" style="margin-top:0.6em;">
+      <div style="display:flex; align-items:baseline; justify-content:center; gap:0.35em; font-weight:800; letter-spacing:-0.03em;">
+        <span style="font-size:1.5em; color:var(--ink-faint);">&lt; 1</span>
+        <span style="font-size:0.9em; color:var(--ink-faint);">Gbit/s</span>
+        <span style="font-size:1.4em; color:var(--accent); margin:0 0.15em;">&rarr;</span>
+        <span style="font-size:3em; color:var(--accent); line-height:1;">4</span>
+        <span style="font-size:1.1em; color:var(--accent);">Gbit/s</span>
+      </div>
+      <p class="muted" style="margin-top:0.9em; font-size:0.85em; max-width:22em; margin-left:auto; margin-right:auto;">
+        Roughly <strong>4&times;</strong> on CPU-bound transfers. Afterwards, CPU time is dominated by I/O syscalls and cryptography, not per-datagram overhead.</p>
+    </div>
+    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de</a>.</figcaption>
+  </section>
+
+  <!-- 9. ECN -->
+  <section>
+    <h2>ECN: observed, and acted on</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Modern syscalls expose IP metadata via <strong>control messages</strong>, including ECN.</li>
+          <li><strong>58%</strong> of paths are ECN-capable; but <strong>33%</strong> <em>bleach</em> the bits (strip ECN in transit).</li>
+          <li>When we do see <strong>CE</strong> marks, Firefox reacts: classic-ECN congestion response, no packet loss required.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-ecn"></div>
+        <figcaption>ECN path capability, share of connections. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>.</figcaption>
+      </div>
+    </div>
   </section>
 
   <!-- 10. OS idiosyncrasies -->
   <section>
     <h2>OS idiosyncrasies (war stories)</h2>
-    <ul>
-      <li><strong>Windows:</strong> URO fails on ARM64 with WSL (no segment size); USO rolled back over packet loss and driver crashes.</li>
-      <li><strong>macOS:</strong> no segmentation offload; <code>sendmsg_x</code>/<code>recvmsg_x</code> undocumented; a 10.15 non-IP edge case.</li>
-      <li><strong>Linux:</strong> GSO/GRO first; one socket per connection; sandbox and runtime GSO checks.</li>
-      <li><strong>Android:</strong> x86 32-bit uses <code>socketcall</code>; API &le; 25 returns <code>EINVAL</code> with ECN (retry without); GSO single-segment errors.</li>
+    <ul class="small">
+      <li><strong>Windows:</strong> URO on ARM64 + WSL returns no segment size, disabled (<a href="https://github.com/quinn-rs/quinn/issues/2041">quinn#2041</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1916558">bug 1916558</a>); USO raised P95 loss to ~6.5% and crashed a driver, rolled back (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1979279">bug 1979279</a>).</li>
+      <li><strong>macOS:</strong> no offload; <code>sendmsg_x</code>/<code>recvmsg_x</code> undocumented, pref-gated and <em>not shipped</em> (<a href="https://github.com/mozilla/neqo/pull/2638">neqo#2638</a>); 10.15 unknown address family (<a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
+      <li><strong>Linux:</strong> GSO can pass the probe but fail at send with EIO, resend individually (<a href="https://github.com/quinn-rs/quinn/issues/2399">quinn#2399</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049334">bug 2049334</a>).</li>
+      <li><strong>Android:</strong> x86 <code>socketcall</code> crashes under seccomp (<a href="https://github.com/quinn-rs/quinn/pull/1966">quinn#1966</a>); API &le; 25 returns EINVAL with ECN, retry without (<a href="https://github.com/quinn-rs/quinn/pull/2079">quinn#2079</a>); single-segment GSO error (<a href="https://github.com/quinn-rs/quinn/pull/2050">quinn#2050</a>).</li>
     </ul>
   </section>
 
-  <!-- 11. What's next -->
+  <!-- 11. Status -->
   <section>
-    <h2>What&rsquo;s next</h2>
+    <h2>Status: it rode the trains</h2>
     <ul>
-      <li>Rolling out <strong>PLPMTUD</strong> (RFC 8899), <strong>ECN</strong>, and QUIC <strong>ACK frequency</strong>.</li>
-      <li>Send-path optimizations: GSO, USO, <code>sendmsg_x</code>, a long-lived send buffer.</li>
-      <li>From Nightly toward Beta and Release.</li>
+      <li>The quinn-udp UDP path is on by default beyond Nightly: <strong>most of this has shipped to Release</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1910360">bug 1910360</a>).</li>
+      <li><strong>ECN</strong> shipped: marking, echoing, and CE-based congestion response.</li>
+      <li>Held back where the OS fights us: Windows <strong>USO/URO</strong> stay off; Apple <code>sendmsg_x</code> stays pref-gated.</li>
+      <li>Still to do: send-path offload hardening, and a long-lived send buffer.</li>
     </ul>
   </section>
 
-  <!-- 12. Get involved -->
+  <!-- 12. Closing -->
   <section class="divider" data-background-color="#20123a">
-    <p class="kicker" style="color:#ff9d5c;">Get involved</p>
-    <h2 style="color:#ffffff;">Make Firefox faster</h2>
+    <p class="kicker" style="color:#ff9d5c;">Takeaways</p>
+    <h2 style="color:#ffffff;">One syscall should carry many packets</h2>
     <ul style="color:#d8d4e2;">
-      <li>neqo: <span class="muted" style="color:#b3adc4;">github.com/mozilla/neqo</span></li>
-      <li>quinn-udp: <span class="muted" style="color:#b3adc4;">github.com/quinn-rs/quinn</span></li>
-      <li>Matrix: <span class="muted" style="color:#b3adc4;">#neqo:mozilla.org</span> &middot; mail@max-inden.de</li>
+      <li>Offload and batching close most of the gap to kernel TCP.</li>
+      <li>The hard part is not the fast path: it is every OS&rsquo;s edge cases.</li>
+      <li>Rust&rsquo;s borrow checker made the shared-buffer receive path safe by construction.</li>
     </ul>
+    <p class="small" style="color:#b3adc4;">neqo &middot; quinn-udp &middot; mail@max-inden.de</p>
   </section>
 
 </div>
@@ -213,15 +199,13 @@
 <script>
   const D = window.DECK_DATA;
 
-  Charts.register('c-throughput', (el) => Charts.bar(el, {
-    x: D.throughput.labels, yName: 'Gbit/s', yMax: 4.6, barLabels: true,
-    barLabelFormatter: (p) => D.throughput.labelText[p.dataIndex],
-    series: [{ name: 'throughput', data: D.throughput.gbit }],
+  Charts.register('c-gro', (el) => Charts.bar(el, {
+    x: D.groSegments.p, yName: 'datagrams / read', barLabels: true,
+    series: [{ name: 'datagrams', data: D.groSegments.n }],
   }));
 
-  Charts.register('c-gro', (el) => Charts.bar(el, {
-    x: D.gro.p, yName: 'packets / read syscall', barLabels: true,
-    series: [{ name: 'packets', data: D.gro.packets }],
+  Charts.register('c-ecn', (el) => Charts.donut(el, {
+    data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
   }));
 
   Reveal.initialize({
@@ -229,7 +213,7 @@
     hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
-  const render = () => window.Charts && Charts.renderAll();
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
   Reveal.on('ready', () => setTimeout(render, 0));
   Reveal.on('slidechanged', render);
   Reveal.on('resize', () => setTimeout(render, 60));
