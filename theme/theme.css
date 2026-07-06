@@ -163,6 +163,55 @@
 .reveal .grid line { stroke: var(--hairline); stroke-dasharray: 2 4; }
 .reveal .lbl-series { font-size: 13px; font-weight: 600; }
 
+/* ---- Protocol-stack diagram (the "thin waist" visual) ----
+ * A vertical stack of labeled layers. Columns within a layer split it
+ * horizontally (e.g. TCP | QUIC). Build with:
+ *   <div class="stack"> <div class="layer accent">HTTP semantics</div> ... </div>
+ */
+.reveal .stack { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.reveal .stack .layer {
+  display: flex; gap: 4px; align-items: stretch;
+}
+.reveal .stack .box {
+  flex: 1; text-align: center; padding: 0.32em 0.5em; border-radius: 7px;
+  background: var(--surface-2); border: 1px solid var(--hairline);
+  color: var(--ink-muted); font-size: 0.62em; font-weight: 600; line-height: 1.15;
+  display: flex; align-items: center; justify-content: center;
+}
+.reveal .stack .box.wide { flex: 2; }
+.reveal .stack .box.accent  { background: rgba(230,96,0,0.10);  border-color: rgba(230,96,0,0.35);  color: #a5430b; }
+.reveal .stack .box.accent2 { background: rgba(0,96,223,0.10);  border-color: rgba(0,96,223,0.30);  color: #0a4aa0; }
+.reveal .stack .box.accent3 { background: rgba(0,131,135,0.10); border-color: rgba(0,131,135,0.30); color: #026266; }
+.reveal .stack .box.on      { background: rgba(1,122,61,0.12);  border-color: rgba(1,122,61,0.28);  color: var(--good); }
+.reveal .stack .box.ghost   { background: transparent; border-style: dashed; color: var(--ink-faint); }
+.reveal .stack .box.tall    { padding: 0.9em 0.5em; }
+
+/* ---- Canonical HTTP protocol stack (the Wikipedia-style diagram) ----
+ * <div class="protostack"> shared top + 3 columns (h1/h2/h3) + shared IP base.
+ * Add .hl to a column and .accent to its boxes to highlight HTTP/3.
+ */
+.reveal .protostack { display: flex; flex-direction: column; gap: 4px; font-size: 0.6em; font-weight: 600; }
+.reveal .protostack .top, .reveal .protostack .base {
+  text-align: center; padding: 0.4em; border-radius: 7px;
+  background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink-muted);
+}
+.reveal .protostack .cols { display: flex; gap: 6px; align-items: flex-end; }
+.reveal .protostack .col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.reveal .protostack .col .box {
+  text-align: center; padding: 0.42em 0.3em; border-radius: 7px;
+  background: var(--surface-2); border: 1px solid var(--hairline); color: var(--ink-muted);
+}
+.reveal .protostack .col .box.accent  { background: rgba(230,96,0,0.10);  border-color: rgba(230,96,0,0.38);  color: #a5430b; }
+.reveal .protostack .col .box.accent2 { background: rgba(0,96,223,0.10);  border-color: rgba(0,96,223,0.32);  color: #0a4aa0; }
+.reveal .protostack .col .box.faint   { background: transparent; border-style: dashed; color: var(--ink-faint); }
+
+/* Fills a slide's chart area at the deck's intrinsic size */
+.reveal .chart { width: 100%; height: 560px; }
+.reveal .chart.tall { height: 620px; }
+.reveal .chart.short { height: 440px; }
+
 @media print {
   .reveal section.cover .cover-accent { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .reveal .stack .box.accent, .reveal .stack .box.accent2, .reveal .stack .box.accent3,
+  .reveal .stack .box.on { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modern Network Protocols - What's Next for Firefox and the Web?</title>
+
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    // reveal.js PDF print stylesheet, loaded only in ?print-pdf mode.
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <div class="cover-accent"></div>
+    <h1>Modern Network Protocols</h1>
+    <p class="subtitle">What&rsquo;s Next for Firefox and the Web?</p>
+    <span class="venue">TU Dresden &middot; 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+    <aside class="notes">Overview of what Firefox sends on the wire today and where the Web's protocol landscape is heading in 2026. Data and collaboration with Andrew Creskey.</aside>
+  </section>
+
+  <!-- 2. About -->
+  <section>
+    <h2>Max Inden</h2>
+    <ul>
+      <li>Software developer at <strong>Mozilla</strong>, on Firefox&rsquo;s networking stack.</li>
+      <li>Focus: <strong>HTTP/3 and QUIC</strong>.</li>
+      <li>Previously: libp2p (peer-to-peer), Prometheus &amp; Kubernetes.</li>
+      <li>Interested in networking, distributed systems, type theory.</li>
+      <li class="muted small"><a href="https://max-inden.de">max-inden.de</a> &middot; mail@max-inden.de &middot; @mxinden</li>
+    </ul>
+    <p class="small muted">Telemetry and much of this work shared with Andrew Creskey (Firefox performance).</p>
+  </section>
+
+  <!-- 3. Thin waist -->
+  <section>
+    <h2>HTTP: the thin waist of the Internet</h2>
+    <div class="cols">
+      <div class="col-60">
+        <p>HTTP is already the thin waist, and we only expect that to deepen:</p>
+        <ul>
+          <li>Consistent</li>
+          <li>Extensible</li>
+          <li>Strong security model</li>
+          <li>Hard to censor</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="stack">
+          <div class="layer"><div class="box">www</div><div class="box">mail</div><div class="box">video</div></div>
+          <div class="layer"><div class="box accent wide">HTTP &middot; DoH &middot; WebTransport &middot; MASQUE</div></div>
+          <div class="layer"><div class="box">TCP + TLS</div><div class="box accent3">QUIC</div></div>
+          <div class="layer"><div class="box">IPv4</div><div class="box">IPv6</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. DoH -->
+  <section>
+    <h2>DNS over HTTPS (DoH)</h2>
+    <div class="cols">
+      <div class="col-60">
+        <p>Run DNS queries through an encrypted HTTP connection to the resolver.</p>
+        <ul>
+          <li><strong>Privacy</strong></li>
+          <li><strong>Integrity</strong></li>
+          <li><strong>Censorship resistance</strong></li>
+        </ul>
+        <p class="small muted">Low overhead with QUIC 0-RTT.</p>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="top">DNS query</div>
+          <div class="cols">
+            <div class="col"><div class="box">HTTP/1.1</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
+            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
+            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
+          </div>
+          <div class="base">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. DoH performance -->
+  <section>
+    <h2>DoH performance</h2>
+    <div class="chart" id="c-dohperf"></div>
+    <figcaption>DNS resolution time, ms, P75. United States and Canada. <em>Illustrative - pending STMO pull.</em></figcaption>
+  </section>
+
+  <!-- 6. DoH adoption -->
+  <section>
+    <h2>DoH adoption</h2>
+    <div class="chart" id="c-dohadopt"></div>
+    <figcaption>Global DNS resolution method. Firefox telemetry.</figcaption>
+  </section>
+
+  <!-- 7. HTTPS vs HTTP -->
+  <section>
+    <h2>HTTPS has won</h2>
+    <div class="chart" id="c-scheme"></div>
+    <figcaption>Global request scheme. Firefox telemetry.</figcaption>
+  </section>
+
+  <!-- 8. ECH -->
+  <section>
+    <h2>Encrypted Client Hello (ECH)</h2>
+    <ul>
+      <li>By default the TLS handshake sends the Server Name Indication (<strong>SNI</strong>) in clear text, e.g. <code>wikipedia.org</code>.</li>
+      <li>A major attack vector for censors today.</li>
+      <li>ECH encrypts parts of the TLS Client Hello, including the SNI.</li>
+      <li>Public key fetched via the DNS <strong>HTTPS record</strong>. Especially relevant behind CDNs.</li>
+      <li>Adoption still low. On TCP, Firefox attempts ECH ~<strong>0.3%</strong> of the time, and it nearly always succeeds.</li>
+    </ul>
+  </section>
+
+  <!-- 9. QUIC & HTTP/3 -->
+  <section>
+    <h2>QUIC and HTTP/3</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>General-purpose transport on top of <strong>UDP</strong></li>
+          <li>Encrypted (meta)data</li>
+          <li>1-RTT connection setup, <strong>0-RTT</strong> on resumption</li>
+          <li>Reliable and unreliable delivery, no head-of-line blocking</li>
+          <li>Easy to evolve, often in user space</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="top">HTTP semantics</div>
+          <div class="cols">
+            <div class="col"><div class="box">HTTP/1.1</div><div class="box faint">TLS (opt)</div><div class="box">TCP</div></div>
+            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
+            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
+          </div>
+          <div class="base">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. HTTP/3 adoption -->
+  <section>
+    <h2>HTTP/3 adoption</h2>
+    <div class="chart" id="c-h3adopt"></div>
+    <figcaption>HTTP/3 share of Firefox responses. <em>Illustrative - pending STMO pull.</em></figcaption>
+  </section>
+
+  <!-- 11. QUIC handshake -->
+  <section>
+    <h2>Fewer round trips</h2>
+    <div class="chart short" id="c-handshake"></div>
+    <figcaption>Round trips to first request, by transport setup.</figcaption>
+    <aside class="notes">TCP+TLS1.3 is 2-RTT, QUIC 1-RTT, QUIC 0-RTT on resumption sends the request with the first flight.</aside>
+  </section>
+
+  <!-- 12. Time to request start -->
+  <section>
+    <h2>Time to request start, by protocol</h2>
+    <div class="chart" id="c-ttrs"></div>
+    <figcaption>Time to request start, ms, P75. Firefox for Android. <em>Illustrative - pending STMO pull.</em></figcaption>
+  </section>
+
+  <!-- 13. WebTransport -->
+  <section>
+    <h2>WebTransport: the next WebSocket?</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>A bidirectional, multiplexed transport for the Web, over HTTP/3.</li>
+          <li>Streams <em>and</em> unreliable datagrams.</li>
+          <li>No major consumer yet beyond upcoming <strong>Media over QUIC</strong>.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="top accent">WebTransport</div>
+          <div class="cols">
+            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">TLS 1.3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
+          </div>
+          <div class="base">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. MASQUE -->
+  <section>
+    <h2>MASQUE: proxying on top of HTTP</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Proxy protocol on top of HTTP; leverages QUIC unreliable datagrams.</li>
+          <li>Inherits HTTP&rsquo;s censorship resistance.</li>
+          <li>Proxy UDP, TCP, IP, &hellip; (even Ethernet).</li>
+          <li>The extreme case of <strong>HTTP as the thin waist</strong>.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="top accent">MASQUE (CONNECT-UDP / -IP)</div>
+          <div class="cols">
+            <div class="col"><div class="box">HTTP/2</div><div class="box">TLS 1.2+</div><div class="box">TCP</div></div>
+            <div class="col hl"><div class="box accent">HTTP/3</div><div class="box accent">QUIC</div><div class="box">UDP</div></div>
+          </div>
+          <div class="base">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. MASQUE hops -->
+  <section>
+    <h2>MASQUE: single and two hop</h2>
+    <div class="stack" style="gap:16px;">
+      <div>
+        <p class="small muted" style="margin-bottom:6px;">Single hop</p>
+        <div class="layer" style="display:flex; gap:10px;">
+          <div class="box tall">client</div>
+          <div class="box tall accent">proxy<br><span class="tiny">knows src and dst</span></div>
+          <div class="box tall">destination</div>
+        </div>
+      </div>
+      <div>
+        <p class="small muted" style="margin-bottom:6px;">Two hop</p>
+        <div class="layer" style="display:flex; gap:10px;">
+          <div class="box tall">client</div>
+          <div class="box tall accent2">proxy 1<br><span class="tiny">knows src</span></div>
+          <div class="box tall accent3">proxy 2<br><span class="tiny">knows dst</span></div>
+          <div class="box tall">destination</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. Oblivious HTTP -->
+  <section>
+    <h2>Oblivious HTTP</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Similar to MASQUE, but <strong>request-oriented</strong>, not connection-oriented.</li>
+          <li>The <strong>relay</strong> sees the client IP, but not the request.</li>
+          <li>The <strong>destination</strong> sees the request, but not the client IP.</li>
+          <li>Used for Telemetry and Oblivious DoH.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="layer" style="display:flex; gap:10px; margin-top:1em;">
+          <div class="box tall">client</div>
+          <div class="box tall accent2">relay<br><span class="tiny">sees IP</span></div>
+          <div class="box tall accent3">destination<br><span class="tiny">sees request</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17. Happy Eyeballs v3 -->
+  <section>
+    <h2>Happy Eyeballs v3</h2>
+    <div class="cols">
+      <div class="col-60">
+        <p>A cardinality explosion of protocol combinations to choose from:</p>
+        <ul>
+          <li>IPv4 / IPv6</li>
+          <li>TCP + TLS <em>or</em> QUIC</li>
+          <li>DNS A, AAAA <em>or</em> HTTPS records</li>
+          <li>HTTP alt-svc header</li>
+          <li>WebSocket <em>or</em> WebTransport</li>
+        </ul>
+        <p class="small">A set of heuristics to <strong>reduce connection-establishment latency</strong> while racing candidates.</p>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-hev3"></div>
+        <figcaption>HEv3 connection-establishment latency in Firefox Nightly.</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. Congestion control -->
+  <section>
+    <h2>Congestion control: ECN and L4S</h2>
+    <ul>
+      <li>Firefox&rsquo;s QUIC stack does <strong>Cubic</strong> today; no BBR planned near-term.</li>
+      <li><strong>ECN</strong> marking and echoing shipped: ~<strong>50%</strong> of network paths are ECN-capable.</li>
+      <li>Ready for an <strong>L4S</strong> congestion controller on the server side. (Hello, Comcast users.)</li>
+      <li>An ongoing research area.</li>
+    </ul>
+  </section>
+
+  <!-- 19. What we don't see -->
+  <section>
+    <h2>What do we <em>not</em> see happening?</h2>
+    <ul>
+      <li>Old protocols (IPv4, DNS53, HTTP/1 &amp; HTTP/2) going away.</li>
+      <li>An anonymous colleague: &ldquo;Hopefully no HTTP/4.&rdquo;</li>
+    </ul>
+  </section>
+
+  <!-- 20. What can you do -->
+  <section>
+    <h2>What can you do for a healthy Internet?</h2>
+    <ul>
+      <li>If you use a browser: <strong>enable DoH</strong>.</li>
+      <li>If you operate DNS infra: <strong>expose a DoH endpoint</strong>.</li>
+      <li>If you operate a website: <strong>serve it over HTTP/3</strong> and add <strong>ECH</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- 21-25. Walkthrough builds -->
+  <section>
+    <h2>The Internet of the (near) future</h2>
+    <ol>
+      <li>DNS over HTTPS</li>
+      <li class="fragment">IPv6, 0-RTT QUIC with ECH</li>
+      <li class="fragment">Fetch the video player assets over HTTP/3</li>
+      <li class="fragment">Open a WebTransport session for Media over QUIC</li>
+      <li class="fragment">Watch the recording of this very talk</li>
+    </ol>
+  </section>
+
+  <!-- 26. Thank you -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Thank you</p>
+    <h2 style="color:#ffffff;">Questions? Let&rsquo;s talk.</h2>
+    <p style="color:#d8d4e2;">Help build a healthy Internet.</p>
+    <p class="small" style="color:#b3adc4;">In person &middot; mail@max-inden.de &middot; @mxinden</p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+
+  Charts.register('c-dohperf', (el) => Charts.line(el, {
+    x: D.dohPerf.months, yName: 'ms (P75)', yMax: 40,
+    series: [
+      { name: 'OS resolver', data: D.dohPerf.osResolver, color: Charts.other },
+      { name: 'DoH', data: D.dohPerf.doh },
+    ],
+  }));
+
+  Charts.register('c-dohadopt', (el) => Charts.donut(el, {
+    data: D.dohAdoption, centerValue: '11.6%', centerLabel: 'via DoH',
+  }));
+
+  Charts.register('c-scheme', (el) => Charts.donut(el, {
+    data: D.scheme, centerValue: '92.4%', centerLabel: 'HTTPS',
+  }));
+
+  Charts.register('c-h3adopt', (el) => Charts.line(el, {
+    x: D.h3Adoption.months, yName: 'share of responses', yMax: 40,
+    yFormatter: (v) => v + '%',
+    series: [{ name: 'HTTP/3', data: D.h3Adoption.pct, area: true }],
+  }));
+
+  Charts.register('c-handshake', (el) => Charts.bar(el, {
+    x: ['TCP + TLS 1.3', 'QUIC 1-RTT', 'QUIC 0-RTT'],
+    yName: 'round trips', yMax: 2.4, barLabels: true,
+    series: [{ name: 'RTT', data: [2, 1, 0] }],
+  }));
+
+  Charts.register('c-ttrs', (el) => Charts.bar(el, {
+    x: D.ttrs.labels, yName: 'ms (P75)', barLabels: true,
+    barLabelFormatter: (p) => p.value + ' ms',
+    series: [{ name: 'time to request start', data: D.ttrs.ms }],
+  }));
+
+  Charts.register('c-hev3', (el) => Charts.bar(el, {
+    x: D.hev3Latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
+    yFormatter: ms, series: [{ name: 'latency', data: D.hev3Latency.ms }],
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => window.Charts && Charts.renderAll();
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>

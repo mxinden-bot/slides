@@ -11,9 +11,18 @@
  * elsewhere `npx playwright install chromium` fetches it.
  */
 import { chromium } from 'playwright';
-import { readdirSync, mkdirSync, existsSync } from 'node:fs';
+import { readdirSync, mkdirSync, existsSync, globSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
+
+// Prefer a pre-installed Chromium (e.g. /opt/pw-browsers) over a version-pinned
+// download, so export works even when the local Playwright build differs.
+function findChromium() {
+  const base = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!base) return undefined;
+  const hits = globSync(join(base, 'chromium-*/chrome-linux/chrome'));
+  return hits.sort().pop();
+}
 
 const root = dirname(fileURLToPath(import.meta.url));
 const outDir = join(root, 'dist');
@@ -29,7 +38,8 @@ if (!decks.length) { console.error('No decks found.'); process.exit(1); }
 // 16:9 at reveal's default logical size.
 const WIDTH = 1280, HEIGHT = 720;
 
-const browser = await chromium.launch();
+const executablePath = findChromium();
+const browser = await chromium.launch(executablePath ? { executablePath } : {});
 try {
   for (const deck of decks) {
     const indexPath = join(root, deck, 'index.html');
