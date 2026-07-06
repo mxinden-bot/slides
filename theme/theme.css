@@ -197,7 +197,7 @@
   display: flex; align-items: center; justify-content: center;
 }
 .reveal .hourglass .box.accent3 { background: rgba(0,131,135,0.10); border-color: rgba(0,131,135,0.30); color: #026266; }
-.reveal .hourglass .funnel { width: 100%; height: 40px; }
+.reveal .hourglass .funnel { width: 100%; height: 26px; }
 .reveal .hourglass .funnel.down {
   background: linear-gradient(180deg, rgba(230,96,0,0.05), rgba(230,96,0,0.18));
   clip-path: polygon(0 0, 100% 0, 63% 100%, 37% 100%);
@@ -261,6 +261,21 @@
 .reveal .handshake .msg.c2s { align-self: flex-start; background: rgba(0,96,223,0.10); border: 1px solid rgba(0,96,223,0.28); color: #0a4aa0; }
 .reveal .handshake .msg.s2c { align-self: flex-end; text-align: right; background: var(--surface); border: 1px solid var(--hairline); color: var(--ink-muted); }
 .reveal .handshake .msg.get { background: rgba(230,96,0,0.12); border-color: rgba(230,96,0,0.38); color: #a5430b; font-weight: 700; }
+
+/* ---- Syscall pipeline: user space -> (syscall) -> kernel/NIC -> wire ---- */
+.reveal .pipe { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: nowrap; }
+.reveal .pipe .stage {
+  border: 1px solid var(--hairline); border-radius: 10px; padding: 12px 14px;
+  min-width: 92px; text-align: center; background: var(--surface-2);
+}
+.reveal .pipe .stage .t { font-size: 0.44em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-bottom: 8px; }
+.reveal .pipe .pkts { display: flex; gap: 4px; justify-content: center; align-items: flex-end; height: 34px; }
+.reveal .pipe .pkt { width: 12px; height: 20px; border-radius: 2px; background: var(--accent-2); }
+.reveal .pipe .pkt.big { height: 34px; background: var(--accent); }
+.reveal .pipe .arr { display: flex; flex-direction: column; align-items: center; color: var(--ink-faint); font-size: 0.46em; font-weight: 700; gap: 2px; }
+.reveal .pipe .arr .g { font-size: 1.7em; line-height: 0.7; color: var(--ink-faint); }
+.reveal .pipe .arr.syscall { color: var(--accent); }
+.reveal .pipe .arr.syscall .g { color: var(--accent); }
 
 /* ---- Datagram flow (App -> OS -> NIC -> Internet) for the UDP I/O deck ---- */
 .reveal .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

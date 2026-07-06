@@ -57,14 +57,12 @@
       </div>
       <div class="col-40">
         <div class="hourglass">
-          <div class="caplbl">applications</div>
           <div class="tier"><div class="box">www</div><div class="box">mail</div><div class="box">video</div><div class="box">chat</div></div>
           <div class="funnel down"></div>
           <div class="tier"><div class="box waist">HTTP</div></div>
           <div class="funnel up"></div>
           <div class="tier"><div class="box">TCP + TLS</div><div class="box">QUIC</div></div>
           <div class="tier"><div class="box">IPv4</div><div class="box">IPv6</div></div>
-          <div class="caplbl">transports &middot; network</div>
         </div>
       </div>
     </div>
@@ -99,21 +97,21 @@
   <section>
     <h2>DNS lookup time: DoH vs OS resolver</h2>
     <div class="chart" id="c-dohperf"></div>
-    <figcaption>DNS lookup time, ms, US + Canada. P75 (solid), P95 (dashed). Firefox telemetry, past 12 months.</figcaption>
+    <figcaption>DNS lookup time, ms, US + Canada. P75 (solid), P95 (dashed). Past 12 months. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
   </section>
 
   <!-- 6. DoH adoption -->
   <section>
     <h2>DoH adoption</h2>
     <div class="chart" id="c-dohadopt"></div>
-    <figcaption>Global DNS resolution method. Firefox telemetry.</figcaption>
+    <figcaption>Global DNS resolution method. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
   </section>
 
   <!-- 7. HTTPS vs HTTP -->
   <section>
     <h2>HTTPS has won</h2>
     <div class="chart" id="c-scheme"></div>
-    <figcaption>Global request scheme. Firefox telemetry.</figcaption>
+    <figcaption>Global request scheme. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
   </section>
 
   <!-- 8. ECH -->
@@ -157,7 +155,7 @@
   <section>
     <h2>HTTP/3 adoption</h2>
     <div class="chart" id="c-h3adopt"></div>
-    <figcaption>HTTP/3 share of Firefox desktop responses. Firefox telemetry (past 12 months).</figcaption>
+    <figcaption>HTTP/3 share of Firefox desktop responses, past 12 months. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
   </section>
 
   <!-- 11. QUIC handshake -->
@@ -224,28 +222,20 @@
   <!-- 11d. Save a round trip / savearoundtrip.com -->
   <section>
     <h2>Save a round trip</h2>
-    <div class="cols">
-      <div class="col-60">
-        <ul>
-          <li>Many sites send <code>Alt-Svc: h3</code> but publish <strong>no HTTPS record</strong>.</li>
-          <li>Every first visit then wastes a round trip: connect over HTTP/2, read the header, upgrade to HTTP/3 only <em>next</em> time.</li>
-          <li>Publish an HTTPS record with <code>alpn="h3"</code> and the client goes straight to QUIC on connection #1.</li>
-          <li>Bonus: the HTTPS record is the <strong>only</strong> way to deliver ECH.</li>
-        </ul>
-      </div>
-      <div class="col-40 center">
-        <div class="stat"><span class="num">1</span><span class="lbl">round trip saved on the first connection</span></div>
-        <p style="margin-top:1.1em; font-size:1.05em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong></p>
-        <p class="tiny">Live HTTPS-record checker, and the numbers measured in Firefox.</p>
-      </div>
-    </div>
+    <ul>
+      <li>Many sites send <code>Alt-Svc: h3</code> but publish <strong>no HTTPS record</strong>.</li>
+      <li>Every first visit then wastes a round trip: connect over HTTP/2, read the header, upgrade to HTTP/3 only <em>next</em> time.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code> and the client goes straight to QUIC on connection #1.</li>
+      <li>Bonus: the HTTPS record is the <strong>only</strong> way to deliver ECH.</li>
+    </ul>
+    <p style="margin-top:0.7em; font-size:1.1em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong> &mdash; check your domain.</p>
   </section>
 
   <!-- 12. Time to request start -->
   <section>
     <h2>Time to request start, by protocol</h2>
     <div class="chart" id="c-ttrs"></div>
-    <figcaption>Time to request start, ms, P75, by HTTP version. Firefox desktop. Includes DNS lookup and connection setup.</figcaption>
+    <figcaption>Time to request start, ms, P75, by HTTP version. Firefox desktop; includes DNS lookup and connection setup. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
   </section>
 
   <!-- 13. WebTransport -->
