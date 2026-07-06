@@ -14,6 +14,15 @@ window.DECK_DATA = {
   // REAL GLAM networking_http_3_udp_datagram_segment_size_received, Fenix (bytes).
   segSize: { p50: 1217, p95: 1271, p99: 1448 },
 
+  // REAL Firefox Profiler capture: on-CPU self time on the Socket Thread during
+  // a 2.3 GB QUIC download, network-wait (poll) excluded, aggregated by library.
+  // Single hottest function: intel_aes_gcmDEC (AES-GCM decrypt) at ~10%.
+  // Source: https://share.firefox.dev/4fmWsog (Firefox 153, Linux).
+  cpuBreakdown: {
+    labels: ['neqo packet processing', 'UDP send/recv syscalls', 'AES-GCM crypto (NSS)', 'lock contention', 'clock / math', 'packet memory copies'],
+    pct: [40, 20, 18, 9, 7, 6],
+  },
+
   // REAL GLAM networking_http_3_ecn_path_capability (share of connections, %).
   ecnPath: [
     { name: 'capable', value: 58.4 },

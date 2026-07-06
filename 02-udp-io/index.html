@@ -95,7 +95,7 @@
       <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections (<a href="https://github.com/mozilla/neqo/blob/main/neqo-udp/src/lib.rs">neqo-udp</a>).</li>
       <li>No per-datagram allocation on the hot receive path.</li>
       <li>The iterator hands out borrowed slices of that one buffer; Rust&rsquo;s <strong>borrow checker</strong> proves there is no aliasing or use-after-free, at compile time.</li>
-      <li>Significant CPU-time reduction on large transfers: most cycles now go to crypto, not I/O.</li>
+      <li>Significant CPU-time reduction on large transfers: crypto now rivals UDP I/O in the profile, instead of being dwarfed by per-datagram overhead.</li>
     </ul>
   </section>
 
@@ -112,17 +112,13 @@
           <span style="font-size:1em; color:var(--accent);">Gbit/s</span>
         </div>
         <p class="muted" style="margin-top:0.8em; font-size:0.8em;">
-          Roughly <strong>4&times;</strong> on CPU-bound transfers. Afterwards, CPU time is dominated by cryptography, not per-datagram I/O overhead.</p>
+          Roughly <strong>4&times;</strong> on CPU-bound transfers. With per-datagram syscalls batched down, on-CPU time now splits between neqo&rsquo;s own packet handling, UDP I/O and crypto: <strong>AES-GCM decrypt is the single hottest function</strong>.</p>
       </div>
       <div class="col-60">
-        <div class="placeholder">
-          <span class="ph-tag">Flamegraph &middot; TODO</span>
-          <p>Client CPU flamegraph, 640&nbsp;MiB QUIC download<br>(neqo CI, samply / Firefox Profiler)</p>
-          <p class="ph-sub">Hot path now dominated by crypto, not UDP syscalls</p>
-        </div>
+        <div class="chart short" id="c-cpu"></div>
       </div>
     </div>
-    <figcaption class="center">CPU-bound throughput benchmark, NSPR baseline vs the Rust stack. Profile: neqo <code>Profile</code> CI (<code>neqo-client --cc cubic -Q1 .../671088640</code>). <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
+    <figcaption class="center">On-CPU self time on Firefox&rsquo;s Socket Thread during a 2.3&nbsp;GB QUIC download, network wait excluded, by library. Profile: <a href="https://share.firefox.dev/4fmWsog">share.firefox.dev/4fmWsog</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->
@@ -201,6 +197,11 @@
 
   Charts.register('c-ecn', (el) => Charts.donut(el, {
     data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
+  }));
+
+  Charts.register('c-cpu', (el) => Charts.barH(el, {
+    y: D.cpuBreakdown.labels, data: D.cpuBreakdown.pct, colorByIndex: false,
+    valueFormatter: (v) => v + '%', xMax: 45,
   }));
 
   const AKN = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }];
