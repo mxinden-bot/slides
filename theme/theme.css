@@ -199,6 +199,17 @@
 }
 .reveal .placeholder .ph-sub { color: var(--ink-faint); font-size: 0.62em; font-style: italic; }
 
+/* Decorative flamegraph strip along the bottom of a cover slide.
+   Fades out upward so it never competes with the title. */
+.reveal .cover { position: relative; }
+.reveal .flamebg {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 150px; z-index: 0; pointer-events: none; opacity: 0.55;
+  -webkit-mask-image: linear-gradient(to top, #000 15%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 15%, transparent 100%);
+}
+.reveal .cover h1, .reveal .cover .subtitle, .reveal .cover .venue { position: relative; z-index: 1; }
+
 /* Chart shared type/colors (SVG inherits these via classes) */
 .reveal svg { max-width: 100%; height: auto; }
 .reveal svg text { font-family: var(--font-sans); fill: var(--ink); }

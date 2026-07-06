@@ -22,6 +22,7 @@
     <h1>Modern UDP I/O for Firefox in Rust</h1>
     <p class="subtitle">Closing the gap to in-kernel TCP</p>
     <span class="venue">HTTP Workshop 2026 &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+    <div class="flamebg" id="cover-flame"></div>
   </section>
 
   <!-- 2. Why UDP I/O -->
@@ -186,9 +187,11 @@
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
 <script src="../theme/seq.js"></script>
+<script src="../theme/flame.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
+  Flame.register('cover-flame', D.flame);
 
   Charts.register('c-gro', (el) => Charts.bar(el, {
     x: D.groSegments.p, yName: 'datagrams / read', barLabels: true,
@@ -226,7 +229,7 @@
     hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
-  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); if (window.Flame) Flame.renderAll(); };
   Reveal.on('ready', () => setTimeout(render, 0));
   Reveal.on('slidechanged', render);
   Reveal.on('resize', () => setTimeout(render, 60));
