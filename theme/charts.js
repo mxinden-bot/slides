@@ -138,6 +138,15 @@
           formatter: o.barLabelFormatter || undefined } : undefined,
       };
     });
+    if (o.refLine != null && series[0]) {
+      series[0].markLine = {
+        silent: true, symbol: 'none',
+        lineStyle: { color: INK_FAINT, type: 'dashed', width: 1.5 },
+        label: { formatter: o.refLineLabel || String(o.refLine), color: INK_MUTED,
+          fontFamily: FONT, fontSize: LABEL_FS, position: 'insideEndTop' },
+        data: [{ yAxis: o.refLine }],
+      };
+    }
     chart.setOption({
       animation: false,
       color: PALETTE,

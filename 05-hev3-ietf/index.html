@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Eyeballs v3 in Firefox: update</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Happy Eyeballs v3 in Firefox</h1>
+    <p class="subtitle">Implementation update</p>
+    <span class="venue">IETF &middot; HAPPY WG &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Since IETF 125 -->
+  <section>
+    <h2>Since IETF 125</h2>
+    <ul>
+      <li>Happy Eyeballs v3 is now <strong>enabled by default in Firefox Nightly</strong>.</li>
+      <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3-04</a>. No major deviation.</li>
+      <li>Public Glean telemetry is flowing.</li>
+    </ul>
+  </section>
+
+  <!-- 3. Try it -->
+  <section>
+    <h2>Try it out</h2>
+    <ol>
+      <li>Install <strong>Firefox Nightly</strong>.</li>
+      <li>Confirm <code>network.http.happy_eyeballs_enabled</code> is <code>true</code> in <code>about:config</code>.</li>
+      <li>Visit any site, e.g. <a href="https://www.happy-eyeballs.net/">happy-eyeballs.net</a>.</li>
+    </ol>
+    <p class="small muted">Enable DoH to get HTTPS records on all platforms.</p>
+  </section>
+
+  <!-- 4. Latency -->
+  <section>
+    <h2>Connection-establishment latency</h2>
+    <div class="chart" id="c-latency"></div>
+    <figcaption>HEv3 end-to-end connection latency, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM</a>.</figcaption>
+  </section>
+
+  <!-- 5. Discovery -->
+  <section>
+    <h2>How connections learn about h3</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+      </div>
+      <div class="col-60">
+        <ul>
+          <li><strong>22%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay.</li>
+          <li>Only <strong>4.7%</strong> via an HTTPS record alone; <strong>8%</strong> via both.</li>
+          <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption><a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
+  </section>
+
+  <!-- 6. Library changes -->
+  <section>
+    <h2>Changes to the library</h2>
+    <ul>
+      <li><strong>mozilla/happy-eyeballs</strong>: a deterministic, sans-I/O state machine, reusable outside Firefox.</li>
+      <li>Interleave <strong>protocol variant and address family</strong> together.</li>
+      <li>A configurable <strong>connection-attempt-delay multiplier</strong> (exponential back-off): Firefox runs 50 ms base &times;2, not the 250 ms default.</li>
+      <li>A flag to <strong>skip waiting for the preferred family</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- 7. For the WG -->
+  <section>
+    <h2>For the working group</h2>
+    <ul>
+      <li>The 250 ms Connection Attempt Delay is coarse; a smaller base with back-off works better in practice.</li>
+      <li>Would a shared, deterministic <strong>test suite</strong> for the algorithm help?</li>
+      <li>Open: <strong>proxy awareness</strong> (MASQUE connect-udp vs HTTP CONNECT ordering), WebSocket / WebTransport EXTENDED CONNECT.</li>
+    </ul>
+  </section>
+
+  <!-- 8. Next -->
+  <section>
+    <h2>Next steps</h2>
+    <ul>
+      <li>Ship Happy Eyeballs v3 to Firefox <strong>Release</strong> in the coming months.</li>
+      <li>Tune resolution and connection-attempt delays from the ~99th-percentile data.</li>
+      <li>More telemetry to share at <strong>IETF 126</strong>.</li>
+    </ul>
+    <p class="small muted">Library: <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a> &middot; Integration: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</p>
+  </section>
+
+  <!-- 9. Questions -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Questions? Proposals?</h2>
+    <p class="small" style="color:#b3adc4;">github.com/mozilla/happy-eyeballs/issues &middot; mail@max-inden.de &middot; @mxinden</p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+  Charts.register('c-latency', (el) => Charts.bar(el, {
+    x: D.latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
+    yFormatter: ms, series: [{ name: 'latency', data: D.latency.ms }],
+  }));
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '22%', centerLabel: 'Alt-Svc only',
+  }));
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>

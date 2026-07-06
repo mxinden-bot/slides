@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evolving HTTP/3 &amp; QUIC beyond 30%?</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Evolving HTTP/3 &amp; QUIC</h1>
+    <p class="subtitle">Growing usage beyond 30% of the Internet?</p>
+    <span class="venue">HTTP Workshop 2026 &middot; discussion &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Denominators -->
+  <section>
+    <h2>Is HTTP/3 really &ldquo;beyond 30%&rdquo;?</h2>
+    <div class="chart" id="c-denom"></div>
+    <figcaption>HTTP/3 &ldquo;share&rdquo; by vantage point. Sources: Cloudflare Radar, W3Techs, Google, Meta, backbone measurement (see notes).</figcaption>
+  </section>
+
+  <!-- 3. The plateau -->
+  <section>
+    <h2>The neutral number has plateaued</h2>
+    <ul>
+      <li>Cloudflare request share sits at <strong>~21%</strong>, flat since a <strong>~28% peak in 2023</strong>.</li>
+      <li>&ldquo;&gt;30%&rdquo; holds only for advertised <em>support</em> (W3Techs ~39%) or hyperscaler first-party traffic (Google ~42%, Meta ~75%).</li>
+      <li>Requests vs connections is a real confound: HTTP/3 multiplexes many requests per connection.</li>
+      <li>&ldquo;QUIC is not Quick Enough over Fast Internet&rdquo;: up to <strong>-45%</strong> throughput vs HTTP/2 above ~500 Mbps.</li>
+    </ul>
+  </section>
+
+  <!-- 4. QUIC v2 -->
+  <section>
+    <h2>QUIC v2: built to be deployed, barely deployed</h2>
+    <ul>
+      <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
+      <li>Measured deployment: <strong>&lt; 0.003%</strong> of QUICv1 domains; &lt; 0.013% grease the QUIC bit.</li>
+      <li><strong>No feature payoff</strong>, so no individual incentive. neqo supports v2 (compatible upgrade); <strong>quinn does not</strong>.</li>
+      <li>Is greasing (RFC 9287) enough that v2 is unnecessary?</li>
+    </ul>
+  </section>
+
+  <!-- 5. Upgrade path -->
+  <section>
+    <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
+    <ul>
+      <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
+      <li>Firefox Nightly: <strong>22%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a wasted round trip.</li>
+      <li>HTTPS records (RFC 9460) are ~15% adopted, and ~70% of those are one CDN&rsquo;s defaults.</li>
+      <li><strong>ECH depends on the HTTPS record</strong>: it is now a privacy lever, not just a perf one.</li>
+    </ul>
+    <p class="small muted">Do we deprecate Alt-Svc, or bridge it (draft-thomson-httpbis-alt-svcb)?</p>
+  </section>
+
+  <!-- 6. Optimistic QUIC -->
+  <section>
+    <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
+    <ul>
+      <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
+      <li>curl (Aug 2025): start QUIC, then TCP after <strong>200 ms</strong>, first wins.</li>
+      <li>Risk: on the <strong>1&ndash;5%</strong> of UDP-hostile networks, an optimistic attempt is strictly slower (timeout + TCP + TLS).</li>
+      <li>The right racing delay is unsettled and network-dependent.</li>
+    </ul>
+  </section>
+
+  <!-- 7. Open questions -->
+  <section>
+    <h2>Open questions</h2>
+    <ul class="small">
+      <li>Which denominator should we rally around, and is the <strong>plateau since 2023</strong> the real worry?</li>
+      <li>Is the fast-internet throughput regression the ceiling on QUIC growth?</li>
+      <li>Can QUIC v2 ever escape its coordination trap? Does a major library shipping no v2 matter?</li>
+      <li>Deprecate Alt-Svc for HTTPS RR, or bridge? Is <strong>ECH</strong> the lever that finally forces HTTPS-RR publication?</li>
+      <li>Default posture for optimistic QUIC, and who eats the fallback tax on UDP-hostile networks?</li>
+    </ul>
+  </section>
+
+  <!-- 8. Closing -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Let&rsquo;s discuss</p>
+    <h2 style="color:#ffffff;">Where does QUIC&rsquo;s next 10% come from?</h2>
+    <p class="small" style="color:#b3adc4;">mail@max-inden.de &middot; @mxinden</p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  Charts.register('c-denom', (el) => Charts.bar(el, {
+    x: D.denominators.labels, yName: 'HTTP/3 share', yMax: 80, barLabels: true,
+    yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
+    refLine: 30, refLineLabel: '30%',
+    series: [{ name: 'share', data: D.denominators.pct }],
+  }));
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
