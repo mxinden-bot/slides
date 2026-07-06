@@ -288,44 +288,48 @@
   <!-- 15. MASQUE hops -->
   <section>
     <h2>MASQUE: single and two hop</h2>
-    <div class="stack" style="gap:16px;">
+    <div class="hops">
       <div>
-        <p class="small muted" style="margin-bottom:6px;">Single hop</p>
-        <div class="layer" style="display:flex; gap:10px;">
-          <div class="box tall">client</div>
-          <div class="box tall accent">proxy<br><span class="tiny">knows src and dst</span></div>
-          <div class="box tall">destination</div>
+        <div class="hlabel">Single hop</div>
+        <div class="chain">
+          <div class="node"><div class="name">client</div></div>
+          <div class="link"></div>
+          <div class="node both"><div class="name">proxy</div><div class="sees">sees client IP <b>and</b> destination</div></div>
+          <div class="link"></div>
+          <div class="node"><div class="name">destination</div></div>
         </div>
       </div>
       <div>
-        <p class="small muted" style="margin-bottom:6px;">Two hop</p>
-        <div class="layer" style="display:flex; gap:10px;">
-          <div class="box tall">client</div>
-          <div class="box tall accent2">proxy 1<br><span class="tiny">knows src</span></div>
-          <div class="box tall accent3">proxy 2<br><span class="tiny">knows dst</span></div>
-          <div class="box tall">destination</div>
+        <div class="hlabel">Two hop &nbsp;&middot;&nbsp; e.g. Apple iCloud Private Relay</div>
+        <div class="chain">
+          <div class="node"><div class="name">client</div></div>
+          <div class="link"></div>
+          <div class="node src"><div class="name">proxy 1</div><div class="sees">sees client IP<br>not destination</div></div>
+          <div class="link"></div>
+          <div class="node dst"><div class="name">proxy 2</div><div class="sees">sees destination<br>not client IP</div></div>
+          <div class="link"></div>
+          <div class="node"><div class="name">destination</div></div>
         </div>
       </div>
     </div>
+    <p class="small muted">No single party learns both who you are and where you are going.</p>
   </section>
 
   <!-- 16. Oblivious HTTP -->
   <section>
     <h2>Oblivious HTTP</h2>
-    <div class="cols">
-      <div class="col-60">
-        <ul>
-          <li>Similar to MASQUE, but <strong>request-oriented</strong>, not connection-oriented.</li>
-          <li>The <strong>relay</strong> sees the client IP, but not the request.</li>
-          <li>The <strong>destination</strong> sees the request, but not the client IP.</li>
-          <li>Used for Telemetry and Oblivious DoH.</li>
-        </ul>
-      </div>
-      <div class="col-40">
-        <div class="layer" style="display:flex; gap:10px; margin-top:1em;">
-          <div class="box tall">client</div>
-          <div class="box tall accent2">relay<br><span class="tiny">sees IP</span></div>
-          <div class="box tall accent3">destination<br><span class="tiny">sees request</span></div>
+    <ul>
+      <li>Similar to MASQUE, but <strong>request-oriented</strong>, not connection-oriented.</li>
+      <li>Used for Telemetry and Oblivious DoH.</li>
+    </ul>
+    <div class="hops">
+      <div>
+        <div class="chain">
+          <div class="node"><div class="name">client</div></div>
+          <div class="link"></div>
+          <div class="node src"><div class="name">relay</div><div class="sees">sees client IP<br>not the request</div></div>
+          <div class="link"></div>
+          <div class="node dst"><div class="name">gateway</div><div class="sees">sees the request<br>not client IP</div></div>
         </div>
       </div>
     </div>
