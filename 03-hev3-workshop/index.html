@@ -194,11 +194,11 @@ fn connection_attempt_delay() {
   <section>
     <h2>The tail: real-world edge cases</h2>
     <ul class="small">
-      <li>Connection <strong>coalescing</strong>: we registered only the winning IP, not all resolved addresses (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051851">1851</a>).</li>
-      <li><strong>DNS fallback</strong>: no fallback to native DNS when all DoH-resolved addresses fail (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051614">1614</a>); a transient DNS failure sticks across reload (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052794">2794</a>).</li>
-      <li>Same-priority SVCB records were not <strong>shuffled</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2039248">9248</a>).</li>
-      <li>Web standards: <code>dnsLookupEnd</code> no longer matches the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">7648</a>).</li>
-      <li>Site breakage: di.fm (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2050384">0384</a>); a site whose Alt-Svc pointed at a <code>.onion</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052534">2534</a>).</li>
+      <li>Connection <strong>coalescing</strong>: we registered only the winning IP, not all resolved addresses (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051851">bug 2051851</a>).</li>
+      <li><strong>DNS fallback</strong>: no fallback to native DNS when all DoH-resolved addresses fail (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051614">bug 2051614</a>); a transient DNS failure sticks across reload (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052794">2052794</a>).</li>
+      <li>Same-priority SVCB records were not <strong>shuffled</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2039248">bug 2039248</a>).</li>
+      <li>Web standards: <code>dnsLookupEnd</code> no longer matches the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
+      <li>Site breakage: di.fm (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2050384">bug 2050384</a>); a site whose Alt-Svc pointed at a <code>.onion</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052534">2052534</a>).</li>
     </ul>
     <p class="small muted">From the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a> dependency tree: 17 open of 80.</p>
   </section>
