@@ -23,6 +23,15 @@ window.DECK_DATA = {
     pct: [40, 20, 18, 9, 7, 6],
   },
 
+  // REAL GLAM networking_http_3_upload_throughput (Mbps, release, per version).
+  // HTTP/3 uploads >10 MB. Up ~60-90% across percentiles over Fx 141..152.
+  uploadTput: {
+    v: ['141', '142', '143', '144', '145', '146', '147', '148', '149', '150', '151', '152'],
+    p50: [20, 21, 25, 25, 25, 25, 27, 27, 29, 29, 33, 33],
+    p75: [38, 44, 50, 54, 54, 54, 58, 62, 62, 66, 66, 71],
+    p95: [107, 132, 163, 175, 175, 175, 175, 175, 188, 188, 202, 202],
+  },
+
   // REAL GLAM networking_http_3_ecn_path_capability (share of connections, %).
   ecnPath: [
     { name: 'capable', value: 58.4 },

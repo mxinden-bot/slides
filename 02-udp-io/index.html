@@ -131,7 +131,7 @@
 
   <!-- 10. OS idiosyncrasies -->
   <section>
-    <h2>OS idiosyncrasies (war stories)</h2>
+    <h2>OS idiosyncrasies (field notes)</h2>
     <div class="cols tiny" style="gap:1.4em;">
       <div>
         <p class="tag">Windows</p>
@@ -142,7 +142,7 @@
         </ul>
         <p class="tag">macOS</p>
         <ul>
-          <li>No NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>).</li>
+          <li>No NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>): a dedicated background thread exercises them once against localhost sockets before we trust them (<a href="https://searchfox.org/mozilla-central/source/netwerk/socket/neqo_glue/AppleFastDatapathProbe.cpp">AppleFastDatapathProbe</a>).</li>
           <li>10.15 reports packets that are neither v4 nor v6 (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1987606">bug 1987606</a>, <a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
         </ul>
       </div>
@@ -167,11 +167,40 @@
     <h2>Status: shipped to most users</h2>
     <ul>
       <li>The quinn-udp UDP path is on by default beyond Nightly: <strong>most of this has shipped to Release</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1910360">bug 1910360</a>).</li>
-      <li><strong>ECN</strong> shipped: marking, echoing, and a reduced CE-based congestion response.</li>
+      <li><strong>ECN</strong> shipped: marking, echoing, and a reduced CE-based congestion response (<a href="https://github.com/mozilla/neqo/pull/3233">neqo#3233</a>).</li>
       <li><strong>Send-path offload</strong> is in: GSO on Linux and Android, <code>sendmsg_x</code> on macOS (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>).</li>
       <li>Windows <strong>USO/URO</strong> remain off (packet loss, driver crashes).</li>
-      <li>Still to do: a long-lived send buffer.</li>
+      <li>Still to do: a long-lived send buffer (<a href="https://github.com/mozilla/neqo/pull/2747">neqo#2747</a>).</li>
     </ul>
+  </section>
+
+  <!-- 11b. Benchmark numbers (artificial) -->
+  <section>
+    <h2>Where the stack is today</h2>
+    <div class="cols" style="gap:1em; margin-top:0.3em;">
+      <div class="stat"><span class="num">683</span><span class="lbl">MiB/s download<br>100 MB, 1 conn, ~146 ms</span></div>
+      <div class="stat"><span class="num">656</span><span class="lbl">MiB/s upload<br>100 MB, 1 conn, ~152 ms</span></div>
+      <div class="stat"><span class="num">~38k</span><span class="lbl">requests/s<br>10k parallel, 1-byte</span></div>
+    </div>
+    <p class="small muted" style="margin-top:1em;">~5.7 / 5.5 Gbit/s single-connection. <strong>These are artificial benchmarks</strong>: neqo&rsquo;s criterion suite over loopback (127.0.0.1), one machine, no real network and no browser, so an upper bound, not field performance. Source: <a href="https://github.com/mozilla/neqo/pull/3768">neqo#3768 benchmark run</a>.</p>
+  </section>
+
+  <!-- 11c. Real-world impact -->
+  <section>
+    <h2>And it shows up in the field</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-uptput"></div></div>
+      <div class="col-40">
+        <p>HTTP/3 upload throughput is up <strong>~60-90%</strong> across percentiles over the last ~11 Firefox releases.</p>
+        <p class="small muted">No single cause: many small compounding wins, including</p>
+        <ul class="small">
+          <li><a href="https://protosaur.dev/perf-reports/142-vs-143-udp-throughput.html">Fast UDP I/O</a>;</li>
+          <li><strong>ECN</strong> plus alternative backoff (gentler than a loss response);</li>
+          <li>spurious-recovery and loss-accounting fixes.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>HTTP/3 upload throughput (Mbps, uploads &gt; 10 MB), Firefox release, by version. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_upload_throughput/explore">GLAM</a>.</figcaption>
   </section>
 
   <!-- 12. Closing -->
@@ -210,6 +239,15 @@
 
   Charts.register('c-ecn', (el) => Charts.donut(el, {
     data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
+  }));
+
+  Charts.register('c-uptput', (el) => Charts.line(el, {
+    x: D.uploadTput.v, yName: 'Mbit/s', yMin: 0, yMax: 220, endLabels: true,
+    series: [
+      { name: 'P95', data: D.uploadTput.p95, color: '#2a78d6' },
+      { name: 'P75', data: D.uploadTput.p75, color: '#1baf7a' },
+      { name: 'P50', data: D.uploadTput.p50, color: '#8f8f9d' },
+    ],
   }));
 
   Flame.registerFlame('c-flame', D.flameFull);
