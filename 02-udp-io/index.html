@@ -198,10 +198,14 @@
     { from: 'A', to: 'K', text: 'sendmsg (1 datagram)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
     { note: 'one syscall per datagram', over: ['A', 'N'] },
   ] }));
-  Seq.register('sq-gso', (el) => Seq.render(el, { actors: AKN, messages: [
+  const AKNW = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }, { id: 'W', label: 'wire' }];
+  Seq.register('sq-gso', (el) => Seq.render(el, { actors: AKNW, messages: [
     { from: 'A', to: 'K', text: 'sendmsg (64 KiB buffer)', hl: true },
-    { from: 'K', to: 'N', text: 'segment into MSS packets', dashed: true },
-    { note: 'one syscall, the NIC segments', over: ['A', 'N'] },
+    { from: 'K', to: 'N', text: 'one big buffer', dashed: true },
+    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
+    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
+    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
+    { note: 'one syscall in; the kernel or the NIC segments into MSS packets', over: ['A', 'W'] },
   ] }));
   Seq.register('sq-mmsg', (el) => Seq.render(el, { actors: AKN, messages: [
     { from: 'A', to: 'K', text: 'sendmmsg (N datagrams)', hl: true },
