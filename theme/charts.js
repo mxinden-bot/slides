@@ -274,7 +274,16 @@
     renderAll() {
       Object.entries(this._registry).forEach(([id, fn]) => {
         const el = document.getElementById(id);
-        if (el && el.clientWidth > 0) fn(el);
+        if (!el) return;
+        if (el.clientWidth > 0) { fn(el); return; }
+        // Slide not laid out yet (e.g. mid-transition on direct navigation):
+        // retry until it has a size, so the chart never renders empty.
+        let tries = 0;
+        const retry = () => {
+          if (el.clientWidth > 0) fn(el);
+          else if (tries++ < 20) setTimeout(retry, 50);
+        };
+        setTimeout(retry, 50);
       });
     },
   };

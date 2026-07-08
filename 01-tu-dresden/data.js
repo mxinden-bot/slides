@@ -58,8 +58,9 @@ window.DECK_DATA = {
   // transaction is dispatched, i.e. PER REQUEST (summed over h1/h2/h3), Firefox
   // release channel, by version (each version ~4 weeks). IPv6 share of requests,
   // flat at ~29-31%. Fx 142..151.
+  // x labels are the release dates of Fx 142..151 (monthly cadence).
   ipv6PerReq: {
-    v: ['142', '143', '144', '145', '146', '147', '148', '149', '150', '151'],
+    v: ["Aug '25", 'Sep', 'Oct', 'Nov', 'Dec', "Jan '26", 'Feb', 'Mar', 'Apr', 'May'],
     v6: [29.4, 29.0, 28.7, 29.5, 30.3, 30.7, 30.9, 29.3, 29.1, 29.1],
     v4: [70.6, 71.0, 71.3, 70.5, 69.7, 69.3, 69.1, 70.7, 70.9, 70.9],
   },
