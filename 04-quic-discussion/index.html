@@ -35,8 +35,8 @@
   <section>
     <h2>The neutral number has plateaued</h2>
     <ul>
-      <li>Cloudflare request share sits at <strong>~21%</strong>, flat since a <strong>~28% peak in 2023</strong> (<a href="https://blog.cloudflare.com/radar-2025-year-in-review/">Radar 2025</a>).</li>
-      <li>&ldquo;&gt;30%&rdquo; holds only for advertised <em>support</em> (W3Techs ~39%) or hyperscaler first-party traffic (Google ~42%, Meta ~75%).</li>
+      <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
+      <li>It runs higher by other measures: advertised <em>support</em> (W3Techs ~39%), hyperscaler first-party traffic (Google ~42%, Meta ~75%); backbone bytes far lower (~6%).</li>
       <li>Requests vs connections is a real confound: HTTP/3 multiplexes many requests per connection.</li>
       <li>&ldquo;<a href="https://dl.acm.org/doi/10.1145/3589334.3645323">QUIC is not Quick Enough over Fast Internet</a>&rdquo;: up to <strong>-45%</strong> throughput vs HTTP/2 above ~500 Mbps.</li>
     </ul>
@@ -89,7 +89,7 @@
   <section>
     <h2>Open questions</h2>
     <ul class="small">
-      <li>Which denominator should we rally around, and is the <strong>plateau since 2023</strong> the real worry?</li>
+      <li>Which denominator should we rally around, and is the <strong>plateau</strong> the real worry?</li>
       <li>Is the fast-internet throughput regression the ceiling on QUIC growth?</li>
       <li>Can QUIC v2 ever escape its coordination trap? Does a major library shipping no v2 matter?</li>
       <li>Deprecate Alt-Svc for HTTPS RR, or bridge? Is <strong>ECH</strong> the lever that finally forces HTTPS-RR publication?</li>

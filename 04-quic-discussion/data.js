@@ -4,9 +4,10 @@
  */
 window.DECK_DATA = {
   // HTTP/3 "share" wildly depends on the denominator.
+  // Cloudflare = HTTP/3 share of requests, worldwide likely-human (Radar, ~30%).
   denominators: {
     labels: ['Cloudflare\nrequests', 'W3Techs\nsite support', 'Google\ntraffic', 'Meta\ntraffic', 'Backbone\nbytes'],
-    pct: [21, 39, 42, 75, 6],
+    pct: [30, 39, 42, 75, 6],
   },
 
   // REAL GLAM netwerk_happy_eyeballs_h3_discovery: how connections learn h3.
