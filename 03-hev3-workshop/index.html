@@ -125,7 +125,7 @@
 
   <!-- 6. Testability -->
   <section>
-    <h2>Deterministic, so easy to formalize</h2>
+    <h2>Testing the state machine</h2>
     <pre><code class="language-rust" data-trim data-noescape>#[test]
 fn connection_attempt_delay() {
     let (mut now, mut he) = setup();
@@ -316,7 +316,8 @@ fn connection_attempt_delay() {
   // 1. end-to-end succeeded (log, ms)
   Charts.register('c-e2eok', (el) => Charts.bar(el, {
     x: D.e2eOk.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
-    yFormatter: ms, series: [{ name: 'succeeded', data: D.e2eOk.ms }],
+    yFormatter: ms, barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'succeeded', data: D.e2eOk.ms }],
   }));
   // 2. end-to-end failed (linear, ms): fail fast or hit the 10 s cap
   Charts.register('c-e2efail', (el) => Charts.bar(el, {
