@@ -154,7 +154,7 @@
   <section>
     <h2>HTTP/3 adoption</h2>
     <div class="chart" id="c-h3adopt"></div>
-    <figcaption>HTTP/3 share, past 12 months: Firefox desktop responses (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>) vs Cloudflare&rsquo;s share of requests, flat near 21% (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</figcaption>
+    <figcaption>HTTP/3 share: Firefox desktop responses, past 12 months (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>) vs Cloudflare&rsquo;s share of requests, ~30% (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</figcaption>
   </section>
 
   <!-- 11. QUIC handshake -->
@@ -463,7 +463,7 @@
   }));
 
   Charts.register('c-h3adopt', (el) => Charts.line(el, {
-    x: D.months, yName: 'HTTP/3 share', yMax: 35,
+    x: D.months, yName: 'HTTP/3 share', yMax: 40,
     yFormatter: (v) => v + '%',
     series: [
       { name: 'Firefox', data: D.h3Adoption.pct, color: '#2a78d6', area: true },
