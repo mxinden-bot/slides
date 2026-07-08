@@ -105,9 +105,9 @@
   <section>
     <h2>Result</h2>
     <p class="small muted" style="margin:0 0 0.3em;">
-      <strong style="color:var(--accent);">&lt;1 &rarr; 4 Gbit/s</strong> on CPU-bound transfers. With per-datagram syscalls batched down, the <strong>AES-GCM decrypt</strong> tower (left) now rivals UDP <code>sendmsg</code> / <code>recvmmsg</code>, instead of being dwarfed by I/O.</p>
+      <strong style="color:var(--accent);">&lt;1 &rarr; 4 Gbit/s</strong> on CPU-bound transfers. What one received packet costs, in user space: <strong>decrypt</strong> (AES-GCM), frame and ACK handling, then build the response and <code>sendmsg</code> it out.</p>
     <div id="c-flame" style="width:100%; height:400px;"></div>
-    <figcaption>Flamegraph of on-CPU stacks on Firefox&rsquo;s Socket Thread during a 2.3&nbsp;GB QUIC download (network wait excluded). <code>libxul.so</code> = neqo/Necko, symbols unresolved. Profile: <a href="https://share.firefox.dev/4fmWsog">share.firefox.dev/4fmWsog</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
+    <figcaption>Flamegraph rooted at <code>HttpConnectionUDP::OnPacketReceived</code>, Firefox 154 loading a page: neqo&rsquo;s per-packet receive path. Widest leaves are <code>sendmsg</code> / <code>recvmmsg</code>; the tall middle branch is <code>Connection::input</code> &rarr; decrypt. Profile: <a href="https://share.firefox.dev/3T9RKSh">share.firefox.dev/3T9RKSh</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->
