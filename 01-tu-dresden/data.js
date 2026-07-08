@@ -54,10 +54,12 @@ window.DECK_DATA = {
     h3: [64, 61, 63, 70, 65, 64, 64, 64, 64, 64, 63, 63, 66],
   },
 
-  // REAL GLAM network_ipv4_and_ipv6_address_connectivity: of successful Firefox
-  // connections, the split by IP version (IPv4 66.6% vs IPv6 23.1% of attempts).
-  ipConnectivity: [
-    { name: 'IPv4', value: 74 },
-    { name: 'IPv6', value: 26, color: '#1baf7a' },
-  ],
+  // REAL GLAM networking_connection_address_type: IP family used when an HTTP
+  // transaction is dispatched, i.e. PER REQUEST (summed over h1/h2/h3), Firefox
+  // release channel, by version (each version ~4 weeks). IPv6 share of requests,
+  // flat at ~29-31%. Fx 142..151.
+  ipv6PerReq: {
+    v: ['142', '143', '144', '145', '146', '147', '148', '149', '150', '151'],
+    pct: [29.4, 29.0, 28.7, 29.5, 30.3, 30.7, 30.9, 29.3, 29.1, 29.1],
+  },
 };

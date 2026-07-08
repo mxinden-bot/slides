@@ -377,13 +377,13 @@
       <div class="col-60">
         <ul>
           <li>Old protocols (IPv4, DNS53, HTTP/1 &amp; HTTP/2) going away.</li>
-          <li>Still ~<strong>3 in 4</strong> successful Firefox connections use <strong>IPv4</strong>, not IPv6.</li>
+          <li><strong>IPv6 is ~30% of requests</strong> and flat across the last ~10 releases: still ~2 in 3 go over IPv4.</li>
           <li>An anonymous colleague: &ldquo;Hopefully no HTTP/4.&rdquo;</li>
         </ul>
       </div>
       <div class="col-40">
         <div class="chart short" id="c-ipconn"></div>
-        <figcaption>Successful Firefox connections by IP version. <a href="https://glam.telemetry.mozilla.org/fog/probe/network_ipv4_and_ipv6_address_connectivity/explore">GLAM</a>.</figcaption>
+        <figcaption>IPv6 share of HTTP transactions (<strong>per request</strong>), Firefox release, by version. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore?activeBuckets=%5B%22http_2_ipv4%22%2C%22http_1_ipv4%22%2C%22http_3_ipv4%22%2C%22http_2_ipv6%22%2C%22http_3_ipv6%22%2C%22http_1_ipv6%22%5D">GLAM</a>.</figcaption>
       </div>
     </div>
   </section>
@@ -403,9 +403,9 @@
     <h2>The Internet of the (near) future</h2>
     <ol>
       <li>Resolve the site over <strong>DNS over HTTPS</strong>; its HTTPS record returns IPv6, <code>h3</code> and ECH.</li>
-      <li class="fragment">Connect with a <strong>0-RTT QUIC</strong> handshake over IPv6, with ECH: no wasted round trip.</li>
+      <li class="fragment">Connect with a <strong>0-RTT QUIC</strong> handshake over IPv6, with <strong>ECH</strong> keeping the SNI private: no wasted round trip.</li>
       <li class="fragment">Fetch the page over <strong>HTTP/3</strong>, on that same first connection.</li>
-      <li class="fragment">Stay responsive under load: <strong>ECN / L4S</strong> keep latency low, and <strong>ECH</strong> kept the SNI private the whole time.</li>
+      <li class="fragment">Stay responsive under load: <strong>ECN / L4S</strong> keep latency <strong>near idle even under load</strong>.</li>
     </ol>
   </section>
 
@@ -416,7 +416,7 @@
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>Work on Firefox&rsquo;s networking <strong>in Rust</strong>: QUIC / HTTP/3 (<a href="https://github.com/mozilla/neqo">neqo</a>), Happy Eyeballs, UDP I/O.</li>
+          <li>Work on Firefox&rsquo;s <strong>networking stack</strong>.</li>
           <li>Ship to hundreds of millions of users, <strong>in the open</strong>, measured with public telemetry.</li>
           <li>Mentored, remote-friendly, alongside the standards work you just saw.</li>
         </ul>
@@ -491,8 +491,10 @@
     yFormatter: ms, series: [{ name: 'latency', data: D.hev3Latency.ms }],
   }));
 
-  Charts.register('c-ipconn', (el) => Charts.donut(el, {
-    data: D.ipConnectivity, centerValue: '74%', centerLabel: 'IPv4',
+  Charts.register('c-ipconn', (el) => Charts.line(el, {
+    x: D.ipv6PerReq.v, yName: '% of requests',
+    yMin: 0, yMax: 50, yFormatter: (v) => v + '%', endLabels: true,
+    series: [{ name: 'IPv6', data: D.ipv6PerReq.pct, color: '#1baf7a' }],
   }));
 
   const CS = [{ id: 'C', label: 'client' }, { id: 'S', label: 'server' }];
