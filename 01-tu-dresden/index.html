@@ -413,28 +413,20 @@
   <section>
     <span class="pill on">We&rsquo;re hiring</span>
     <h2>Student worker on the networking team</h2>
-    <div class="cols">
-      <div class="col-60">
-        <ul>
-          <li>Work on Firefox&rsquo;s <strong>networking stack</strong>.</li>
-          <li>Ship to hundreds of millions of users, <strong>in the open</strong>, measured with public telemetry.</li>
-          <li>Mentored, remote-friendly, alongside the standards work you just saw.</li>
-        </ul>
-      </div>
-      <div class="col-40 center" style="align-self:center;">
-        <p class="small muted" style="margin:0 0 0.4em;">Curious? Grab me after the talk or email:</p>
-        <p style="font-weight:700; font-size:1.05em;">mail@max-inden.de</p>
-      </div>
-    </div>
-    <p class="small muted">A working-student (Werkstudent) position on Mozilla&rsquo;s networking team.</p>
+    <ul>
+      <li>Work on Firefox&rsquo;s <strong>networking stack</strong>.</li>
+      <li>Help keep the Internet a <strong>healthy public resource</strong>: open, private, and accessible to everyone (Mozilla&rsquo;s mission), shipped to hundreds of millions.</li>
+      <li>Mentored.</li>
+    </ul>
+    <p style="margin-top:1em;"><span class="muted" style="font-size:0.8em;">Curious? Grab me after the talk or email</span> &nbsp; <strong>minden@mozilla.com</strong></p>
   </section>
 
   <!-- 26. Thank you -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
     <h2 style="color:#ffffff;">Questions?</h2>
-    <p style="color:#d8d4e2;">Help build a healthy Internet.</p>
-    <p class="small" style="color:#b3adc4;">In person &middot; mail@max-inden.de &middot; @mxinden</p>
+    <p style="color:#d8d4e2;">Help us build a healthy Internet.</p>
+    <p class="small" style="color:#b3adc4;">In person &middot; mail@max-inden.de &middot; <a href="https://max-inden.de" style="color:#ff9d5c;">max-inden.de</a></p>
   </section>
 
 </div>
@@ -493,8 +485,11 @@
 
   Charts.register('c-ipconn', (el) => Charts.line(el, {
     x: D.ipv6PerReq.v, yName: '% of requests',
-    yMin: 0, yMax: 50, yFormatter: (v) => v + '%', endLabels: true,
-    series: [{ name: 'IPv6', data: D.ipv6PerReq.pct, color: '#1baf7a' }],
+    yMin: 0, yMax: 100, yFormatter: (v) => v + '%', endLabels: true,
+    series: [
+      { name: 'IPv4', data: D.ipv6PerReq.v4, color: '#2a78d6' },
+      { name: 'IPv6', data: D.ipv6PerReq.v6, color: '#1baf7a' },
+    ],
   }));
 
   const CS = [{ id: 'C', label: 'client' }, { id: 'S', label: 'server' }];
