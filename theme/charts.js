@@ -40,7 +40,9 @@
   function axisCommon(name) {
     return {
       name: name || undefined,
-      nameTextStyle: { color: INK_MUTED, fontSize: AXIS_FS, fontFamily: FONT, fontWeight: 600 },
+      // anchor the axis title's left edge at the axis so a long y-title
+      // (e.g. "share of responses") never overflows the left container edge
+      nameTextStyle: { color: INK_MUTED, fontSize: AXIS_FS, fontFamily: FONT, fontWeight: 600, align: 'left' },
       axisLine: { lineStyle: { color: HAIRLINE } },
       axisTick: { show: false },
       axisLabel: { color: INK_FAINT, fontSize: AXIS_FS, fontFamily: FONT },

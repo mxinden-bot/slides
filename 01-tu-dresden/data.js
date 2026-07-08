@@ -43,6 +43,9 @@ window.DECK_DATA = {
   // REAL - HTTP/3 share of Firefox desktop responses (%). Plateaued ~15-20%.
   h3Adoption: {
     pct: [20.1, 17.9, 18.5, 15.5, 15.1, 15.3, 16.1, 14.9, 14.8, 15.0, 15.9, 16.9, 17.3],
+    // Cloudflare Radar HTTP/3 share of requests: published ~flat near 21%
+    // (20.5% mid-2025 -> 21.0% mid-2026, held ~21% through H1 2026).
+    cf: [20.5, 20.5, 20.6, 20.7, 20.8, 20.9, 21.0, 21.0, 21.0, 20.9, 21.0, 21.0, 21.0],
   },
 
   // REAL - time to request start, P75 (ms), Firefox desktop, by protocol over

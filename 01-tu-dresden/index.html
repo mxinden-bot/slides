@@ -154,7 +154,7 @@
   <section>
     <h2>HTTP/3 adoption</h2>
     <div class="chart" id="c-h3adopt"></div>
-    <figcaption>HTTP/3 share of Firefox desktop responses, past 12 months. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
+    <figcaption>HTTP/3 share, past 12 months: Firefox desktop responses (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>) vs Cloudflare&rsquo;s share of requests, flat near 21% (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</figcaption>
   </section>
 
   <!-- 11. QUIC handshake -->
@@ -392,7 +392,7 @@
   <section>
     <h2>What can you do for a healthy Internet?</h2>
     <ul>
-      <li>If you use a browser: <strong>enable DoH</strong> (Firefox: Settings &rarr; Privacy &amp; Security &rarr; DNS over HTTPS &rarr; Max Protection).</li>
+      <li>If you use a browser: <strong>enable DoH</strong> (Firefox: Settings &rarr; Privacy &amp; Security &rarr; DNS over HTTPS).</li>
       <li>If you operate DNS infra: <strong>expose a DoH endpoint</strong>.</li>
       <li>If you operate a website: <strong>serve it over HTTP/3</strong>, <strong>publish an HTTPS record</strong>, and add <strong>ECH</strong>.</li>
     </ul>
@@ -463,9 +463,12 @@
   }));
 
   Charts.register('c-h3adopt', (el) => Charts.line(el, {
-    x: D.months, yName: 'share of responses', yMax: 30,
+    x: D.months, yName: 'HTTP/3 share', yMax: 35,
     yFormatter: (v) => v + '%',
-    series: [{ name: 'HTTP/3', data: D.h3Adoption.pct, area: true }],
+    series: [
+      { name: 'Firefox', data: D.h3Adoption.pct, color: '#2a78d6', area: true },
+      { name: 'Cloudflare', data: D.h3Adoption.cf, color: '#eb6834', dashed: true },
+    ],
   }));
 
   Charts.register('c-ttrs', (el) => Charts.line(el, {
