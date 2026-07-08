@@ -363,9 +363,9 @@
     <h2>Congestion control: ECN and L4S</h2>
     <ul>
       <li>Firefox&rsquo;s QUIC stack does <strong>Cubic</strong> today; no BBR planned near-term.</li>
-      <li><strong>ECN</strong> marking and echoing shipped: ~<strong>50%</strong> of network paths are ECN-capable.</li>
+      <li><strong>ECN</strong> marking and echoing shipped: <strong>58%</strong> of network paths are ECN-capable (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>).</li>
+      <li>Already <strong>1 in 5</strong> congestion responses is triggered by an ECN <strong>CE</strong> mark, not packet loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM</a>).</li>
       <li>Ready for an <strong>L4S</strong> congestion controller on the server side. (Hello, Comcast users.)</li>
-      <li>An ongoing research area.</li>
     </ul>
   </section>
 
