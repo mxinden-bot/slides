@@ -132,12 +132,34 @@
   <!-- 10. OS idiosyncrasies -->
   <section>
     <h2>OS idiosyncrasies (war stories)</h2>
-    <ul class="small">
-      <li><strong>Windows:</strong> URO on ARM64 + WSL returns no segment size, disabled (<a href="https://github.com/quinn-rs/quinn/issues/2041">quinn#2041</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1916558">bug 1916558</a>); USO raised P95 loss to ~6.5% and crashed a driver, rolled back (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1979279">bug 1979279</a>).</li>
-      <li><strong>macOS:</strong> no NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>); 10.15 unknown address family (<a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
-      <li><strong>Linux:</strong> GSO can pass the probe but fail at send with EIO, resend individually (<a href="https://github.com/quinn-rs/quinn/issues/2399">quinn#2399</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049334">bug 2049334</a>).</li>
-      <li><strong>Android:</strong> x86 <code>socketcall</code> crashes under seccomp (<a href="https://github.com/quinn-rs/quinn/pull/1966">quinn#1966</a>); API &le; 25 returns EINVAL with ECN, retry without (<a href="https://github.com/quinn-rs/quinn/pull/2079">quinn#2079</a>); single-segment GSO error (<a href="https://github.com/quinn-rs/quinn/pull/2050">quinn#2050</a>).</li>
-    </ul>
+    <div class="cols tiny" style="gap:1.4em;">
+      <div>
+        <p class="tag">Windows</p>
+        <ul>
+          <li>URO on Windows-on-ARM returns <em>no segment size</em>, so receive coalescing is unusable, disabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1916558">bug 1916558</a>, <a href="https://github.com/quinn-rs/quinn/issues/2041">quinn#2041</a>).<br><strong style="color:var(--accent);">Bought the same Surface laptop, same colour, just to reproduce it.</strong></li>
+          <li>USO raised P95 loss to ~6.5%, rolled back (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1979279">bug 1979279</a>).</li>
+          <li>USO crashed a user&rsquo;s network driver (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978821">bug 1978821</a>).</li>
+        </ul>
+        <p class="tag">macOS</p>
+        <ul>
+          <li>No NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>).</li>
+          <li>10.15 reports packets that are neither v4 nor v6 (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1987606">bug 1987606</a>, <a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag">Linux</p>
+        <ul>
+          <li>GSO support must be probed at runtime; sandbox tweaks needed (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a>).</li>
+          <li>GSO can pass the probe but fail at send with <code>EIO</code>, resend individually (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049334">bug 2049334</a>, <a href="https://github.com/quinn-rs/quinn/issues/2399">quinn#2399</a>).</li>
+        </ul>
+        <p class="tag">Android</p>
+        <ul>
+          <li>x86 dispatches via <code>socketcall</code>; seccomp blocks it (<a href="https://github.com/quinn-rs/quinn/pull/1966">quinn#1966</a>).</li>
+          <li>API &le; 25 returns <code>EINVAL</code> when setting ECN, retry without (<a href="https://github.com/quinn-rs/quinn/pull/2079">quinn#2079</a>).</li>
+          <li>Complains about single-segment GSO (<a href="https://github.com/quinn-rs/quinn/pull/2050">quinn#2050</a>).</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <!-- 11. Status -->
