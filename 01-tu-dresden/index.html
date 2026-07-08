@@ -320,7 +320,7 @@
     <ul>
       <li>Similar to MASQUE, but <strong>request-oriented</strong>, not connection-oriented.</li>
       <li>So requests are <strong>unlinkable</strong>: the gateway cannot associate two requests as coming from the same user.</li>
-      <li>The trade-off is <strong>performance overhead</strong>: an extra hop and no connection reuse, so it costs latency (Oblivious DoH ~228 ms vs ~146 ms for plain DoH, <a href="https://blog.cloudflare.com/oblivious-dns/">Cloudflare</a>).</li>
+      <li>The trade-off is <strong>performance overhead</strong>: the extra relay hop plus per-request encryption cost latency (Oblivious DoH ~228 ms vs ~146 ms for plain DoH, <a href="https://blog.cloudflare.com/oblivious-dns/">Cloudflare</a>).</li>
       <li>Used for Telemetry and Oblivious DoH.</li>
     </ul>
     <div class="hops">
