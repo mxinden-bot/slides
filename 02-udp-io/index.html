@@ -267,10 +267,13 @@
     { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
     { note: 'one syscall in; the kernel or the NIC segments into MSS packets', over: ['A', 'W'] },
   ] }));
-  Seq.register('sq-mmsg', (el) => Seq.render(el, { actors: AKN, messages: [
+  Seq.register('sq-mmsg', (el) => Seq.render(el, { actors: AKNW, messages: [
     { from: 'A', to: 'K', text: 'sendmmsg (N datagrams)', hl: true },
-    { from: 'K', to: 'N', text: 'N packets', dashed: true },
-    { note: 'one syscall, a batch of datagrams', over: ['A', 'N'] },
+    { from: 'K', to: 'N', text: 'batch of datagrams', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { note: 'one syscall, a batch of datagrams', over: ['A', 'W'] },
   ] }));
 
   Reveal.initialize({
