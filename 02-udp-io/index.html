@@ -278,7 +278,7 @@
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
-    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
   const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); if (window.Flame) Flame.renderAll(); };

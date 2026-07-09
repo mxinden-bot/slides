@@ -418,7 +418,7 @@
       <li>Help make the Internet <strong>open, private, and accessible to everyone</strong> (<a href="https://www.mozilla.org/about/manifesto/">Mozilla&rsquo;s mission</a>).</li>
       <li>Your work ships to <a href="https://data.firefox.com/dashboard/user-activity">hundreds of millions</a> of people.</li>
     </ul>
-    <p class="small muted" style="margin-top:0.6em;">Rust and/or C/C++ &middot; students at a German university &middot; some visits to our Berlin office &middot; 1:1 mentoring.</p>
+    <p class="small muted" style="margin-top:0.6em;">Rust and/or C/C++.</p>
     <p style="margin-top:0.8em;"><span class="muted" style="font-size:0.8em;">The role goes live soon on</span> &nbsp; <strong><a href="https://www.mozilla.org/careers/">mozilla.org/careers</a></strong></p>
     <p style="margin-top:0.2em;"><span class="muted" style="font-size:0.8em;">Until then, find me after the talk or email</span> &nbsp; <strong>minden@mozilla.com</strong></p>
   </section>
@@ -485,7 +485,8 @@
 
   Charts.register('c-hev3', (el) => Charts.bar(el, {
     x: D.hev3Latency.p, yName: 'latency (log)', yType: 'log', yMin: 10, yMax: 20000,
-    yFormatter: ms, series: [{ name: 'latency', data: D.hev3Latency.ms }],
+    yFormatter: ms, barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'latency', data: D.hev3Latency.ms }],
   }));
 
   Charts.register('c-ipconn', (el) => Charts.line(el, {
@@ -526,7 +527,7 @@
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
-    hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast',
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
   const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
