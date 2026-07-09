@@ -201,29 +201,29 @@
       itemStyle: { color: d.color || PALETTE[i % PALETTE.length],
         borderColor: SURFACE, borderWidth: 2 },
     }));
+    const center = o.center || ['50%', '52%'];
     chart.setOption({
       animation: false,
       tooltip: Object.assign(tooltip({ trigger: 'item' }),
         { formatter: o.tooltipFormatter || '{b}: {d}%' }),
-      legend: Object.assign(legend(true), { top: 'middle', right: 0, orient: 'vertical',
-        itemGap: 14 }),
       series: [{
-        type: 'pie', radius: ['58%', '82%'], center: o.center || ['38%', '52%'],
+        type: 'pie', radius: ['44%', '62%'], center, percentPrecision: 0,
         avoidLabelOverlap: true,
-        label: { show: !!o.sliceLabels, formatter: '{d}%', color: INK, fontFamily: FONT,
-          fontSize: LABEL_FS, fontWeight: 600 },
-        labelLine: { show: !!o.sliceLabels },
+        label: { show: true, formatter: '{b}\n{d}%', color: INK, fontFamily: FONT,
+          fontSize: LABEL_FS, fontWeight: 600, lineHeight: 15, align: 'center',
+          width: 92, overflow: 'break' },
+        labelLine: { show: true, length: 10, length2: 10 },
         data,
         emphasis: { scaleSize: 6 },
       }],
       graphic: (o.centerValue ? [{
-        type: 'text', left: '35%', top: '44%', style: {
-          text: o.centerValue, fill: INK, fontFamily: FONT, fontSize: 40, fontWeight: 800,
-          textAlign: 'center' },
+        type: 'text', left: center[0], top: '45%', style: {
+          text: o.centerValue, fill: INK, fontFamily: FONT, fontSize: 34, fontWeight: 800,
+          textAlign: 'center', textVerticalAlign: 'middle' },
       }, {
-        type: 'text', left: '35%', top: '56%', style: {
-          text: o.centerLabel || '', fill: INK_MUTED, fontFamily: FONT, fontSize: 15,
-          textAlign: 'center' },
+        type: 'text', left: center[0], top: '56%', style: {
+          text: o.centerLabel || '', fill: INK_MUTED, fontFamily: FONT, fontSize: 14,
+          textAlign: 'center', textVerticalAlign: 'middle' },
       }] : undefined),
     });
     return chart;

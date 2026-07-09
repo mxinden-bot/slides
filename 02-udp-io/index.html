@@ -31,7 +31,7 @@
     <ul>
       <li>~<strong>20%</strong> of Firefox desktop HTTP requests are HTTP/3 over QUIC (UDP), already <strong>~28%</strong> on Android Nightly (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>).</li>
       <li>We expect that to keep <strong>growing</strong>: broadly, and specifically through <strong>Happy Eyeballs v3</strong>.</li>
-      <li>Firefox&rsquo;s QUIC implementation lives in <strong>user space</strong>; the kernel hands us raw datagrams.</li>
+      <li>Firefox&rsquo;s QUIC implementation lives in <strong>user space</strong>, so every datagram has to cross the boundary between the application and the OS kernel, many times per connection.</li>
       <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong> UDP I/O (one <code>sendto</code>/<code>recvfrom</code> per datagram) with a modern Rust stack.</li>
       <li>Goal: close the gap to heavily optimized, in-kernel TCP.</li>
     </ul>
@@ -114,13 +114,13 @@
     <h2>Result</h2>
     <p class="small muted" style="margin:0 0 0.3em;">
       <strong style="color:var(--accent);">&lt;1 &rarr; 4 Gbit/s</strong> on CPU-bound transfers.</p>
-    <div id="c-flame" style="width:100%; height:400px;"></div>
+    <div id="c-flame" style="width:100%; height:468px;"></div>
     <figcaption>Flamegraph rooted at <code>HttpConnectionUDP::OnPacketReceived</code>, Firefox 154 loading a page: neqo&rsquo;s per-packet receive path. Widest leaves are <code>sendmsg</code> / <code>recvmmsg</code>; the tall middle branch is <code>Connection::input</code> &rarr; decrypt. Profile: <a href="https://share.firefox.dev/3T9RKSh">share.firefox.dev/3T9RKSh</a>. Throughput: <a href="https://max-inden.de/post/fast-udp-io-in-firefox/">max-inden.de/post/fast-udp-io-in-firefox</a>.</figcaption>
   </section>
 
   <!-- 9. ECN -->
   <section>
-    <h2>ECN: observed, and acted on</h2>
+    <h2>ECN: marking and echoing</h2>
     <div class="cols">
       <div class="col-60">
         <ul>
@@ -198,8 +198,8 @@
     <h2>Where the stack is today</h2>
     <div style="display:flex; flex-direction:column; justify-content:center; min-height:74%;">
       <div class="cols" style="gap:1em;">
-        <div class="stat"><span class="num">683</span><span class="lbl">MiB/s download<br>100 MB, 1 conn, ~146 ms</span></div>
-        <div class="stat"><span class="num">656</span><span class="lbl">MiB/s upload<br>100 MB, 1 conn, ~152 ms</span></div>
+        <div class="stat"><span class="num">683</span><span class="lbl">MiB/s download<br>100 MB, 1 conn</span></div>
+        <div class="stat"><span class="num">656</span><span class="lbl">MiB/s upload<br>100 MB, 1 conn</span></div>
         <div class="stat"><span class="num">~38k</span><span class="lbl">requests/s<br>10k parallel, 1-byte</span></div>
       </div>
       <p class="small muted" style="margin-top:2.4em;">~5.7 / 5.5 Gbit/s single-connection. <strong>These are artificial benchmarks</strong>: neqo&rsquo;s criterion suite over loopback (127.0.0.1), one machine, no real network and no browser, so an upper bound, not field performance. Source: <a href="https://github.com/mozilla/neqo/pull/3768">neqo#3768 benchmark run</a>.</p>
