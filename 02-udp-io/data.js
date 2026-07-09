@@ -6,12 +6,18 @@
 window.DECK_DATA = {
   glam: 'https://glam.telemetry.mozilla.org/fog/probe/',
 
-  // REAL GLAM networking_http_3_udp_datagram_segments_received, Firefox for
-  // Android (Fenix), which enables GRO. Windows is excluded: it does not do GRO.
-  groSegments: { p: ['P50', 'P75', 'P95', 'P99', 'P99.9'], n: [1, 1, 4, 14, 46] },
-
-  // REAL GLAM networking_http_3_udp_datagram_segment_size_received, Fenix (bytes).
-  segSize: { p50: 1217, p95: 1271, p99: 1448 },
+  // REAL GLAM: the six networking_http_3_udp_datagram_* distributions, Firefox
+  // Nightly (os:*), percentiles P50/P75/P95/P99/P99.9. Counts are integers;
+  // sizes are bytes. Fenix is not exposed on this product, so Nightly desktop.
+  seg: {
+    p: ['P50', 'P75', 'P95', 'P99', 'P99.9'],
+    segmentsSent:    [1, 1, 1, 1, 3],
+    segmentsRecv:    [1, 1, 2, 15, 16],
+    segSizeSent:     [0, 45, 1327, 1448, 1448],
+    segSizeRecv:     [1217, 1217, 1271, 1448, 1448],
+    sizeSent:        [47, 1217, 1217, 2435, 7193],
+    sizeRecv:        [1217, 1217, 1448, 4664, 21247],
+  },
 
   // REAL GLAM networking_http_3_upload_throughput (Mbps, release, per version).
   // HTTP/3 uploads >10 MB. Up ~60-90 pct across percentiles over Fx 141..152.

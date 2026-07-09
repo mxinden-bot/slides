@@ -59,17 +59,111 @@
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the NIC splits (send) or coalesces (receive) (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
-          <li>Real GRO coalescing on <strong>Android</strong>: median <strong>1</strong> datagram/read, but the P99 read pulls in <strong>14</strong> (P99.9: 46).</li>
-          <li>Median received segment: <strong>1217 bytes</strong>.</li>
+          <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the kernel or NIC <strong>splits</strong> it on send (GSO) and <strong>coalesces</strong> many datagrams on receive (GRO) (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
+          <li>One syscall then moves many packets instead of one, cutting the per-datagram cost.</li>
+          <li>The next slides measure, from real telemetry, how much batching actually happens on send and on receive.</li>
         </ul>
       </div>
+      <div class="col-40"><div id="sq-gso" style="margin-top:0.6em;"></div></div>
+    </div>
+  </section>
+
+  <!-- 4a. Segments per send syscall (GSO) -->
+  <section>
+    <h2>Send: segments per syscall (GSO)</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-seg-sent" style="height:430px;"></div></div>
       <div class="col-40">
-        <div id="sq-gso"></div>
-        <div class="chart" id="c-gro" style="height:250px;"></div>
-        <figcaption>Datagrams coalesced per receive syscall (GRO), Firefox for Android. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM</a>.</figcaption>
+        <p>How many segments one <code>sendmsg</code> carries via GSO.</p>
+        <ul class="small">
+          <li>Mostly <strong>1</strong>: single small packets and ACKs dominate.</li>
+          <li>The tail batches (P99.9 is <strong>3</strong>), where GSO runs: Linux and Android.</li>
+          <li>Send-side batching is modest; the bigger win is on receive.</li>
+        </ul>
       </div>
     </div>
+    <figcaption>UDP segments per send syscall, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_sent/explore">GLAM: udp_datagram_segments_sent</a>.</figcaption>
+  </section>
+
+  <!-- 4b. Segments per receive syscall (GRO) -->
+  <section>
+    <h2>Receive: segments per syscall (GRO)</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-seg-recv" style="height:430px;"></div></div>
+      <div class="col-40">
+        <p>How many datagrams one <code>recvmmsg</code> / GRO read returns.</p>
+        <ul class="small">
+          <li>Median <strong>1</strong>, but the busy tail coalesces <strong>15+</strong> into a single read.</li>
+          <li>This is where receive offload pays off: bulk download.</li>
+          <li>Fewer syscalls per byte on the hot receive path.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>UDP segments per receive syscall, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM: udp_datagram_segments_received</a>.</figcaption>
+  </section>
+
+  <!-- 4c. Sent segment size -->
+  <section>
+    <h2>Sent segment size</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-segsize-sent" style="height:430px;"></div></div>
+      <div class="col-40">
+        <p>The GSO segment size on send. <strong>0</strong> means a single, unsegmented datagram.</p>
+        <ul class="small">
+          <li>Half of sends are single datagrams (<strong>0</strong>): ACKs and control.</li>
+          <li>When GSO batches, segments reach the path MTU (~<strong>1327 to 1448 B</strong>).</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>UDP datagram segment size sent, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_sent/explore">GLAM: udp_datagram_segment_size_sent</a>.</figcaption>
+  </section>
+
+  <!-- 4d. Received segment size -->
+  <section>
+    <h2>Received segment size</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-segsize-recv" style="height:430px;"></div></div>
+      <div class="col-40">
+        <p>The size of each datagram the network delivers to us.</p>
+        <ul class="small">
+          <li>Tightly clustered at the common <strong>1217 B</strong> and <strong>1448 B</strong> MTUs.</li>
+          <li>Near-MTU datagrams arrive consistently, little variation.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>UDP datagram segment size received, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a>.</figcaption>
+  </section>
+
+  <!-- 4e. Bytes per send syscall -->
+  <section>
+    <h2>Bytes per send syscall</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-size-sent" style="height:430px;"></div></div>
+      <div class="col-40">
+        <p>Total bytes handed to one <code>sendmsg</code>.</p>
+        <ul class="small">
+          <li>Median is tiny (an ACK or control write, ~<strong>47 B</strong>).</li>
+          <li>The tail packs several segments into one GSO syscall (P99.9 ~<strong>7 KB</strong>).</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>UDP datagram size sent, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_sent/explore">GLAM: udp_datagram_size_sent</a>.</figcaption>
+  </section>
+
+  <!-- 4f. Bytes per receive syscall -->
+  <section>
+    <h2>Bytes per receive syscall</h2>
+    <div class="cols">
+      <div class="col-60"><div class="chart" id="c-size-recv" style="height:430px;"></div></div>
+      <div class="col-40">
+        <p>Total bytes returned by one <code>recvmmsg</code> / GRO read.</p>
+        <ul class="small">
+          <li>Median is one datagram (~<strong>1217 B</strong>).</li>
+          <li>The tail coalesces up to ~<strong>21 KB</strong> into a single read on bulk download.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>UDP datagram size received, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_received/explore">GLAM: udp_datagram_size_received</a>.</figcaption>
   </section>
 
   <!-- 5. Multi-message syscalls -->
@@ -253,10 +347,22 @@
   const D = window.DECK_DATA;
   Flame.register('cover-flame', D.flame);
 
-  Charts.register('c-gro', (el) => Charts.bar(el, {
-    x: D.groSegments.p, yName: 'datagrams / read', barLabels: true,
-    series: [{ name: 'datagrams', data: D.groSegments.n }],
+  const bytesFmt = (v) => (v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : v);
+  const segCount = (id, data, yName) => Charts.register(id, (el) => Charts.bar(el, {
+    x: D.seg.p, yName, barLabels: true,
+    series: [{ name: 'segments', data }],
   }));
+  const segBytes = (id, data) => Charts.register(id, (el) => Charts.bar(el, {
+    x: D.seg.p, yName: 'bytes', barLabels: true,
+    yFormatter: bytesFmt, barLabelFormatter: (p) => bytesFmt(p.value),
+    series: [{ name: 'bytes', data }],
+  }));
+  segCount('c-seg-sent', D.seg.segmentsSent, 'segments / send');
+  segCount('c-seg-recv', D.seg.segmentsRecv, 'segments / read');
+  segBytes('c-segsize-sent', D.seg.segSizeSent);
+  segBytes('c-segsize-recv', D.seg.segSizeRecv);
+  segBytes('c-size-sent', D.seg.sizeSent);
+  segBytes('c-size-recv', D.seg.sizeRecv);
 
   Charts.register('c-ecn', (el) => Charts.donut(el, {
     data: D.ecnPath, centerValue: '58%', centerLabel: 'ECN capable',
