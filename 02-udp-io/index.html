@@ -41,18 +41,21 @@
   <!-- 3. The problem -->
   <section>
     <h2>Userspace QUIC on UDP is expensive</h2>
-    <div id="sq-single" style="margin-top:0.3em;"></div>
-    <ul>
-      <li><strong>One syscall per datagram</strong>, &lt; 1500 bytes each.</li>
-      <li>Default QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>) ACKs up to every second packet.</li>
-      <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (<a href="https://dl.acm.org/doi/10.1145/3098822.3098842">Langley et al., SIGCOMM 2017</a>; later optimized toward ~2&times;).</li>
-    </ul>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li><strong>One syscall per datagram</strong>, &lt; 1500 bytes each.</li>
+          <li>Default QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>) ACKs up to every second packet.</li>
+          <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (<a href="https://dl.acm.org/doi/10.1145/3098822.3098842">Langley et al., SIGCOMM 2017</a>; later optimized toward ~2&times;).</li>
+        </ul>
+      </div>
+      <div class="col-40"><div id="sq-single" style="margin-top:0.6em;"></div></div>
+    </div>
   </section>
 
   <!-- 4. Segmentation offload -->
   <section>
     <h2>Segmentation offload: GSO / GRO</h2>
-    <div id="sq-gso" style="margin:0.2em 0 0.4em;"></div>
     <div class="cols">
       <div class="col-60">
         <ul>
@@ -62,7 +65,8 @@
         </ul>
       </div>
       <div class="col-40">
-        <div class="chart short" id="c-gro"></div>
+        <div id="sq-gso"></div>
+        <div class="chart" id="c-gro" style="height:250px;"></div>
         <figcaption>Datagrams coalesced per receive syscall (GRO), Firefox for Android. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM</a>.</figcaption>
       </div>
     </div>
@@ -71,12 +75,16 @@
   <!-- 5. Multi-message syscalls -->
   <section>
     <h2>Multi-message syscalls</h2>
-    <div id="sq-mmsg" style="margin-top:0.3em;"></div>
-    <ul>
-      <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>; macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented, <a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
-      <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
-      <li><strong>~11%</strong> improvement on an OS loopback transfer (<a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
-    </ul>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Linux <code>sendmmsg</code> / <code>recvmmsg</code>; macOS <code>sendmsg_x</code> / <code>recvmsg_x</code> (Apple, undocumented, <a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
+          <li>One syscall moves a <strong>batch</strong> of independent datagrams.</li>
+          <li><strong>~11%</strong> improvement on an OS loopback transfer (<a href="https://github.com/quinn-rs/quinn/pull/1993">quinn#1993</a>).</li>
+        </ul>
+      </div>
+      <div class="col-40"><div id="sq-mmsg" style="margin-top:0.6em;"></div></div>
+    </div>
   </section>
 
   <!-- 6. quinn-udp platforms -->
@@ -129,10 +137,10 @@
     </div>
   </section>
 
-  <!-- 10. OS idiosyncrasies -->
+  <!-- 10a. OS idiosyncrasies: Windows & macOS -->
   <section>
-    <h2>OS idiosyncrasies (field notes)</h2>
-    <div class="cols tiny" style="gap:1.4em;">
+    <h2>OS idiosyncrasies (field notes): Windows &amp; macOS</h2>
+    <div class="cols" style="gap:1.6em;">
       <div>
         <p class="tag">Windows</p>
         <ul>
@@ -140,18 +148,29 @@
           <li>USO raised P95 loss to ~6.5%, rolled back (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1979279">bug 1979279</a>).</li>
           <li>USO crashed a user&rsquo;s network driver (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978821">bug 1978821</a>).</li>
         </ul>
+      </div>
+      <div>
         <p class="tag">macOS</p>
         <ul>
           <li>No NIC offload, but the undocumented <code>sendmsg_x</code>/<code>recvmsg_x</code> are now enabled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2028797">bug 2028797</a>): a dedicated background thread exercises them once against localhost sockets before we trust them (<a href="https://searchfox.org/mozilla-central/source/netwerk/socket/neqo_glue/AppleFastDatapathProbe.cpp">AppleFastDatapathProbe</a>).</li>
           <li>10.15 reports packets that are neither v4 nor v6 (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1987606">bug 1987606</a>, <a href="https://github.com/quinn-rs/quinn/pull/2387">quinn#2387</a>).</li>
         </ul>
       </div>
+    </div>
+  </section>
+
+  <!-- 10b. OS idiosyncrasies: Linux & Android -->
+  <section>
+    <h2>OS idiosyncrasies (field notes): Linux &amp; Android</h2>
+    <div class="cols" style="gap:1.6em;">
       <div>
         <p class="tag">Linux</p>
         <ul>
           <li>GSO support must be probed at runtime; sandbox tweaks needed (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a>).</li>
           <li>GSO can pass the probe but fail at send with <code>EIO</code>, resend individually (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049334">bug 2049334</a>, <a href="https://github.com/quinn-rs/quinn/issues/2399">quinn#2399</a>).</li>
         </ul>
+      </div>
+      <div>
         <p class="tag">Android</p>
         <ul>
           <li>x86 dispatches via <code>socketcall</code>; seccomp blocks it (<a href="https://github.com/quinn-rs/quinn/pull/1966">quinn#1966</a>).</li>
@@ -177,12 +196,14 @@
   <!-- 11b. Benchmark numbers (artificial) -->
   <section>
     <h2>Where the stack is today</h2>
-    <div class="cols" style="gap:1em; margin-top:0.3em;">
-      <div class="stat"><span class="num">683</span><span class="lbl">MiB/s download<br>100 MB, 1 conn, ~146 ms</span></div>
-      <div class="stat"><span class="num">656</span><span class="lbl">MiB/s upload<br>100 MB, 1 conn, ~152 ms</span></div>
-      <div class="stat"><span class="num">~38k</span><span class="lbl">requests/s<br>10k parallel, 1-byte</span></div>
+    <div style="display:flex; flex-direction:column; justify-content:center; min-height:74%;">
+      <div class="cols" style="gap:1em;">
+        <div class="stat"><span class="num">683</span><span class="lbl">MiB/s download<br>100 MB, 1 conn, ~146 ms</span></div>
+        <div class="stat"><span class="num">656</span><span class="lbl">MiB/s upload<br>100 MB, 1 conn, ~152 ms</span></div>
+        <div class="stat"><span class="num">~38k</span><span class="lbl">requests/s<br>10k parallel, 1-byte</span></div>
+      </div>
+      <p class="small muted" style="margin-top:2.4em;">~5.7 / 5.5 Gbit/s single-connection. <strong>These are artificial benchmarks</strong>: neqo&rsquo;s criterion suite over loopback (127.0.0.1), one machine, no real network and no browser, so an upper bound, not field performance. Source: <a href="https://github.com/mozilla/neqo/pull/3768">neqo#3768 benchmark run</a>.</p>
     </div>
-    <p class="small muted" style="margin-top:1em;">~5.7 / 5.5 Gbit/s single-connection. <strong>These are artificial benchmarks</strong>: neqo&rsquo;s criterion suite over loopback (127.0.0.1), one machine, no real network and no browser, so an upper bound, not field performance. Source: <a href="https://github.com/mozilla/neqo/pull/3768">neqo#3768 benchmark run</a>.</p>
   </section>
 
   <!-- 11c. Real-world impact -->
@@ -252,24 +273,24 @@
 
   Flame.registerFlame('c-flame', D.flameFull);
 
-  const AKN = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }];
+  const AKN = [{ id: 'A', label: 'QUIC' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }];
   Seq.register('sq-single', (el) => Seq.render(el, { actors: AKN, messages: [
-    { from: 'A', to: 'K', text: 'sendmsg (1 datagram)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
-    { from: 'A', to: 'K', text: 'sendmsg (1 datagram)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
+    { from: 'A', to: 'K', text: 'sendmsg (1)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
+    { from: 'A', to: 'K', text: 'sendmsg (1)' }, { from: 'K', to: 'N', text: '1 packet', dashed: true },
     { note: 'one syscall per datagram', over: ['A', 'N'] },
   ] }));
-  const AKNW = [{ id: 'A', label: 'QUIC (user space)' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }, { id: 'W', label: 'wire' }];
+  const AKNW = [{ id: 'A', label: 'QUIC' }, { id: 'K', label: 'kernel' }, { id: 'N', label: 'NIC' }, { id: 'W', label: 'wire' }];
   Seq.register('sq-gso', (el) => Seq.render(el, { actors: AKNW, messages: [
-    { from: 'A', to: 'K', text: 'sendmsg (64 KiB buffer)', hl: true },
-    { from: 'K', to: 'N', text: 'one big buffer', dashed: true },
-    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
-    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
-    { from: 'N', to: 'W', text: 'MSS packet', dashed: true },
-    { note: 'one syscall in; the kernel or the NIC segments into MSS packets', over: ['A', 'W'] },
+    { from: 'A', to: 'K', text: 'sendmsg (64 KiB)', hl: true },
+    { from: 'K', to: 'N', text: 'big buffer', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { from: 'N', to: 'W', text: 'packet', dashed: true },
+    { note: 'kernel or NIC segments into MSS packets', over: ['A', 'W'] },
   ] }));
   Seq.register('sq-mmsg', (el) => Seq.render(el, { actors: AKNW, messages: [
-    { from: 'A', to: 'K', text: 'sendmmsg (N datagrams)', hl: true },
-    { from: 'K', to: 'N', text: 'batch of datagrams', dashed: true },
+    { from: 'A', to: 'K', text: 'sendmmsg (N)', hl: true },
+    { from: 'K', to: 'N', text: 'batch', dashed: true },
     { from: 'N', to: 'W', text: 'packet', dashed: true },
     { from: 'N', to: 'W', text: 'packet', dashed: true },
     { from: 'N', to: 'W', text: 'packet', dashed: true },
