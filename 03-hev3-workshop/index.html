@@ -193,7 +193,7 @@ fn connection_attempt_delay() {
   <section>
     <h2>3. Winning attempt index</h2>
     <div class="chart" id="c-winidx"></div>
-    <figcaption>Which staggered attempt actually connected. <strong>84%</strong> of connections win on the very first attempt; the racing tail is thin. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM: winning_attempt_index</a>.</figcaption>
+    <figcaption>Which staggered attempt actually connected. <strong>84%</strong> of connections win on the very first attempt; few need a later one. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM: winning_attempt_index</a>.</figcaption>
   </section>
 
   <!-- M4. connection_attempt_count -->
@@ -260,7 +260,7 @@ fn connection_attempt_delay() {
   <section>
     <h2>How Firefox deviates from the draft</h2>
     <ul>
-      <li><strong>Attempt delay</strong>: the draft recommends a flat 250 ms. Firefox uses a smaller 50 ms base with a <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), so the second attempt fires far sooner while the tail still backs off.</li>
+      <li><strong>Attempt delay</strong>: the draft recommends a flat 250 ms. Firefox uses a smaller 50 ms base with a <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), so the second attempt fires far sooner while later attempts still back off.</li>
       <li><strong>Resolution delay</strong>: draft 50 ms, Firefox <strong>25 ms</strong> (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
       <li><strong>Interleaving</strong>: the draft interleaves address families; the library also interleaves <strong>protocol variants</strong>, so QUIC and the other family are both reached early. A library choice, not fed back into the draft.</li>
     </ul>
@@ -269,7 +269,7 @@ fn connection_attempt_delay() {
 
   <!-- 11b. The tail -->
   <section>
-    <h2>The tail: real-world edge cases</h2>
+    <h2>Real-world edge cases</h2>
     <ul class="small">
       <li>Connection <strong>coalescing</strong>: we registered only the winning IP, not all resolved addresses (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051851">bug 2051851</a>).</li>
       <li><strong>DNS fallback</strong>: no fallback to native DNS when all DoH-resolved addresses fail (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2051614">bug 2051614</a>); a transient DNS failure sticks across reload (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2052794">2052794</a>).</li>

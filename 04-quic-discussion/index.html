@@ -63,7 +63,7 @@
           <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
           <li><strong>29%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, a wasted round trip.</li>
           <li>HTTPS records (RFC 9460) are ~15% adopted; ~70% one CDN&rsquo;s defaults (<a href="https://arxiv.org/html/2403.15672v2">IMC 2024</a>).</li>
-          <li><strong>ECH depends on the HTTPS record</strong>: now a privacy lever, not just perf.</li>
+          <li><strong>ECH depends on the HTTPS record</strong>: now also a privacy feature, not just performance.</li>
         </ul>
       </div>
       <div class="col-40">
@@ -89,18 +89,18 @@
   <section>
     <h2>Open questions</h2>
     <ul class="small">
-      <li>Which denominator should we rally around, and is the <strong>plateau</strong> the real worry?</li>
+      <li>Which denominator should we agree on, and is the <strong>plateau</strong> the real worry?</li>
       <li>Is the fast-internet throughput regression the ceiling on QUIC growth?</li>
-      <li>Can QUIC v2 ever escape its coordination trap? Does a major library shipping no v2 matter?</li>
-      <li>Deprecate Alt-Svc for HTTPS RR, or bridge? Is <strong>ECH</strong> the lever that finally forces HTTPS-RR publication?</li>
-      <li>Default posture for optimistic QUIC, and who eats the fallback tax on UDP-hostile networks?</li>
+      <li>Can QUIC v2 ever get deployed? Does a major library shipping no v2 matter?</li>
+      <li>Deprecate Alt-Svc for HTTPS RR, or bridge the two? Is <strong>ECH</strong> the reason sites finally publish HTTPS records?</li>
+      <li>What should the default be for optimistic QUIC, and who pays the fallback cost on UDP-hostile networks?</li>
     </ul>
   </section>
 
   <!-- 8. Closing -->
   <section class="divider" data-background-color="#20123a">
     <h2 style="color:#ffffff;">Discussion</h2>
-    <p class="small" style="color:#b3adc4;">The denominator, the fast-internet regression, QUIC v2&rsquo;s coordination trap, Alt-Svc vs HTTPS-RR, optimistic QUIC.</p>
+    <p class="small" style="color:#b3adc4;">The denominator, the fast-internet regression, why QUIC v2 stays undeployed, Alt-Svc vs HTTPS-RR, optimistic QUIC.</p>
     <p class="small" style="color:#8f8f9d;">mail@max-inden.de &middot; @mxinden</p>
   </section>
 

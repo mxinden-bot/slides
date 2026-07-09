@@ -97,7 +97,7 @@
       <li>A single, long-lived <strong>64 KiB receive buffer</strong> shared across all QUIC connections (<a href="https://github.com/mozilla/neqo/blob/main/neqo-udp/src/lib.rs">neqo-udp</a>).</li>
       <li>No per-datagram allocation on the hot receive path.</li>
       <li>The iterator hands out borrowed slices of that one buffer; Rust&rsquo;s <strong>borrow checker</strong> proves there is no aliasing or use-after-free, at compile time.</li>
-      <li>Significant CPU-time reduction on large transfers: crypto now rivals UDP I/O in the profile, instead of being dwarfed by per-datagram overhead.</li>
+      <li>Large transfers spend much less CPU: in the profile, crypto is now about as costly as UDP I/O, no longer far below the per-datagram overhead.</li>
     </ul>
   </section>
 
@@ -196,7 +196,7 @@
         <ul class="small">
           <li><a href="https://protosaur.dev/perf-reports/142-vs-143-udp-throughput.html">Fast UDP I/O</a>;</li>
           <li><strong>ECN</strong> plus alternative backoff (gentler than a loss response);</li>
-          <li>spurious-recovery and loss-accounting fixes.</li>
+          <li>spurious-recovery and <a href="https://github.com/mozilla/neqo/pull/3520">loss-accounting</a> fixes.</li>
         </ul>
       </div>
     </div>
