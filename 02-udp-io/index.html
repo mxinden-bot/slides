@@ -46,7 +46,7 @@
         <ul>
           <li><strong>One syscall per datagram</strong>, &lt; 1500 bytes each.</li>
           <li>Default QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>) ACKs up to every second packet.</li>
-          <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (<a href="https://static.googleusercontent.com/media/research.google.com/fr//pubs/archive/46403.pdf">Langley et al., SIGCOMM 2017</a>; later optimized toward ~2&times;).</li>
+          <li>Early QUIC servers spent <strong>~3.5&times;</strong> the CPU cycles per byte of TLS/TCP (<a href="https://static.googleusercontent.com/media/research.google.com/fr//pubs/archive/46403.pdf">Langley et al., SIGCOMM 2017</a>).</li>
         </ul>
       </div>
       <div class="col-40"><div id="sq-single" style="margin-top:0.6em;"></div></div>
@@ -61,7 +61,6 @@
         <ul>
           <li>Linux <strong>GSO/GRO</strong>, Windows <strong>USO/URO</strong>: one syscall carries a big buffer; the kernel or NIC <strong>splits</strong> it on send (GSO) and <strong>coalesces</strong> many datagrams on receive (GRO) (<a href="https://lwn.net/Articles/752184/">LWN</a>).</li>
           <li>One syscall then moves many packets instead of one, cutting the per-datagram cost.</li>
-          <li>The next slides measure, from real telemetry, how much batching actually happens on send and on receive.</li>
         </ul>
       </div>
       <div class="col-40"><div id="sq-gso" style="margin-top:0.6em;"></div></div>
