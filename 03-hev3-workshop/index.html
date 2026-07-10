@@ -256,6 +256,35 @@ fn connection_attempt_delay() {
     <figcaption>Same SvcParams, split by DoH vs the OS resolver. DoH: 98/96/96/32% (h3/v4/v6/ECH). OS resolver: 96/90/89/<strong>52%</strong>. ECH shows up more over the OS resolver. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
+  <!-- 10b. The wasted round trip (savearoundtrip) -->
+  <section>
+    <h2>The wasted round trip</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10c. Save a round trip / savearoundtrip.com -->
+  <section>
+    <h2>Save a round trip</h2>
+    <ul>
+      <li>Many sites send <code>Alt-Svc: h3</code> but publish <strong>no HTTPS record</strong>.</li>
+      <li>Every first visit then wastes a round trip: connect over HTTP/2, read the header, upgrade to HTTP/3 only <em>next</em> time.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code> and the client goes straight to QUIC on connection #1.</li>
+      <li>Bonus: the HTTPS record is the <strong>only</strong> way to deliver ECH.</li>
+    </ul>
+    <p style="margin-top:0.7em; font-size:1.1em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: check your domain.</p>
+  </section>
+
   <!-- 11. How Firefox deviates from the draft -->
   <section>
     <h2>How Firefox deviates from the draft</h2>
@@ -271,11 +300,14 @@ fn connection_attempt_delay() {
   <section>
     <h2>Real-world edge cases</h2>
     <ul class="small">
-      <li>Web standards: <code>dnsLookupEnd</code> no longer matches the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
-      <li>DNS: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>) for negative answers over DoH (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>).</li>
-      <li>QUIC 0-RTT: share one 0-RTT attempt across the requests racing on it (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2033495">bug 2033495</a>).</li>
+      <li>Racing an <strong>unreachable IPv6</strong> address first added up to <strong>40 ms</strong> on cold DoH connections (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044951">bug 2044951</a>).</li>
+      <li><strong>IPv6 blackholes</strong>: an h3 path that silently drops packets needed explicit handling (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1993300">bug 1993300</a>).</li>
+      <li><strong>0-RTT</strong>: a rejected 0-RTT connection was wrongly kept as usable (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040900">bug 2040900</a>); the fallback when 0-RTT loses the race had to be defined (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1994321">bug 1994321</a>).</li>
+      <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
+      <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
+      <li><strong>Web standards</strong>: <code>dnsLookupEnd</code> stopped matching the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
     </ul>
-    <p class="small muted">From the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a> dependency tree: 11 open of 81.</p>
+    <p class="small muted">Gotchas from the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a> and its 81 dependencies, most now fixed.</p>
   </section>
 
   <!-- 12. Lessons -->
@@ -304,6 +336,7 @@ fn connection_attempt_delay() {
 <script src="../lib/reveal/plugin/zoom/zoom.js"></script>
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
@@ -375,6 +408,20 @@ fn connection_attempt_delay() {
       { name: 'OS resolver', data: D.rrByResolver.native },
     ],
   }));
+
+  // Alt-Svc vs HTTPS-record connection flows (savearoundtrip)
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
