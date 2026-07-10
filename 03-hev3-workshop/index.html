@@ -39,8 +39,8 @@
         </ul>
       </div>
       <div class="col-40">
-        <p>Multiplied out, that is dozens of possible ways to open one connection. Pick wrong and you pay a round trip, or fail on a broken path.</p>
-        <p>Firefox now makes that choice with a single state machine, built on <strong>Happy Eyeballs v3</strong>.</p>
+        <p>Multiplied out, that is dozens of possible ways to open one connection, and some paths are slow, blocked, or broken.</p>
+        <p>You cannot know in advance which one works. Trying them one at a time means waiting out each stall before the next, and a broken path can hang for seconds.</p>
         <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
       </div>
     </div>
