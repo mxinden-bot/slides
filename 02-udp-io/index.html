@@ -31,7 +31,7 @@
     <ul>
       <li>~<strong>20%</strong> of Firefox desktop HTTP requests are HTTP/3 over QUIC (UDP), already <strong>~28%</strong> on Android Nightly (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>).</li>
       <li>We expect that to keep <strong>growing</strong>: broadly, and specifically through <strong>Happy Eyeballs v3</strong>.</li>
-      <li>Firefox&rsquo;s QUIC implementation lives in <strong>user space</strong>, so every datagram has to cross the boundary between the application and the OS kernel, many times per connection.</li>
+      <li>Firefox&rsquo;s QUIC implementation lives in <strong>user space</strong>, so every datagram crosses the boundary between the application and the OS kernel.</li>
       <li>We replaced Firefox&rsquo;s dated <strong>NSPR</strong> UDP I/O (one <code>sendto</code>/<code>recvfrom</code> per datagram) with a modern Rust stack.</li>
       <li>Goal: close the gap to heavily optimized, in-kernel TCP.</li>
     </ul>
