@@ -119,6 +119,7 @@
       <li>No dependency on Firefox; embeds in Necko&rsquo;s C++ event loop.</li>
       <li>Permissive license (MIT OR Apache-2.0). Input and contributions welcome.</li>
       <li>Every scenario is a plain unit test, so behaviour is easy to pin down and easy to review.</li>
+      <li>Spec-conformant on <strong>multi-CDN</strong>: each HTTPS-record <code>TargetName</code> is resolved independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>). A heuristic that broke multi-CDN setups was reverted, with the spec&rsquo;s example added as a test (<a href="https://github.com/mozilla/happy-eyeballs/pull/104">PR 104</a>).</li>
     </ul>
     <p class="small muted"><a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
