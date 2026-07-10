@@ -76,8 +76,8 @@
         <p>How many segments one <code>sendmsg</code> carries via GSO.</p>
         <ul class="small">
           <li>Median <strong>1</strong>, but the tail batches: P99 <strong>5</strong>, P99.9 <strong>10</strong> segments per send.</li>
-          <li>GSO packs several datagrams into one syscall.</li>
-          <li>Still smaller than the receive-side coalescing.</li>
+          <li>Firefox is a client: mostly downloading, so most sends are small <strong>ACKs</strong> with nothing to batch.</li>
+          <li>GSO batches only when there is bulk data to send (uploads).</li>
         </ul>
       </div>
     </div>
