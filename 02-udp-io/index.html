@@ -76,13 +76,13 @@
       <div class="col-40">
         <p>How many segments one <code>sendmsg</code> carries via GSO.</p>
         <ul class="small">
-          <li>Mostly <strong>1</strong>: single small packets and ACKs dominate.</li>
-          <li>The tail batches (P99.9 is <strong>3</strong>), where GSO runs: Linux and Android.</li>
-          <li>Send-side batching is modest; the bigger win is on receive.</li>
+          <li>Median <strong>1</strong>, but the tail batches: P99 <strong>5</strong>, P99.9 <strong>10</strong> segments per send.</li>
+          <li>GSO packs several datagrams into one syscall.</li>
+          <li>Still smaller than the receive-side coalescing.</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP segments per send syscall, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_sent/explore">GLAM: udp_datagram_segments_sent</a>.</figcaption>
+    <figcaption>UDP segments per send syscall, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_sent/explore">GLAM: udp_datagram_segments_sent</a>.</figcaption>
   </section>
 
   <!-- 4b. Segments per receive syscall (GRO) -->
@@ -93,13 +93,13 @@
       <div class="col-40">
         <p>How many datagrams one <code>recvmmsg</code> / GRO read returns.</p>
         <ul class="small">
-          <li>Median <strong>1</strong>, but the busy tail coalesces <strong>15+</strong> into a single read.</li>
+          <li>Median <strong>1</strong>, but the tail coalesces heavily: P95 <strong>10</strong>, P99 <strong>27</strong>, P99.9 <strong>53</strong> per read.</li>
           <li>This is where receive offload pays off: bulk download.</li>
           <li>Fewer syscalls per byte on the hot receive path.</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP segments per receive syscall, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM: udp_datagram_segments_received</a>.</figcaption>
+    <figcaption>UDP segments per receive syscall, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_received/explore">GLAM: udp_datagram_segments_received</a>.</figcaption>
   </section>
 
   <!-- 4c. Sent segment size -->
@@ -108,14 +108,14 @@
     <div class="cols">
       <div class="col-60"><div class="chart" id="c-segsize-sent" style="height:430px;"></div></div>
       <div class="col-40">
-        <p>The GSO segment size on send. <strong>0</strong> means a single, unsegmented datagram.</p>
+        <p>The GSO segment size chosen on send.</p>
         <ul class="small">
-          <li>Half of sends are single datagrams (<strong>0</strong>): ACKs and control.</li>
-          <li>When GSO batches, segments reach the path MTU (~<strong>1327 to 1448 B</strong>).</li>
+          <li>The median is small (~<strong>33 to 47 B</strong>): ACKs and control writes.</li>
+          <li>When GSO batches bulk data, segments reach the path MTU (~<strong>1217 B</strong>).</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP datagram segment size sent, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_sent/explore">GLAM: udp_datagram_segment_size_sent</a>.</figcaption>
+    <figcaption>UDP datagram segment size sent, bytes, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_sent/explore">GLAM: udp_datagram_segment_size_sent</a>.</figcaption>
   </section>
 
   <!-- 4d. Received segment size -->
@@ -131,7 +131,7 @@
         </ul>
       </div>
     </div>
-    <figcaption>UDP datagram segment size received, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a>.</figcaption>
+    <figcaption>UDP datagram segment size received, bytes, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a>.</figcaption>
   </section>
 
   <!-- 4e. Bytes per send syscall -->
@@ -142,12 +142,12 @@
       <div class="col-40">
         <p>Total bytes handed to one <code>sendmsg</code>.</p>
         <ul class="small">
-          <li>Median is tiny (an ACK or control write, ~<strong>47 B</strong>).</li>
-          <li>The tail packs several segments into one GSO syscall (P99.9 ~<strong>7 KB</strong>).</li>
+          <li>Median is tiny (an ACK or control write, ~<strong>43 B</strong>).</li>
+          <li>The tail packs several segments into one GSO syscall (P99 ~<strong>5 KB</strong>, P99.9 ~<strong>12 KB</strong>).</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP datagram size sent, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_sent/explore">GLAM: udp_datagram_size_sent</a>.</figcaption>
+    <figcaption>UDP datagram size sent, bytes, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_sent/explore">GLAM: udp_datagram_size_sent</a>.</figcaption>
   </section>
 
   <!-- 4f. Bytes per receive syscall -->
@@ -159,11 +159,11 @@
         <p>Total bytes returned by one <code>recvmmsg</code> / GRO read.</p>
         <ul class="small">
           <li>Median is one datagram (~<strong>1217 B</strong>).</li>
-          <li>The tail coalesces up to ~<strong>21 KB</strong> into a single read on bulk download.</li>
+          <li>The tail coalesces a lot into one read: P95 ~<strong>13 KB</strong>, P99 ~<strong>31 KB</strong>, P99.9 ~<strong>63 KB</strong>.</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP datagram size received, bytes, Firefox Nightly. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_received/explore">GLAM: udp_datagram_size_received</a>.</figcaption>
+    <figcaption>UDP datagram size received, bytes, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_size_received/explore">GLAM: udp_datagram_size_received</a>.</figcaption>
   </section>
 
   <!-- 5. Multi-message syscalls -->

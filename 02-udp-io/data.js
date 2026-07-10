@@ -7,16 +7,17 @@ window.DECK_DATA = {
   glam: 'https://glam.telemetry.mozilla.org/fog/probe/',
 
   // REAL GLAM: the six networking_http_3_udp_datagram_* distributions, Firefox
-  // Nightly (os:*), percentiles P50/P75/P95/P99/P99.9. Counts are integers;
-  // sizes are bytes. Fenix is not exposed on this product, so Nightly desktop.
+  // Nightly, filtered to LINUX. GSO/GRO are off on Windows (our biggest share),
+  // so os:* buries the offload; Linux is where it runs. Percentiles
+  // P50/P75/P95/P99/P99.9; counts are integers, sizes are bytes.
   seg: {
     p: ['P50', 'P75', 'P95', 'P99', 'P99.9'],
-    segmentsSent:    [1, 1, 1, 1, 3],
-    segmentsRecv:    [1, 1, 2, 15, 16],
-    segSizeSent:     [0, 45, 1327, 1448, 1448],
-    segSizeRecv:     [1217, 1217, 1271, 1448, 1448],
-    sizeSent:        [47, 1217, 1217, 2435, 7193],
-    sizeRecv:        [1217, 1217, 1448, 4664, 21247],
+    segmentsSent:    [1, 1, 2, 5, 10],
+    segmentsRecv:    [1, 2, 10, 27, 53],
+    segSizeSent:     [33, 47, 1217, 1217, 1217],
+    segSizeRecv:     [1217, 1217, 1386, 1448, 1448],
+    sizeSent:        [43, 279, 2435, 5086, 12098],
+    sizeRecv:        [1217, 2435, 13193, 31378, 62757],
   },
 
   // REAL GLAM networking_http_3_upload_throughput (Mbps, release, per version).
