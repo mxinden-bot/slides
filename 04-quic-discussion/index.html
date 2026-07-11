@@ -72,9 +72,7 @@
     <ul class="small">
       <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
       <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
-      <li>An enterprise-policy switch to re-enable h3 in managed setups is requested (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
     </ul>
-    <p class="small muted">So even where UDP/443 is open, interception still costs QUIC.</p>
   </section>
 
   <!-- 4. New protocols that could grow the share -->
