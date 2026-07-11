@@ -128,7 +128,7 @@
         <ul class="small">
           <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
           <li><strong>29%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, i.e. don&rsquo;t do HTTP/3 on the first connection.</li>
-          <li>HTTPS records (RFC 9460) are ~15% adopted; ~70% one CDN&rsquo;s defaults (<a href="https://arxiv.org/html/2403.15672v2">IMC 2024</a>).</li>
+          <li>HTTPS records (RFC 9460): <strong>&gt;20%</strong> of the top-1M publish one, but mostly one CDN&rsquo;s default (&gt;70% Cloudflare) (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>).</li>
           <li><strong>ECH depends on the HTTPS record</strong>: now also a privacy feature, not just performance.</li>
           <li>But some networks and VPNs <strong>strip the HTTPS record</strong> (or just its ECH parameter) to keep the SNI visible, which can take the h3 hint with it (<a href="https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-block-TLS-1-3-Encrypted-Client-Hello-ECH-in/ta-p/328324">FortiGate</a>, <a href="https://secure.cisco.com/secure-firewall/docs/encrypted-client-hello-defense-strategies-how-cisco-secure-firewall-tackles-ech">Cisco</a>).</li>
         </ul>
