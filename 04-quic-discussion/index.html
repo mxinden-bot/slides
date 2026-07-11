@@ -28,7 +28,7 @@
   <section>
     <h2>Is HTTP/3 really &ldquo;beyond 30%&rdquo;?</h2>
     <div class="chart" id="c-denom"></div>
-    <figcaption>HTTP/3 &ldquo;share&rdquo; by vantage point. Sources: <a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>, <a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>, <a href="https://en.wikipedia.org/wiki/QUIC">Google / backbone</a>, <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">Meta</a>.</figcaption>
+    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point. Firefox desktop requests <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Chrome&#8596;Google connections <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
   </section>
 
   <!-- 3. The plateau -->
@@ -36,9 +36,9 @@
     <h2>The neutral number has plateaued</h2>
     <ul>
       <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
-      <li>It runs higher by other measures: advertised <em>support</em> (W3Techs ~39%), hyperscaler first-party traffic (Google ~42%, Meta ~75%); backbone bytes far lower (~6%).</li>
+      <li>Firefox&rsquo;s own view is lower: HTTP/3 is <strong>~17%</strong> of desktop requests, <strong>~25%</strong> on Android (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>).</li>
+      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Chrome&#8596;Google <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta ~75%).</li>
       <li>Requests vs connections is a real confound: HTTP/3 multiplexes many requests per connection.</li>
-      <li>&ldquo;<a href="https://dl.acm.org/doi/10.1145/3589334.3645323">QUIC is not Quick Enough over Fast Internet</a>&rdquo;: up to <strong>-45%</strong> throughput vs HTTP/2 above ~500 Mbps.</li>
     </ul>
   </section>
 
@@ -49,9 +49,34 @@
       <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
       <li>Measured deployment: <strong>&lt; 0.003%</strong> of QUICv1 domains; &lt; 0.013% grease the QUIC bit (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
       <li>Firefox&rsquo;s own telemetry agrees: of version-labeled QUIC handshakes in Nightly, <strong>v2 is a rounding error</strong>, v1 carries essentially all of them (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM: http_3_quic_version</a>).</li>
-      <li><strong>No feature payoff</strong>, so no individual incentive. neqo supports v2 (compatible upgrade); <strong>quinn does not</strong>.</li>
+      <li><strong>No feature payoff</strong>, so no individual incentive: adoption across open-source stacks is uneven.</li>
       <li>Is greasing (RFC 9287) enough that v2 is unnecessary?</li>
     </ul>
+  </section>
+
+  <!-- 4b. QUIC v2 support matrix -->
+  <section>
+    <h2>Who ships QUIC v2?</h2>
+    <div class="cols" style="gap:1.8em;">
+      <div>
+        <p class="tag" style="color:var(--good);">Ships v2 (9 of 13)</p>
+        <ul class="small">
+          <li><a href="https://github.com/mozilla/neqo/blob/main/neqo-transport/src/version.rs">neqo</a>, <a href="https://github.com/google/quiche/blob/main/quiche/quic/core/quic_versions.h">google/quiche</a>, <a href="https://github.com/ngtcp2/ngtcp2/blob/main/lib/includes/ngtcp2/ngtcp2.h">ngtcp2</a></li>
+          <li><a href="https://github.com/microsoft/msquic/blob/main/src/inc/quic_versions.h">msquic</a>, <a href="https://github.com/litespeedtech/lsquic/blob/master/src/liblsquic/lsquic_version.c">lsquic</a>, <a href="https://github.com/private-octopus/picoquic">picoquic</a></li>
+          <li><a href="https://github.com/aiortc/aioquic/blob/main/src/aioquic/quic/packet.py">aioquic</a>, <a href="https://github.com/quic-go/quic-go/blob/master/internal/protocol/version.go">quic-go</a>, <a href="https://github.com/ptrd/kwik">kwik</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag" style="color:var(--warn);">v1 only (4)</p>
+        <ul class="small">
+          <li><a href="https://github.com/quinn-rs/quinn/blob/main/quinn-proto/src/lib.rs">quinn</a> (Rust)</li>
+          <li><a href="https://github.com/cloudflare/quiche/blob/master/quiche/src/lib.rs">Cloudflare quiche</a></li>
+          <li><a href="https://github.com/facebook/mvfst/blob/main/quic/QuicConstants.h">Meta mvfst</a></li>
+          <li><a href="https://github.com/aws/s2n-quic/blob/main/quic/s2n-quic-transport/src/endpoint/version.rs">AWS s2n-quic</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">Presence of the <code>0x6b3343cf</code> codepoint in each stack&rsquo;s version table (surveyed Jul 2026). Telling detail: none of the four holdouts has an open tracking issue for v2. No one is asking.</p>
   </section>
 
   <!-- 5. Upgrade path -->
@@ -74,13 +99,31 @@
     <p class="small muted">Do we deprecate Alt-Svc, or bridge it (draft-thomson-httpbis-alt-svcb)?</p>
   </section>
 
+  <!-- 5b. The wasted round trip (savearoundtrip) -->
+  <section>
+    <h2>The wasted round trip</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+    <p class="small muted"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: check whether a domain publishes the record.</p>
+  </section>
+
   <!-- 6. Optimistic QUIC -->
   <section>
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
       <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
-      <li><a href="https://daniel.haxx.se/blog/2025/08/04/even-happier-eyeballs/">curl (Aug 2025)</a>: start QUIC, then TCP after <strong>200 ms</strong>, first wins.</li>
-      <li>Risk: on the <strong>1&ndash;5%</strong> of UDP-hostile networks, an optimistic attempt is strictly slower (timeout + TCP + TLS).</li>
+      <li><a href="https://daniel.haxx.se/blog/2025/08/04/even-happier-eyeballs/">curl 8.16 (Aug 2025)</a>: with HTTP/3 allowed, races QUIC then TCP after <strong>200 ms</strong>. Still an opt-in, not automatic.</li>
+      <li>Risk: where UDP is blocked, an optimistic attempt is strictly slower (timeout, then TCP + TLS). Chrome&rsquo;s QUIC failure rate runs <strong>~6&ndash;12%</strong> by region (<a href="https://blog.apnic.net/2025/06/17/a-quic-progress-report/">APNIC, 2025</a>).</li>
       <li>The right racing delay is unsettled and network-dependent.</li>
     </ul>
   </section>
@@ -90,17 +133,16 @@
     <h2>Open questions</h2>
     <ul class="small">
       <li>Which denominator should we agree on, and is the <strong>plateau</strong> the real worry?</li>
-      <li>Is the fast-internet throughput regression the ceiling on QUIC growth?</li>
       <li>Can QUIC v2 ever get deployed? Does a major library shipping no v2 matter?</li>
       <li>Deprecate Alt-Svc for HTTPS RR, or bridge the two? Is <strong>ECH</strong> the reason sites finally publish HTTPS records?</li>
       <li>What should the default be for optimistic QUIC, and who pays the fallback cost on UDP-hostile networks?</li>
+      <li>Is QUIC the best ground to deploy <strong>L4S</strong>? ECN is reflected natively in the ACKs, and the sender&rsquo;s response lives in user space.</li>
     </ul>
   </section>
 
   <!-- 8. Closing -->
   <section class="divider" data-background-color="#20123a">
     <h2 style="color:#ffffff;">Discussion</h2>
-    <p class="small" style="color:#b3adc4;">The denominator, the fast-internet regression, why QUIC v2 stays undeployed, Alt-Svc vs HTTPS-RR, optimistic QUIC.</p>
     <p class="small" style="color:#8f8f9d;">mail@max-inden.de &middot; @mxinden</p>
   </section>
 
@@ -113,6 +155,7 @@
 <script src="../lib/reveal/plugin/zoom/zoom.js"></script>
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
@@ -125,6 +168,18 @@
   Charts.register('c-discovery', (el) => Charts.donut(el, {
     data: D.discovery, centerValue: '29%', centerLabel: 'Alt-Svc only',
   }));
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
     hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
