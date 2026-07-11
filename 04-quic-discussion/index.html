@@ -71,10 +71,33 @@
     <ul class="small">
       <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
       <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
-      <li>Even then, interception still breaks QUIC: Facebook would not load behind <strong>Bitdefender</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, fixed in <a href="https://github.com/mozilla/neqo/releases/tag/v0.26.1">neqo v0.26.1</a>); sporadic Google Drive failures, Firefox only (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
       <li>An enterprise-policy switch to re-enable h3 in managed setups is requested (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
     </ul>
     <p class="small muted">So even where UDP/443 is open, interception still costs QUIC.</p>
+  </section>
+
+  <!-- 3d. Interception corrupts QUIC -->
+  <section>
+    <h2>When interception corrupts QUIC</h2>
+    <ul class="small">
+      <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
+      <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a new Initial-padding byte tripped its HTTP/3 inspection (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, next slide).</li>
+      <li><strong>Google Drive</strong> stalled when QUIC crypto frames were dropped and the h2 fallback was itself broken, Firefox only (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
+      <li><strong>Kaspersky</strong>: a spec-wrong <code>unknown_ca</code> alert on shutdown, despite a trusted root (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</li>
+    </ul>
+    <p class="small muted">Hard to root-cause, and users blame the browser, not the middlebox.</p>
+  </section>
+
+  <!-- 3e. Case study: SCONE vs Bitdefender -->
+  <section>
+    <h2>Case study: SCONE padding vs Bitdefender</h2>
+    <ul class="small">
+      <li>Firefox 150 defaulted the new <strong>SCONE</strong> feature off (<a href="https://github.com/mozilla/neqo/pull/3492">neqo#3492</a>), but the flag only gated advertising it, not the padding: every client still put the SCONE bytes <code>0xc8 0x13</code> in each Initial packet.</li>
+      <li>Facebook&rsquo;s edge reacted to the indicator. The QUIC handshake still completed (SCONE is on-path signaling), so <strong>h3 to h2 fallback never fired</strong>, and Bitdefender&rsquo;s inspection broke: facebook.com went blank.</li>
+      <li>Fixed by gating the padding on the connection parameter (<a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a>, v0.24.2, Firefox 150.0.1).</li>
+      <li>Padding is legitimately the endpoint&rsquo;s choice, and inspectors should tolerate it, but one new byte on the wire broke a popular middlebox and had to be rolled back. <strong>Ossification in miniature.</strong></li>
+    </ul>
+    <p class="small muted">Source: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-scone-protocol/">draft-ietf-scone-protocol</a>.</p>
   </section>
 
   <!-- 4. Why deploy QUIC -->
