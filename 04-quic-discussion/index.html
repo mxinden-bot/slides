@@ -26,7 +26,6 @@
 
   <!-- 2. Denominators -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Status quo</h2>
     <div class="chart" id="c-denom" style="height:450px;"></div>
     <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Chrome&#8596;Google connections <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
@@ -34,7 +33,6 @@
 
   <!-- 3. The plateau -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Different ways of measuring</h2>
     <ul>
       <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
@@ -46,7 +44,6 @@
 
   <!-- 3b. Security vendors recommend blocking QUIC -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Security vendors recommend blocking QUIC</h2>
     <ul>
       <li><strong>Palo Alto</strong> ships a &ldquo;Block QUIC&rdquo; knowledge-base article and best-practice block rules, so the firewall can decrypt the TCP fallback instead (<a href="https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClarCAC">KB</a>).</li>
@@ -59,7 +56,6 @@
 
   <!-- 3d. Interception corrupts QUIC -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>When interception corrupts QUIC</h2>
     <ul class="small">
       <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
@@ -72,7 +68,6 @@
 
   <!-- 3c. Firefox's own interception handling -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Firefox turns HTTP/3 off under interception</h2>
     <ul class="small">
       <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
@@ -84,7 +79,6 @@
 
   <!-- 4. New protocols that could grow the share -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>New use cases that need QUIC</h2>
     <p>HTTP/3-native protocols, each only practical over QUIC, that could pull adoption with them:</p>
     <div class="cols" style="gap:1.2em; margin-top:0.3em;">
@@ -106,7 +100,6 @@
 
   <!-- 5. Upgrade path -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
     <div class="cols">
       <div class="col-60">
@@ -128,7 +121,6 @@
 
   <!-- 5b. The wasted round trip (savearoundtrip) -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>The wasted round trip</h2>
     <div class="cols" style="gap:26px; align-items:flex-start;">
       <div>
@@ -147,7 +139,6 @@
 
   <!-- 6. Optimistic QUIC -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
       <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
@@ -159,7 +150,6 @@
 
   <!-- 4. QUIC v2 -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 2 &middot; Evolve without ossifying</p>
     <h2>QUIC v2: built to be deployed, barely deployed</h2>
     <ul>
       <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
@@ -172,7 +162,6 @@
 
   <!-- 4b. QUIC v2 support matrix -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 2 &middot; Evolve without ossifying</p>
     <h2>Who ships QUIC v2?</h2>
     <div class="cols" style="gap:1.8em;">
       <div>
