@@ -81,23 +81,11 @@
     <h2>When interception corrupts QUIC</h2>
     <ul class="small">
       <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
-      <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a new Initial-padding byte tripped its HTTP/3 inspection (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, next slide).</li>
+      <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a default-off feature (SCONE) still padded every Initial with the bytes <code>0xc8 0x13</code>, which tripped its HTTP/3 inspection. The handshake completed, so no h3-to-h2 fallback fired. Rolled back in <a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>).</li>
       <li><strong>Google Drive</strong> stalled when QUIC crypto frames were dropped and the h2 fallback was itself broken, Firefox only (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
       <li><strong>Kaspersky</strong>: a spec-wrong <code>unknown_ca</code> alert on shutdown, despite a trusted root (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</li>
     </ul>
     <p class="small muted">Hard to root-cause, and users blame the browser, not the middlebox.</p>
-  </section>
-
-  <!-- 3e. Case study: SCONE vs Bitdefender -->
-  <section>
-    <h2>Case study: SCONE padding vs Bitdefender</h2>
-    <ul class="small">
-      <li>Firefox 150 defaulted the new <strong>SCONE</strong> feature off (<a href="https://github.com/mozilla/neqo/pull/3492">neqo#3492</a>), but the flag only gated advertising it, not the padding: every client still put the SCONE bytes <code>0xc8 0x13</code> in each Initial packet.</li>
-      <li>Facebook&rsquo;s edge reacted to the indicator. The QUIC handshake still completed (SCONE is on-path signaling), so <strong>h3 to h2 fallback never fired</strong>, and Bitdefender&rsquo;s inspection broke: facebook.com went blank.</li>
-      <li>Fixed by gating the padding on the connection parameter (<a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a>, v0.24.2, Firefox 150.0.1).</li>
-      <li>Padding is legitimately the endpoint&rsquo;s choice, and inspectors should tolerate it, but one new byte on the wire broke a popular middlebox and had to be rolled back. <strong>Ossification in miniature.</strong></li>
-    </ul>
-    <p class="small muted">Source: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-scone-protocol/">draft-ietf-scone-protocol</a>.</p>
   </section>
 
   <!-- 4. Why deploy QUIC -->
