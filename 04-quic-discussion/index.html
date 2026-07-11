@@ -20,7 +20,7 @@
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Evolving HTTP/3 &amp; QUIC</h1>
-    <p class="subtitle">Two threads: grow the share, and evolve without ossifying.</p>
+    <p class="subtitle">Increase and evolve.</p>
     <span class="venue">HTTP Workshop 2026 &middot; discussion &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
 
@@ -28,15 +28,15 @@
   <section>
     <h2>Two threads</h2>
     <ol>
-      <li><strong>Grow the share.</strong> QUIC/HTTP/3 has plateaued near 30%. What moves it: discovery, optimistic racing, new use cases?</li>
-      <li><strong>Evolve it.</strong> Can QUIC still change, or is it ossifying? QUIC v2 was the test, and it barely deployed.</li>
+      <li><strong>Increase the share.</strong> QUIC/HTTP/3 sits near 30% and has plateaued. Discovery, optimistic racing, and new use cases could move it.</li>
+      <li><strong>Evolve the protocol.</strong> QUIC should keep changing over time. QUIC v2 tested that, and saw almost no deployment.</li>
     </ol>
     <p class="small muted">The rest of the talk follows these two threads.</p>
   </section>
 
   <!-- 2. Denominators -->
   <section>
-    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Grow the share</p>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Is HTTP/3 really &ldquo;beyond 30%&rdquo;?</h2>
     <div class="chart" id="c-denom"></div>
     <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point. Firefox desktop requests <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Chrome&#8596;Google connections <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
