@@ -174,8 +174,8 @@
     <h2>QUIC v2 is barely deployed</h2>
     <ul>
       <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
-      <li>Measured deployment: <strong>&lt; 0.003%</strong> of QUICv1 domains; &lt; 0.013% grease the QUIC bit (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
-      <li>Firefox&rsquo;s own telemetry agrees: of version-labeled QUIC handshakes in Nightly, <strong>v2 is a rounding error</strong>, v1 carries essentially all of them (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM: http_3_quic_version</a>).</li>
+      <li>Firefox telemetry: of version-labeled QUIC handshakes in Nightly, <strong>v2 is a rounding error</strong>, v1 carries essentially all of them (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM: http_3_quic_version</a>).</li>
+      <li>Wider measurement agrees: <strong>&lt; 0.003%</strong> of QUICv1 domains, &lt; 0.013% grease the QUIC bit (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
       <li><strong>No feature payoff</strong>, so no individual incentive: adoption across open-source stacks is uneven.</li>
       <li>Is greasing (RFC 9287) enough that v2 is unnecessary?</li>
     </ul>
