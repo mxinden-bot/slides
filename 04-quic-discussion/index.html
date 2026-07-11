@@ -44,7 +44,7 @@
 
   <!-- 3d. Interception corrupts QUIC -->
   <section>
-    <h2>When interception corrupts QUIC</h2>
+    <h2>&ldquo;Security&rdquo; software breaks QUIC</h2>
     <ul class="small">
       <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
       <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a default-off feature (SCONE) still padded every Initial with the bytes <code>0xc8 0x13</code>, which tripped its HTTP/3 inspection. The handshake completed, so no h3-to-h2 fallback fired. Rolled back in <a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>).</li>
