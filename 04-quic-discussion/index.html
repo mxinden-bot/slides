@@ -19,7 +19,7 @@
 
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
-    <h1>Evolving HTTP/3 &amp; QUIC</h1>
+    <h1>HTTP/3 &amp; QUIC</h1>
     <p class="subtitle">Increase and evolve.</p>
     <span class="venue">HTTP Workshop 2026 &middot; discussion &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
@@ -63,6 +63,18 @@
       <li>Not inherent: some boxes now inspect QUIC inline (<a href="https://secure.cisco.com/secure-firewall/docs/quic-decryption">Cisco</a>, Cloudflare One, FortiSASE).</li>
     </ul>
     <p class="small muted">A quiet ceiling on the share: these users are invisibly capped at HTTP/2.</p>
+  </section>
+
+  <!-- 3c. Firefox's own interception handling -->
+  <section>
+    <h2>Firefox turns HTTP/3 off under interception</h2>
+    <ul class="small">
+      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
+      <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
+      <li>Even then, interception still breaks QUIC: Facebook would not load behind <strong>Bitdefender</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>, fixed in <a href="https://github.com/mozilla/neqo/releases/tag/v0.26.1">neqo v0.26.1</a>); sporadic Google Drive failures, Firefox only (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
+      <li>An enterprise-policy switch to re-enable h3 in managed setups is requested (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
+    </ul>
+    <p class="small muted">So even where UDP/443 is open, interception still costs QUIC.</p>
   </section>
 
   <!-- 4. Why deploy QUIC -->
