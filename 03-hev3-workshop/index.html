@@ -124,7 +124,6 @@
       <li>No dependency on Firefox; embeds in Necko&rsquo;s C++ event loop.</li>
       <li>Permissive license (MIT OR Apache-2.0). Input and contributions welcome.</li>
       <li>Every scenario is a plain unit test, so behaviour is easy to pin down and easy to review.</li>
-      <li>Spec-conformant on <strong>multi-CDN</strong>: each HTTPS-record <code>TargetName</code> is resolved independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>). A heuristic that broke multi-CDN setups was reverted, with the spec&rsquo;s example added as a test (<a href="https://github.com/mozilla/happy-eyeballs/pull/104">PR 104</a>).</li>
     </ul>
     <p class="small muted"><a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
@@ -132,7 +131,7 @@
   <!-- 6. Testability -->
   <section>
     <h2>Testing the state machine</h2>
-    <pre><code class="language-rust" data-trim data-noescape>#[test]
+    <pre style="font-size:0.72em;"><code class="language-rust" data-trim data-noescape>#[test]
 fn connection_attempt_delay() {
     let (mut now, mut he) = setup();
     expect_initial_dns_queries(&mut he, now);
@@ -192,7 +191,7 @@ fn connection_attempt_delay() {
   <section>
     <h2>2. End-to-end time, failed</h2>
     <div class="chart" id="c-e2efail"></div>
-    <figcaption>When a connection fails, it fails fast (P75 <strong>50 ms</strong>, an immediate refusal) or grinds to the <strong>10 s</strong> cap. Few failures sit in between. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore">GLAM: end_to_end_time_failed</a>.</figcaption>
+    <figcaption>When a connection fails, it fails fast (P75 <strong>50 ms</strong>, an immediate refusal) or times out at the <strong>10 s</strong> cap. Few failures sit in between. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore">GLAM: end_to_end_time_failed</a>.</figcaption>
   </section>
 
   <!-- M3. winning_attempt_index -->
@@ -311,9 +310,10 @@ fn connection_attempt_delay() {
       <li><strong>0-RTT</strong>: a rejected 0-RTT connection was wrongly kept as usable (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040900">bug 2040900</a>); the fallback when 0-RTT loses the race had to be defined (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1994321">bug 1994321</a>).</li>
       <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
       <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
+      <li><strong>Multi-CDN</strong>: a non-standard HTTPS-RR/CNAME consistency check rejected legitimate multi-CDN records; reverted to resolve each <code>TargetName</code> independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>, <a href="https://github.com/mozilla/happy-eyeballs/pull/104">PR 104</a>).</li>
       <li><strong>Web standards</strong>: <code>dnsLookupEnd</code> stopped matching the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
     </ul>
-    <p class="small muted">Gotchas from the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a> and its 81 dependencies, most now fixed.</p>
+    <p class="small muted">Gotchas from the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a> and the <a href="https://github.com/mozilla/happy-eyeballs">happy-eyeballs crate</a>, most now fixed.</p>
   </section>
 
   <!-- 12. Lessons -->
