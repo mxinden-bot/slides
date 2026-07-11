@@ -28,7 +28,7 @@
   <section>
     <h2>Status quo</h2>
     <div class="chart" id="c-denom" style="height:450px;"></div>
-    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Chrome&#8596;Google connections <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
+    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
   </section>
 
   <!-- 3. The plateau -->
@@ -37,7 +37,7 @@
     <ul>
       <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
       <li>Firefox&rsquo;s own view is lower: HTTP/3 is <strong>~17%</strong> of desktop top-level page loads, <strong>~25%</strong> on Android (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>, the <code>perf.page_load</code> event).</li>
-      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Chrome&#8596;Google <a href="https://www.chromium.org/quic/">&gt;50%</a>, Meta ~75%).</li>
+      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Meta ~75%).</li>
       <li>Requests vs connections changes the answer, too: HTTP/3 multiplexes many requests per connection.</li>
     </ul>
   </section>
@@ -85,6 +85,7 @@
     <ul class="small">
       <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
       <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a default-off feature (SCONE) still padded every Initial with the bytes <code>0xc8 0x13</code>, which tripped its HTTP/3 inspection. The handshake completed, so no h3-to-h2 fallback fired. Rolled back in <a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>).</li>
+      <li><strong>CrowdStrike Falcon</strong> dropped QUIC crypto frames, so HTTP/3 connections stalled. neqo fell back to h2 correctly, but that fallback path was itself broken (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
       <li><strong>Kaspersky</strong>: a spec-wrong <code>unknown_ca</code> alert on shutdown, despite a trusted root (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</li>
     </ul>
     <p class="small muted">Hard to root-cause, and users blame the browser, not the middlebox.</p>
@@ -94,7 +95,7 @@
   <section>
     <h2>Firefox turns HTTP/3 off under interception</h2>
     <ul class="small">
-      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
+      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
       <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
     </ul>
   </section>
@@ -125,11 +126,10 @@
     <div class="cols">
       <div class="col-60">
         <ul class="small">
-          <li>Alt-Svc is learned <em>after</em> a slower HTTP/2 connection: the first visit never uses HTTP/3.</li>
-          <li><strong>29%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, i.e. don&rsquo;t do HTTP/3 on the first connection.</li>
-          <li>HTTPS records (RFC 9460): <strong>&gt;20%</strong> of the top-1M publish one, but mostly one CDN&rsquo;s default (&gt;70% Cloudflare) (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>).</li>
-          <li><strong>ECH depends on the HTTPS record</strong>: now also a privacy feature, not just performance.</li>
-          <li>But some networks and VPNs <strong>strip the HTTPS record</strong> (or just its ECH parameter) to keep the SNI visible, which can take the h3 hint with it (<a href="https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-block-TLS-1-3-Encrypted-Client-Hello-ECH-in/ta-p/328324">FortiGate</a>, <a href="https://secure.cisco.com/secure-firewall/docs/encrypted-client-hello-defense-strategies-how-cisco-secure-firewall-tackles-ech">Cisco</a>).</li>
+          <li>Alt-Svc is learned <em>after</em> an HTTP/2 connection: the first visit never uses HTTP/3.</li>
+          <li><strong>29%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, i.e. don&rsquo;t do HTTP/3 on the first connection (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>).</li>
+          <li>HTTPS records (RFC 9460) fix this, but <strong>few sites publish one</strong>: <strong>&gt;20%</strong> of the top-1M, and mostly one CDN&rsquo;s default (&gt;70% Cloudflare) (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>).</li>
+          <li>On-path actors also <strong>strip the record</strong> (or just its ECH parameter) to keep the SNI visible, taking the h3 hint with it (<a href="https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-block-TLS-1-3-Encrypted-Client-Hello-ECH-in/ta-p/328324">FortiGate</a>, <a href="https://secure.cisco.com/secure-firewall/docs/encrypted-client-hello-defense-strategies-how-cisco-secure-firewall-tackles-ech">Cisco</a>).</li>
         </ul>
       </div>
       <div class="col-40">
@@ -137,7 +137,7 @@
         <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>.</figcaption>
       </div>
     </div>
-    <p class="small muted">Do we deprecate Alt-Svc, or bridge it (draft-thomson-httpbis-alt-svcb)?</p>
+    <p class="small muted">Do we deprecate Alt-Svc, or bridge it (<a href="https://datatracker.ietf.org/doc/draft-thomson-httpbis-alt-svcb/">draft-thomson-httpbis-alt-svcb</a>)?</p>
   </section>
 
   <!-- 5b. The wasted round trip (savearoundtrip) -->
@@ -162,7 +162,7 @@
   <section>
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
-      <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
+      <li>Race QUIC <em>speculatively</em> on the first connection, even without any h3 signal.</li>
       <li>Risk: where UDP is blocked, an optimistic attempt is strictly slower (timeout, then TCP + TLS). Chrome&rsquo;s QUIC failure rate runs <strong>~6&ndash;12%</strong> by region (<a href="https://blog.apnic.net/2025/06/17/a-quic-progress-report/">APNIC, 2025</a>).</li>
       <li>The right racing delay is unsettled and network-dependent.</li>
     </ul>
