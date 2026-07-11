@@ -42,18 +42,6 @@
     </ul>
   </section>
 
-  <!-- 3b. Security vendors recommend blocking QUIC -->
-  <section>
-    <h2>Security vendors recommend blocking QUIC</h2>
-    <ul>
-      <li><strong>Palo Alto</strong> ships a &ldquo;Block QUIC&rdquo; knowledge-base article and best-practice block rules, so the firewall can decrypt the TCP fallback instead (<a href="https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClarCAC">KB</a>).</li>
-      <li><strong>Zscaler</strong>, <strong>Cato</strong>, and Prisma Access block <strong>UDP/443</strong> by default: their TLS inspection needs TCP (<a href="https://help.zscaler.com/zia/managing-quic-protocol">Zscaler</a>).</li>
-      <li>They cannot decrypt QUIC, so they block it and force a TCP fallback they can inspect.</li>
-      <li>Some inspect QUIC inline instead (<a href="https://secure.cisco.com/secure-firewall/docs/quic-decryption">Cisco</a>, Cloudflare One, FortiSASE).</li>
-    </ul>
-    <p class="small muted">Whole fleets fall back to TCP and never speak HTTP/3. A quiet ceiling on the share.</p>
-  </section>
-
   <!-- 3d. Interception corrupts QUIC -->
   <section>
     <h2>When interception corrupts QUIC</h2>
@@ -77,7 +65,7 @@
 
   <!-- 4. New protocols that could grow the share -->
   <section>
-    <h2>New use cases that need QUIC</h2>
+    <h2>New use cases that encourage QUIC adoption</h2>
     <p>HTTP/3-native protocols, at their best over QUIC but with an HTTP/2 fallback, that could pull adoption with them:</p>
     <div class="cols" style="gap:1.2em; margin-top:0.3em;">
       <div class="card">
@@ -90,7 +78,7 @@
       </div>
       <div class="card">
         <p class="tag">MASQUE</p>
-        <p class="small">Proxy UDP and IP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>).</p>
+        <p class="small">Proxy UDP, IP, and TCP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">CONNECT-TCP</a>).</p>
       </div>
     </div>
     <p class="small muted">A growing HTTP/3-native ecosystem could be the driver the plateau needs.</p>
