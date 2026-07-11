@@ -42,6 +42,43 @@
     </ul>
   </section>
 
+  <!-- 3aa. Server and CDN support -->
+  <section>
+    <h2>Server and CDN support</h2>
+    <div class="cols" style="gap:2em;">
+      <div>
+        <p class="tag">Web servers &amp; proxies</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://github.com/caddyserver/caddy/releases/tag/v2.6.0">Caddy</a> <span style="color:var(--ink-faint)">on by default</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://docs.litespeedtech.com/lsws/cp/cpanel/quic-http3/">LiteSpeed</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http3">Envoy</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://h2o.examp1e.net/configure/http3_directives.html">H2O</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://jetty.org/docs/jetty/12.1/programming-guide/server/http3.html">Jetty</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://doc.traefik.io/traefik/routing/entrypoints/#http3">Traefik</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://techcommunity.microsoft.com/blog/networkingblog/enabling-http3-support-on-windows-server-2022/2676880">IIS</a> <span style="color:var(--ink-faint)">opt-in</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://www.haproxy.com/blog/announcing-haproxy-2-6">HAProxy</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nodejs.org/api/quic.html">Node.js</a> <span style="color:var(--ink-faint)">behind a flag</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://bz.apache.org/bugzilla/show_bug.cgi?id=64462">Apache httpd</a></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://lists.apache.org/thread/gwz432gzpq6tprtsswkd5cmqk3s2wplh">Tomcat</a></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag">Hosts &amp; CDNs</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://developers.cloudflare.com/speed/optimization/protocol/http3/">Cloudflare</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://www.fastly.com/release-notes/q1-2022">Fastly</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://techdocs.akamai.com/property-mgr/docs/http3-support">Akamai</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://aws.amazon.com/blogs/aws/new-http-3-support-for-amazon-cloudfront/">AWS CloudFront</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://cloud.google.com/blog/products/networking/cloud-cdn-and-load-balancing-support-http3">Google Cloud</a></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://learn.microsoft.com/en-us/azure/frontdoor/front-door-faq">Azure Front Door</a></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://community.vercel.com/t/how-do-i-get-http-3-enabled-on-my-site/11723">Vercel</a></span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted"><span style="color:var(--good)">&#10003;</span> shipped &nbsp; <span style="color:var(--accent)">&#10003;</span> experimental &nbsp; <span style="color:var(--ink-faint)">&#10007;</span> none &middot; HTTP/3 (RFC 9114), surveyed 2026-07-11.</p>
+  </section>
+
   <!-- 3d. Interception corrupts QUIC -->
   <section>
     <h2>&ldquo;Security&rdquo; software breaks QUIC</h2>
@@ -127,7 +164,6 @@
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
       <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
-      <li><a href="https://daniel.haxx.se/blog/2025/08/04/even-happier-eyeballs/">curl 8.16 (Aug 2025)</a>: with HTTP/3 allowed, races QUIC then TCP after <strong>200 ms</strong>. Still an opt-in, not automatic.</li>
       <li>Risk: where UDP is blocked, an optimistic attempt is strictly slower (timeout, then TCP + TLS). Chrome&rsquo;s QUIC failure rate runs <strong>~6&ndash;12%</strong> by region (<a href="https://blog.apnic.net/2025/06/17/a-quic-progress-report/">APNIC, 2025</a>).</li>
       <li>The right racing delay is unsettled and network-dependent.</li>
     </ul>
@@ -160,7 +196,7 @@
       <div>
         <p class="tag" style="color:var(--warn);">v1 only (4)</p>
         <ul class="small">
-          <li><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a> (Rust)</li>
+          <li><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a></li>
           <li><a href="https://github.com/cloudflare/quiche/blob/b9d7b96e727045448b8110234d74cdff84115203/quiche/src/lib.rs#L437">Cloudflare quiche</a></li>
           <li><a href="https://github.com/facebook/mvfst/blob/efefcbc5eba9d1085140b8a3c021121991601b14/quic/QuicConstants.h#L423">Meta mvfst</a></li>
           <li><a href="https://github.com/aws/s2n-quic/blob/c340da81d2e7a0fc1bc20c8712995059f18100f0/quic/s2n-quic-transport/src/endpoint/version.rs#L26">AWS s2n-quic</a></li>
