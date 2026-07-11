@@ -39,8 +39,13 @@
         </ul>
       </div>
       <div class="col-40">
-        <p>Multiplied out, that is dozens of possible ways to open one connection, and some paths are slow, blocked, or broken.</p>
-        <p>You cannot know in advance which one works. Trying them one at a time means waiting out each stall before the next, and a broken path can hang for seconds.</p>
+        <p>One real origin can offer, at once:</p>
+        <ul class="small">
+          <li>DNS: <strong>3&times; A</strong> + <strong>1&times; AAAA</strong>, four addresses.</li>
+          <li>An <strong>HTTPS record</strong> with <code>ipv4hint</code>, <code>ipv6hint</code>, <code>alpn=h3,h2</code>, ECH.</li>
+          <li><strong>Alt-Svc</strong> advertising <code>h3</code>.</li>
+        </ul>
+        <p class="small">4 addresses &times; {h1, h2, h3} = <strong>12 candidate endpoints</strong>, before ECH and two discovery paths. Which is fastest? Which even connects?</p>
         <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
       </div>
     </div>
@@ -78,7 +83,7 @@
       <li><strong>Race</strong> attempts one at a time, staggered by the Connection Attempt Delay.</li>
       <li>First success wins; the rest are cancelled.</li>
     </ol>
-    <p class="small muted">Default preference: IPv6 &gt; IPv4, QUIC &gt; TCP. HTTPS records let QUIC/h3 be discovered at resolution time, no Alt-Svc round trip.</p>
+    <p class="small muted">Default preference: IPv6 &gt; IPv4, QUIC &gt; TCP.</p>
   </section>
 
   <!-- 4. Timers -->
