@@ -24,16 +24,6 @@
     <span class="venue">HTTP Workshop 2026 &middot; discussion &nbsp;&middot;&nbsp; Max Inden &middot; Mozilla</span>
   </section>
 
-  <!-- 2. Framing: two threads -->
-  <section>
-    <h2>Two threads</h2>
-    <ol>
-      <li><strong>Increase the share.</strong> QUIC/HTTP/3 sits near 30% and has plateaued. Discovery, optimistic racing, and new use cases could move it.</li>
-      <li><strong>Evolve the protocol.</strong> QUIC should keep changing over time. QUIC v2 tested that, and saw almost no deployment.</li>
-    </ol>
-    <p class="small muted">The rest of the talk follows these two threads.</p>
-  </section>
-
   <!-- 2. Denominators -->
   <section>
     <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
@@ -44,6 +34,7 @@
 
   <!-- 3. The plateau -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Different ways of measuring</h2>
     <ul>
       <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
@@ -53,31 +44,22 @@
     </ul>
   </section>
 
-  <!-- 3b. Adoption barrier: middleboxes -->
+  <!-- 3b. Security vendors recommend blocking QUIC -->
   <section>
-    <h2>Antivirus and enterprise middleboxes block QUIC</h2>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
+    <h2>Security vendors recommend blocking QUIC</h2>
     <ul>
-      <li>Enterprise SASE and firewalls (Zscaler, Palo Alto Prisma Access, Cato) block <strong>UDP/443</strong> by default: their TLS inspection needs TCP, and they cannot read QUIC (<a href="https://help.zscaler.com/zia/managing-quic-protocol">Zscaler</a>).</li>
-      <li>Antivirus with HTTPS scanning does the same: it can intercept TLS-over-TCP but not QUIC, so it advises turning QUIC off (<a href="https://www.bitdefender.com/business/support/en/77209-352516-disable-quic-protocol.html">Bitdefender</a>).</li>
-      <li>The fallback is the trap: QUIC silently drops to TCP, so pages still load and no one notices, yet whole fleets never speak HTTP/3.</li>
-      <li>Not inherent: some boxes now inspect QUIC inline (<a href="https://secure.cisco.com/secure-firewall/docs/quic-decryption">Cisco</a>, Cloudflare One, FortiSASE).</li>
+      <li><strong>Palo Alto</strong> ships a &ldquo;Block QUIC&rdquo; knowledge-base article and best-practice block rules, so the firewall can decrypt the TCP fallback instead (<a href="https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000ClarCAC">KB</a>).</li>
+      <li><strong>Zscaler</strong>, <strong>Cato</strong>, and Prisma Access block <strong>UDP/443</strong> by default: their TLS inspection needs TCP (<a href="https://help.zscaler.com/zia/managing-quic-protocol">Zscaler</a>).</li>
+      <li>They cannot decrypt QUIC, so they block it and force a TCP fallback they can inspect.</li>
+      <li>Some inspect QUIC inline instead (<a href="https://secure.cisco.com/secure-firewall/docs/quic-decryption">Cisco</a>, Cloudflare One, FortiSASE).</li>
     </ul>
-    <p class="small muted">A quiet ceiling on the share: these users are invisibly capped at HTTP/2.</p>
-  </section>
-
-  <!-- 3c. Firefox's own interception handling -->
-  <section>
-    <h2>Firefox turns HTTP/3 off under interception</h2>
-    <ul class="small">
-      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
-      <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
-      <li>An enterprise-policy switch to re-enable h3 in managed setups is requested (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
-    </ul>
-    <p class="small muted">So even where UDP/443 is open, interception still costs QUIC.</p>
+    <p class="small muted">Whole fleets fall back to TCP and never speak HTTP/3. A quiet ceiling on the share.</p>
   </section>
 
   <!-- 3d. Interception corrupts QUIC -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>When interception corrupts QUIC</h2>
     <ul class="small">
       <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
@@ -88,26 +70,35 @@
     <p class="small muted">Hard to root-cause, and users blame the browser, not the middlebox.</p>
   </section>
 
-  <!-- 4. Why deploy QUIC -->
+  <!-- 3c. Firefox's own interception handling -->
   <section>
-    <h2>Why deploy QUIC / HTTP/3?</h2>
-    <ul>
-      <li>Faster setup: 1-RTT, and 0-RTT on resumption. No head-of-line blocking, and connection migration across networks.</li>
-      <li>Privacy: ECH hides the SNI, delivered through the HTTPS record.</li>
-      <li>New capabilities that need QUIC, and may pull adoption with them:</li>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
+    <h2>Firefox turns HTTP/3 off under interception</h2>
+    <ul class="small">
+      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it: pref <code>network.http.http3.disable_when_third_party_roots_found</code> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
+      <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
+      <li>An enterprise-policy switch to re-enable h3 in managed setups is requested (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
     </ul>
-    <div class="cols" style="gap:1.2em; margin-top:0.2em;">
-      <div class="card">
-        <p class="tag">MASQUE</p>
-        <p class="small">Proxy UDP and IP over HTTP/3: <a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>.</p>
-      </div>
+    <p class="small muted">So even where UDP/443 is open, interception still costs QUIC.</p>
+  </section>
+
+  <!-- 4. New protocols that could grow the share -->
+  <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
+    <h2>New use cases that need QUIC</h2>
+    <p>HTTP/3-native protocols, each only practical over QUIC, that could pull adoption with them:</p>
+    <div class="cols" style="gap:1.2em; margin-top:0.3em;">
       <div class="card">
         <p class="tag">WebTransport</p>
-        <p class="small">Low-latency streams and datagrams for web apps (<a href="https://datatracker.ietf.org/wg/webtrans/about/">IETF webtrans</a>).</p>
+        <p class="small">Low-latency streams and datagrams for web apps, the WebSocket successor (<a href="https://datatracker.ietf.org/wg/webtrans/about/">IETF webtrans</a>).</p>
       </div>
       <div class="card">
         <p class="tag">Media over QUIC</p>
-        <p class="small">Live media delivery (<a href="https://datatracker.ietf.org/wg/moq/about/">IETF moq</a>).</p>
+        <p class="small">Low-latency live media, one stack for ingest and delivery (<a href="https://datatracker.ietf.org/wg/moq/about/">IETF moq</a>).</p>
+      </div>
+      <div class="card">
+        <p class="tag">MASQUE</p>
+        <p class="small">Proxy UDP and IP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>).</p>
       </div>
     </div>
     <p class="small muted">A growing HTTP/3-native ecosystem could be the driver the plateau needs.</p>
@@ -115,6 +106,7 @@
 
   <!-- 5. Upgrade path -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
     <div class="cols">
       <div class="col-60">
@@ -136,6 +128,7 @@
 
   <!-- 5b. The wasted round trip (savearoundtrip) -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>The wasted round trip</h2>
     <div class="cols" style="gap:26px; align-items:flex-start;">
       <div>
@@ -154,6 +147,7 @@
 
   <!-- 6. Optimistic QUIC -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 1 &middot; Increase the share</p>
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
       <li>Race QUIC <em>speculatively</em> on the first connection, before any h3 signal.</li>
@@ -178,6 +172,7 @@
 
   <!-- 4b. QUIC v2 support matrix -->
   <section>
+    <p class="kicker" style="color:var(--accent);">Thread 2 &middot; Evolve without ossifying</p>
     <h2>Who ships QUIC v2?</h2>
     <div class="cols" style="gap:1.8em;">
       <div>
