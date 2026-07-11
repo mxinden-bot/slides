@@ -53,6 +53,18 @@
     </ul>
   </section>
 
+  <!-- 3b. Adoption barrier: middleboxes -->
+  <section>
+    <h2>Antivirus and enterprise middleboxes block QUIC</h2>
+    <ul>
+      <li>Enterprise SASE and firewalls (Zscaler, Palo Alto Prisma Access, Cato) block <strong>UDP/443</strong> by default: their TLS inspection needs TCP, and they cannot read QUIC (<a href="https://help.zscaler.com/zia/managing-quic-protocol">Zscaler</a>).</li>
+      <li>Antivirus with HTTPS scanning does the same: it can intercept TLS-over-TCP but not QUIC, so it advises turning QUIC off (<a href="https://www.bitdefender.com/business/support/en/77209-352516-disable-quic-protocol.html">Bitdefender</a>).</li>
+      <li>The fallback is the trap: QUIC silently drops to TCP, so pages still load and no one notices, yet whole fleets never speak HTTP/3.</li>
+      <li>Not inherent: some boxes now inspect QUIC inline (<a href="https://secure.cisco.com/secure-firewall/docs/quic-decryption">Cisco</a>, Cloudflare One, FortiSASE).</li>
+    </ul>
+    <p class="small muted">A quiet ceiling on the share: these users are invisibly capped at HTTP/2.</p>
+  </section>
+
   <!-- 4. Why deploy QUIC -->
   <section>
     <h2>Why deploy QUIC / HTTP/3?</h2>
