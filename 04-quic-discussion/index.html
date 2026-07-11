@@ -162,9 +162,10 @@
   <section>
     <h2>Optimistic QUIC, Happy-Eyeballs style</h2>
     <ul>
-      <li>Race QUIC <em>speculatively</em> on the first connection, even without any h3 signal.</li>
-      <li>Risk: where UDP is blocked, an optimistic attempt is strictly slower (timeout, then TCP + TLS). Chrome&rsquo;s QUIC failure rate runs <strong>~6&ndash;12%</strong> by region (<a href="https://blog.apnic.net/2025/06/17/a-quic-progress-report/">APNIC, 2025</a>).</li>
-      <li>The right racing delay is unsettled and network-dependent.</li>
+      <li>Still listen for an h3 signal (HTTPS RR): it also carries <strong>ECH</strong>, so it stays worth having.</li>
+      <li>Signal present: try HTTP/3 first, as today.</li>
+      <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
+      <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
     </ul>
   </section>
 
