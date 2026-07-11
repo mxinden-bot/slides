@@ -3,13 +3,14 @@
  * Sources in research/04-quic-http3-evolution.md.
  */
 window.DECK_DATA = {
-  // HTTP/3 "share" depends entirely on the vantage point. All values sourced:
-  //  Firefox desktop requests ~17% (performance.mozilla.org, query 113403, Jul 2026);
-  //  Cloudflare likely-human requests ~30% (Radar); W3Techs site support 39.8%;
-  //  Chrome<->Google connections >50% (chromium.org/quic); Meta first-party ~75%
-  //  (engineering.fb.com, 2020; measured ~86% on some ISPs in 2023).
+  // HTTP/3 "share" depends entirely on the vantage point (different denominators):
+  //  Firefox desktop TOP-LEVEL PAGE LOADS ~17% (performance.mozilla.org, query 113403,
+  //  from the Glean perf.page_load event, Jul 2026); Cloudflare likely-human REQUESTS
+  //  ~30% (Radar); W3Techs SITE support 39.8%; Chrome<->Google CONNECTIONS >50%
+  //  (chromium.org/quic); Meta first-party traffic ~75% (engineering.fb.com, 2020;
+  //  measured ~86% on some ISPs in 2023).
   denominators: {
-    labels: ['Firefox\nrequests', 'Cloudflare\nrequests', 'W3Techs\nsite support', 'Chrome ↔\nGoogle', 'Meta\ntraffic'],
+    labels: ['Firefox\npage loads', 'Cloudflare\nrequests', 'W3Techs\nsite support', 'Chrome ↔\nGoogle', 'Meta\ntraffic'],
     pct: [17, 30, 40, 50, 75],
   },
 
