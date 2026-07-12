@@ -37,34 +37,6 @@
     </ul>
   </section>
 
-  <!-- 2b. What the crate actually attempts -->
-  <section>
-    <h2>What Happy Eyeballs v3 attempts</h2>
-    <div class="cols" style="gap:2em;">
-      <div class="col-40">
-        <p class="small"><strong>Example.</strong> Say one origin happens to advertise:</p>
-        <ul class="small">
-          <li>DNS: <strong>3&times; A</strong> + <strong>1&times; AAAA</strong>, four addresses.</li>
-          <li>Two <strong>HTTPS records</strong> with different targets, each with <code>ipv4hint</code>, <code>ipv6hint</code>, <code>alpn=h3,h2</code>, ECH.</li>
-          <li><strong>Alt-Svc</strong> advertising <code>h3</code>.</li>
-        </ul>
-      </div>
-      <div class="col-60">
-        <ol class="small">
-          <li><strong>IPv6</strong> &middot; QUIC (h3)</li>
-          <li><strong>IPv4 #1</strong> &middot; QUIC (h3)</li>
-          <li><strong>IPv6</strong> &middot; TCP (h2/h1)</li>
-          <li><strong>IPv4 #1</strong> &middot; TCP (h2/h1)</li>
-          <li><strong>IPv4 #2</strong> &middot; QUIC (h3)</li>
-          <li><strong>IPv4 #2</strong> &middot; TCP (h2/h1)</li>
-          <li><strong>IPv4 #3</strong> &middot; QUIC (h3)</li>
-          <li><strong>IPv4 #3</strong> &middot; TCP (h2/h1)</li>
-        </ol>
-      </div>
-    </div>
-    <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
-  </section>
-
   <!-- 3a. What HEv3 does: Resolution -->
   <section>
     <h2>Part 1: Resolution</h2>
