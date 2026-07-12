@@ -101,6 +101,17 @@
     <p class="small muted">Should we stop disabling, or find a more specific mechanism than any third-party root?</p>
   </section>
 
+  <!-- 3e. Making QUIC enterprise-ready -->
+  <section>
+    <h2>Making QUIC enterprise-ready</h2>
+    <p class="small muted">Enterprises have real reasons to block or drop QUIC: firewalls default to blocking UDP/443, MITM proxies cannot inspect it yet, and operators lose the visibility TCP gave them. The goal is to remove those reasons, not to blame the admin.</p>
+    <ul class="small">
+      <li><strong>Give admins managed control.</strong> A policy to keep HTTP/3 on where their proxy is correct, instead of the all-or-nothing third-party-root heuristic (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
+      <li><strong>Help middlebox vendors proxy QUIC correctly.</strong> Conformance testing (<a href="https://interop.seemann.io/">QUIC Interop Runner</a>) and the manageability guidance (<a href="https://datatracker.ietf.org/doc/rfc9312/">RFC 9312</a>).</li>
+      <li><strong>Restore operator visibility without breaking encryption.</strong> The latency spin bit for RTT (<a href="https://datatracker.ietf.org/doc/rfc9000/">RFC 9000</a>), <a href="https://datatracker.ietf.org/doc/draft-ietf-quic-qlog-main-schema/">qlog</a> for diagnostics, <a href="https://datatracker.ietf.org/doc/draft-ietf-scone-protocol/">SCONE</a> for on-path rate signaling.</li>
+    </ul>
+  </section>
+
   <!-- 4. New protocols that could grow the share -->
   <section>
     <h2>New use cases that encourage QUIC adoption</h2>
