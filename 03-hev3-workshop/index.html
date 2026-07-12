@@ -39,13 +39,13 @@
         </ul>
       </div>
       <div class="col-40">
-        <p>One real origin can offer, at once:</p>
+        <p><strong>Example.</strong> One origin can offer, at once:</p>
         <ul class="small">
           <li>DNS: <strong>3&times; A</strong> + <strong>1&times; AAAA</strong>, four addresses.</li>
-          <li>An <strong>HTTPS record</strong> with <code>ipv4hint</code>, <code>ipv6hint</code>, <code>alpn=h3,h2</code>, ECH.</li>
+          <li>Two <strong>HTTPS records</strong> with different targets, each with <code>ipv4hint</code>, <code>ipv6hint</code>, <code>alpn=h3,h2</code>, ECH.</li>
           <li><strong>Alt-Svc</strong> advertising <code>h3</code>.</li>
         </ul>
-        <p class="small">4 addresses &times; {h1, h2, h3} = <strong>12 candidate endpoints</strong>, before ECH and two discovery paths. Which is fastest? Which even connects?</p>
+        <p class="small">h1 and h2 ride the <strong>same TCP connection</strong>, so each address is two attempts: TCP (h1/h2) and QUIC (h3). Four addresses, two HTTPS targets, ECH, two discovery paths: which is fastest? Which even connects?</p>
         <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
       </div>
     </div>
