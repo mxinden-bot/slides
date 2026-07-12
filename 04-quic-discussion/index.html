@@ -40,6 +40,7 @@
       <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Meta ~75%, 2020).</li>
       <li>Requests vs connections changes the answer, too: HTTP/3 multiplexes many requests per connection.</li>
     </ul>
+    <p class="small muted">Is ~30% already good enough, or is the plateau a problem worth solving?</p>
   </section>
 
   <!-- 3aa. Server and CDN support -->
@@ -70,7 +71,7 @@
           <li><span style="color:var(--accent)">&#10003;</span> <a href="https://spring.io/blog/2024/11/26/http3-in-reactor-2024/">Spring / Netty</a> <span style="color:var(--ink-faint)">experimental</span></li>
           <li><span style="color:var(--accent)">&#10003;</span> <a href="https://bun.com/blog/bun-v1.3.14">Bun</a> <span style="color:var(--ink-faint)">experimental</span></li>
           <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nodejs.org/api/quic.html">Node.js</a> <span style="color:var(--ink-faint)">behind a flag</span></li>
-          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://pkg.go.dev/github.com/quic-go/quic-go/http3">Go net/http</a> <span style="color:var(--ink-faint)">quic-go only</span></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://pkg.go.dev/github.com/quic-go/quic-go/http3">Go net/http</a> <span style="color:var(--ink-faint)">via quic-go/http3</span></span></li>
           <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/hyperium/hyper/issues/1818">Rust hyper / axum</a> <span style="color:var(--ink-faint)">h3 crate only</span></span></li>
           <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/puma/puma">Rails / Puma</a></span></li>
         </ul>
@@ -144,7 +145,7 @@
         <p class="small">Proxy UDP, IP, and TCP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">CONNECT-TCP</a>).</p>
       </div>
     </div>
-    <p class="small" style="margin-top:0.7em;">QUIC is also the easy home for <strong>L4S</strong>: every ACK frame already carries precise ECT(0)/ECT(1)/CE counts (<a href="https://www.rfc-editor.org/rfc/rfc9000#section-19.3">RFC 9000</a>), the accurate feedback L4S needs, while TCP is still rolling out AccECN. With the sender&rsquo;s response in user space, deploying <a href="https://www.rfc-editor.org/rfc/rfc9330">L4S</a> is simpler than in the kernel.</p>
+    <p class="small" style="margin-top:0.7em;">QUIC also makes <strong>L4S</strong> easier to deploy: every ACK frame already carries precise ECT(0)/ECT(1)/CE counts (<a href="https://www.rfc-editor.org/rfc/rfc9000#section-19.3">RFC 9000</a>), the feedback L4S needs, while TCP is still rolling out AccECN. The sender&rsquo;s response runs in user space, so no kernel change is required (<a href="https://www.rfc-editor.org/rfc/rfc9330">L4S</a>).</p>
   </section>
 
   <!-- 5. Upgrade path -->
@@ -194,6 +195,7 @@
       <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
       <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
     </ul>
+    <p class="small muted">What should the default be, who pays the fallback cost on UDP-hostile networks, and how does racing interact with multi-CDN (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>)?</p>
   </section>
 
   <!-- 4. QUIC v2 -->
@@ -244,21 +246,7 @@
       <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself; immature client-side control shows up as uploads <strong>5&ndash;8x slower</strong>, enough that operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/ju_UcuwWMkXs1MA-4TEtGHPVoVY/">Tarreau, quic@ietf</a>).</li>
       <li><strong>Less operational expertise.</strong> Fewer engineers have run QUIC at scale, and the encrypted user-space stack gives operators less visibility than TCP.</li>
     </ul>
-    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks), but today it is real.</p>
-  </section>
-
-  <!-- 7. Open questions -->
-  <section>
-    <h2>Open questions</h2>
-    <ul class="small">
-      <li>Is <strong>~30%</strong> already good enough, or is the plateau a problem worth solving?</li>
-      <li>Can QUIC v2 ever get deployed? Does a major library shipping no v2 matter?</li>
-      <li>Deprecate Alt-Svc for HTTPS RR, or bridge the two? Is <strong>ECH</strong> the reason sites finally publish HTTPS records?</li>
-      <li>What should the default be for optimistic QUIC, and who pays the fallback cost on UDP-hostile networks?</li>
-      <li>Multi-CDN deployments complicate QUIC discovery and Happy Eyeballs: do we need shared best practices (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>)?</li>
-      <li>Is QUIC the best ground to deploy <strong>L4S</strong>? ECN is reflected natively in the ACKs, and the sender&rsquo;s response lives in user space.</li>
-      <li>Given the maturity gap, is QUIC worth it for many deployments today, and what closes the gap fastest?</li>
-    </ul>
+    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks): is QUIC worth the switch today, and what closes it fastest?</p>
   </section>
 
   <!-- 8. Closing -->
