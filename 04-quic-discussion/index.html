@@ -28,7 +28,7 @@
   <section>
     <h2>Status quo</h2>
     <div class="chart" id="c-denom" style="height:450px;"></div>
-    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75%</a>.</figcaption>
+    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75% (2020)</a>.</figcaption>
   </section>
 
   <!-- 3. The plateau -->
@@ -37,7 +37,7 @@
     <ul>
       <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
       <li>Firefox&rsquo;s own view is lower: HTTP/3 is <strong>~17%</strong> of desktop top-level page loads, <strong>~25%</strong> on Android (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>). This counts only the main document the user navigated to, not the ad and tracker subresources that inflate a per-request count.</li>
-      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Meta ~75%).</li>
+      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Meta ~75%, 2020).</li>
       <li>Requests vs connections changes the answer, too: HTTP/3 multiplexes many requests per connection.</li>
     </ul>
   </section>
@@ -45,7 +45,7 @@
   <!-- 3aa. Server and CDN support -->
   <section>
     <h2>Server and CDN support</h2>
-    <div class="cols" style="gap:2em;">
+    <div class="cols" style="gap:1.6em;">
       <div>
         <p class="tag">Web servers &amp; proxies</p>
         <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
@@ -58,9 +58,21 @@
           <li><span style="color:var(--good)">&#10003;</span> <a href="https://techcommunity.microsoft.com/blog/networkingblog/enabling-http3-support-on-windows-server-2022/2676880">IIS</a> <span style="color:var(--ink-faint)">opt-in</span></li>
           <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx</a> <span style="color:var(--ink-faint)">experimental</span></li>
           <li><span style="color:var(--accent)">&#10003;</span> <a href="https://www.haproxy.com/blog/announcing-haproxy-2-6">HAProxy</a> <span style="color:var(--ink-faint)">experimental</span></li>
-          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nodejs.org/api/quic.html">Node.js</a> <span style="color:var(--ink-faint)">behind a flag</span></li>
           <li><span style="color:var(--ink-faint)">&#10007; <a href="https://bz.apache.org/bugzilla/show_bug.cgi?id=64462">Apache httpd</a></span></li>
           <li><span style="color:var(--ink-faint)">&#10007; <a href="https://lists.apache.org/thread/gwz432gzpq6tprtsswkd5cmqk3s2wplh">Tomcat</a></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag">App frameworks &amp; runtimes</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/http3">ASP.NET Core</a> <span style="color:var(--ink-faint)">GA</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://github.com/pgjones/hypercorn">Hypercorn</a> <span style="color:var(--ink-faint)">Python</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://spring.io/blog/2024/11/26/http3-in-reactor-2024/">Spring / Netty</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://bun.com/blog/bun-v1.3.14">Bun</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nodejs.org/api/quic.html">Node.js</a> <span style="color:var(--ink-faint)">behind a flag</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://pkg.go.dev/github.com/quic-go/quic-go/http3">Go net/http</a> <span style="color:var(--ink-faint)">quic-go only</span></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/hyperium/hyper/issues/1818">Rust hyper / axum</a> <span style="color:var(--ink-faint)">h3 crate only</span></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/puma/puma">Rails / Puma</a></span></li>
         </ul>
       </div>
       <div>
@@ -76,7 +88,7 @@
         </ul>
       </div>
     </div>
-    <p class="small muted"><span style="color:var(--good)">&#10003;</span> shipped &nbsp; <span style="color:var(--accent)">&#10003;</span> experimental &nbsp; <span style="color:var(--ink-faint)">&#10007;</span> none &middot; surveyed 2026-07-11.</p>
+    <p class="small muted"><span style="color:var(--good)">&#10003;</span> shipped &nbsp; <span style="color:var(--accent)">&#10003;</span> experimental &nbsp; <span style="color:var(--ink-faint)">&#10007;</span> none &middot; surveyed 2026-07-11. Is QUIC supported widely enough, or does the application-framework layer still hold it back?</p>
   </section>
 
   <!-- 3d. Interception corrupts QUIC -->
@@ -103,13 +115,15 @@
 
   <!-- 3e. Making QUIC enterprise-ready -->
   <section>
-    <h2>Making QUIC enterprise-ready</h2>
-    <p class="small muted">Enterprises have real reasons to block or drop QUIC: firewalls default to blocking UDP/443, MITM proxies cannot inspect it yet, and operators lose the visibility TCP gave them. The goal is to remove those reasons, not to blame the admin.</p>
+    <h2>QUIC in enterprise environments</h2>
+    <p class="small muted">Enterprises have real reasons to block or drop QUIC. The goal is to remove those reasons, not to blame the admin (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</p>
     <ul class="small">
-      <li><strong>Give admins managed control.</strong> A policy to keep HTTP/3 on where their proxy is correct, instead of the all-or-nothing third-party-root heuristic (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2006660">bug 2006660</a>).</li>
-      <li><strong>Help middlebox vendors proxy QUIC correctly.</strong> Conformance testing (<a href="https://interop.seemann.io/">QUIC Interop Runner</a>) and the manageability guidance (<a href="https://datatracker.ietf.org/doc/rfc9312/">RFC 9312</a>).</li>
-      <li><strong>Restore operator visibility without breaking encryption.</strong> The latency spin bit for RTT (<a href="https://datatracker.ietf.org/doc/rfc9000/">RFC 9000</a>), <a href="https://datatracker.ietf.org/doc/draft-ietf-quic-qlog-main-schema/">qlog</a> for diagnostics, <a href="https://datatracker.ietf.org/doc/draft-ietf-scone-protocol/">SCONE</a> for on-path rate signaling.</li>
+      <li>Firewalls often block <strong>UDP/443</strong> outright.</li>
+      <li>MITM proxies cannot yet inspect QUIC correctly, so it gets disabled on any third-party root.</li>
+      <li>Operators lose the flow visibility TCP gave them.</li>
+      <li>Banks and regulated networks must audit their traffic. They still can where they own the servers: inspect at the endpoint, not as a passive middlebox.</li>
     </ul>
+    <p class="small muted">How do we get vendors to proxy QUIC correctly (<a href="https://interop.seemann.io/">conformance testing</a>, <a href="https://datatracker.ietf.org/doc/rfc9312/">RFC 9312</a>), and can <a href="https://datatracker.ietf.org/doc/draft-ietf-quic-qlog-main-schema/">qlog</a> give operators back the visibility they need?</p>
   </section>
 
   <!-- 4. New protocols that could grow the share -->
@@ -130,6 +144,7 @@
         <p class="small">Proxy UDP, IP, and TCP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">CONNECT-TCP</a>).</p>
       </div>
     </div>
+    <p class="small" style="margin-top:0.7em;">QUIC is also the easy home for <strong>L4S</strong>: every ACK frame already carries precise ECT(0)/ECT(1)/CE counts (<a href="https://www.rfc-editor.org/rfc/rfc9000#section-19.3">RFC 9000</a>), the accurate feedback L4S needs, while TCP is still rolling out AccECN. With the sender&rsquo;s response in user space, deploying <a href="https://www.rfc-editor.org/rfc/rfc9330">L4S</a> is simpler than in the kernel.</p>
   </section>
 
   <!-- 5. Upgrade path -->
@@ -183,15 +198,14 @@
 
   <!-- 4. QUIC v2 -->
   <section>
-    <h2>QUIC v2 is barely deployed</h2>
+    <h2>QUIC ossification: v2 is barely deployed</h2>
     <ul>
       <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
-      <li>Firefox telemetry: of version-labeled QUIC handshakes in Nightly, <strong>v2 is a rounding error</strong>, v1 carries essentially all of them (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM: http_3_quic_version</a>).</li>
-      <li>Wider measurement agrees: <strong>&lt; 0.003%</strong> of QUICv1 domains, &lt; 0.013% grease the QUIC bit (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
+      <li>Firefox Nightly telemetry: <strong>v1 ~100%</strong>, <strong>v2 ~0%</strong> of version-labeled QUIC handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM</a>).</li>
+      <li>Wider measurement agrees: v2 is on <strong>&lt; 0.003%</strong> of QUICv1 domains (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
       <li>Is adoption low because there is <strong>no technical incentive</strong>? v2 buys no new feature, only anti-ossification.</li>
-      <li>Greasing the QUIC bit (RFC 9287) exercises only the fixed bit, not version negotiation, so it does not replace v2. It is better deployed though: Cloudflare&rsquo;s quiche greases by default (<a href="https://docs.quic.tech/quiche/struct.Config.html">quiche Config</a>).</li>
+      <li>Probe any origin&rsquo;s live v1/v2 support at <a href="https://savearoundtrip.com">savearoundtrip.com</a> (cold h3 handshake, reports the versions).</li>
     </ul>
-    <p class="small muted">Probe any origin&rsquo;s live v1/v2 support at <a href="https://savearoundtrip.com">savearoundtrip.com</a> (cold h3 handshake, reports the versions).</p>
   </section>
 
   <!-- 4b. QUIC v2 support matrix -->
@@ -221,7 +235,7 @@
 
   <!-- 6b. The maturity gap -->
   <section>
-    <h2>QUIC is not yet as mature as TCP</h2>
+    <h2>QUIC server-side performance is not yet on par with TCP</h2>
     <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
     <ul class="small">
       <li><strong>User space, not the kernel.</strong> Every packet crosses the syscall boundary, and there is no kernel zero-copy path like <code>sendfile</code> or kTLS. TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
@@ -237,10 +251,11 @@
   <section>
     <h2>Open questions</h2>
     <ul class="small">
-      <li>Which denominator should we agree on, and is the <strong>plateau</strong> the real worry?</li>
+      <li>Is <strong>~30%</strong> already good enough, or is the plateau a problem worth solving?</li>
       <li>Can QUIC v2 ever get deployed? Does a major library shipping no v2 matter?</li>
       <li>Deprecate Alt-Svc for HTTPS RR, or bridge the two? Is <strong>ECH</strong> the reason sites finally publish HTTPS records?</li>
       <li>What should the default be for optimistic QUIC, and who pays the fallback cost on UDP-hostile networks?</li>
+      <li>Multi-CDN deployments complicate QUIC discovery and Happy Eyeballs: do we need shared best practices (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>)?</li>
       <li>Is QUIC the best ground to deploy <strong>L4S</strong>? ECN is reflected natively in the ACKs, and the sender&rsquo;s response lives in user space.</li>
       <li>Given the maturity gap, is QUIC worth it for many deployments today, and what closes the gap fastest?</li>
     </ul>
