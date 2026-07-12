@@ -48,10 +48,8 @@
           <li>Two <strong>HTTPS records</strong> with different targets, each with <code>ipv4hint</code>, <code>ipv6hint</code>, <code>alpn=h3,h2</code>, ECH.</li>
           <li><strong>Alt-Svc</strong> advertising <code>h3</code>.</li>
         </ul>
-        <p class="small">Happy Eyeballs v3 interleaves protocol and family, so these four addresses give <strong>eight</strong> attempts: one QUIC and one TCP per address.</p>
       </div>
       <div class="col-60">
-        <p class="small">Order, each started a short delay after the last, first success wins:</p>
         <ol class="small">
           <li><strong>IPv6</strong> &middot; QUIC (h3)</li>
           <li><strong>IPv4 #1</strong> &middot; QUIC (h3)</li>
@@ -62,7 +60,6 @@
           <li><strong>IPv4 #3</strong> &middot; QUIC (h3)</li>
           <li><strong>IPv4 #3</strong> &middot; TCP (h2/h1)</li>
         </ol>
-        <p class="small muted">QUIC and the preferred family (IPv6) lead, then the other family and TCP interleave. An ECH-rejected attempt adds one retry; the second, lower-priority HTTPS target follows after these.</p>
       </div>
     </div>
     <p class="small muted"><a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, HAPPY WG.</p>
