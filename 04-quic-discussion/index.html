@@ -127,6 +127,20 @@
     <p class="small muted">How do we get vendors to proxy QUIC correctly (<a href="https://interop.seemann.io/">conformance testing</a>, <a href="https://datatracker.ietf.org/doc/rfc9312/">RFC 9312</a>), and can <a href="https://datatracker.ietf.org/doc/draft-ietf-quic-qlog-main-schema/">qlog</a> give operators back the visibility they need?</p>
   </section>
 
+  <!-- 3f. Server-side performance gap -->
+  <section>
+    <h2>QUIC server-side performance is not yet on par with TCP</h2>
+    <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
+    <ul class="small">
+      <li><strong>User space, not the kernel.</strong> Every packet crosses the syscall boundary, and there is no kernel zero-copy path like <code>sendfile</code> or kTLS. TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
+      <li><strong>Offload is less mature.</strong> UDP segmentation and receive offload (GSO/GRO) are newer and less universal than TCP&rsquo;s TSO/LRO, so more of the work happens in software (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
+      <li><strong>Higher CPU per byte.</strong> QUIC costs more to send than TCP; where infrastructure is weak it can be a net loss. Netflix fills a NIC at 800&nbsp;MB/s on TCP, not yet on QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
+      <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself, and immature client-side control can make uploads slower, enough that some operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
+      <li><strong>Less operational expertise.</strong> Fewer engineers have run QUIC at scale, and the encrypted user-space stack gives operators less visibility than TCP.</li>
+    </ul>
+    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks): is QUIC worth the switch today, and what closes it fastest?</p>
+  </section>
+
   <!-- 4. New protocols that could grow the share -->
   <section>
     <h2>New use cases that encourage QUIC adoption</h2>
@@ -233,20 +247,6 @@
       </div>
     </div>
     <p class="small muted">Surveyed 2026-07-11.</p>
-  </section>
-
-  <!-- 6b. The maturity gap -->
-  <section>
-    <h2>QUIC server-side performance is not yet on par with TCP</h2>
-    <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
-    <ul class="small">
-      <li><strong>User space, not the kernel.</strong> Every packet crosses the syscall boundary, and there is no kernel zero-copy path like <code>sendfile</code> or kTLS. TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
-      <li><strong>Offload is less mature.</strong> UDP segmentation and receive offload (GSO/GRO) are newer and less universal than TCP&rsquo;s TSO/LRO, so more of the work happens in software (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
-      <li><strong>Higher CPU per byte.</strong> QUIC costs more to send than TCP; where infrastructure is weak it can be a net loss. Netflix fills a NIC at 800&nbsp;MB/s on TCP, not yet on QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
-      <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself, and immature client-side control can make uploads slower, enough that some operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
-      <li><strong>Less operational expertise.</strong> Fewer engineers have run QUIC at scale, and the encrypted user-space stack gives operators less visibility than TCP.</li>
-    </ul>
-    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks): is QUIC worth the switch today, and what closes it fastest?</p>
   </section>
 
   <!-- 8. Closing -->
