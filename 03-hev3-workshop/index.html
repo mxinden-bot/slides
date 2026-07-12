@@ -51,6 +51,31 @@
     </div>
   </section>
 
+  <!-- 2b. What the crate actually attempts -->
+  <section>
+    <h2>What the crate actually attempts</h2>
+    <p class="small">The <a href="https://github.com/mxinden-bot/happy-eyeballs">happy-eyeballs</a> crate collapses h1/h2 into one TCP attempt and interleaves protocol and family, so those four addresses give <strong>eight</strong> attempts, not twelve. Order, each started a short delay after the last, first success wins:</p>
+    <div class="cols" style="gap:2em;">
+      <div class="col-60">
+        <ol class="small">
+          <li><strong>IPv6</strong> &middot; QUIC (h3)</li>
+          <li><strong>IPv4 #1</strong> &middot; QUIC (h3)</li>
+          <li><strong>IPv6</strong> &middot; TCP (h2/h1)</li>
+          <li><strong>IPv4 #1</strong> &middot; TCP (h2/h1)</li>
+          <li><strong>IPv4 #2</strong> &middot; QUIC (h3)</li>
+          <li><strong>IPv4 #2</strong> &middot; TCP (h2/h1)</li>
+          <li><strong>IPv4 #3</strong> &middot; QUIC (h3)</li>
+          <li><strong>IPv4 #3</strong> &middot; TCP (h2/h1)</li>
+        </ol>
+      </div>
+      <div class="col-40">
+        <p class="small"><strong>QUIC (h3)</strong> and the preferred family (<strong>IPv6</strong>) go first, then the other family and TCP are interleaved, so both are reached within the first few attempts.</p>
+        <p class="small">On top: an <strong>ECH</strong>-rejected attempt adds one retry, and the second, lower-priority HTTPS target adds its own endpoints after these.</p>
+      </div>
+    </div>
+    <p class="small muted">Source: <a href="https://github.com/mxinden-bot/happy-eyeballs/blob/57537e85c39e4116f82b4642550c3a6516d1f4d2/src/lib.rs#L753"><code>interleave_endpoints</code></a>, happy-eyeballs crate.</p>
+  </section>
+
   <!-- 3a. What HEv3 does: Resolution -->
   <section>
     <h2>Part 1: Resolution</h2>
