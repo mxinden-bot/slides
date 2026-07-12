@@ -225,29 +225,34 @@
     </ul>
   </section>
 
-  <!-- 4b. QUIC v2 support matrix -->
+  <!-- 4b. QUIC v2 implement vs deploy -->
   <section>
-    <h2>Who ships QUIC v2?</h2>
-    <div class="cols" style="gap:1.8em;">
+    <h2>Who implements QUIC v2, and who runs it?</h2>
+    <div class="cols" style="gap:2em;">
       <div>
-        <p class="tag" style="color:var(--good);">Ships v2 (9 of 13)</p>
+        <p class="tag" style="color:var(--good);">Implements v2 (9 of 13 stacks)</p>
         <ul class="small">
           <li><a href="https://github.com/mozilla/neqo/blob/9b564e79cf0bf0a7bf1cf74170c2a3bbc89d9610/neqo-transport/src/version.rs#L17">neqo</a>, <a href="https://github.com/google/quiche/blob/c61c583fc2ffd0cc6a53db46e154194898f11177/quiche/quic/core/quic_versions.h#L131">google/quiche</a>, <a href="https://github.com/ngtcp2/ngtcp2/blob/ac14c5180486404ecda2a4e3d00bbd918112f79c/lib/includes/ngtcp2/ngtcp2.h#L273">ngtcp2</a></li>
           <li><a href="https://github.com/microsoft/msquic/blob/ad6ab3f99283f05d6becda5d23bbb3561bbb911d/src/inc/quic_versions.h#L27">msquic</a>, <a href="https://github.com/litespeedtech/lsquic/blob/f8ebaf838d2f4db836bda1182ee35b05d5191cee/src/liblsquic/lsquic_version.c#L127">lsquic</a>, <a href="https://github.com/private-octopus/picoquic/blob/1d416567cc999aad379ad3d9c3b2b7dca66cb1ea/picoquic/picoquic_internal.h#L227">picoquic</a></li>
           <li><a href="https://github.com/aiortc/aioquic/blob/6d36838d008c2202c337142fa07e8bf80e96bac8/src/aioquic/quic/packet.py#L88">aioquic</a>, <a href="https://github.com/quic-go/quic-go/blob/2b5fd98c239aa65a318bd46165bff702c2639a6e/internal/protocol/version.go#L27">quic-go</a>, <a href="https://github.com/ptrd/kwik/blob/4d5d40f540d70a1b50ea59651f9d36740e77f165/core/src/main/java/tech/kwik/core/impl/Version.java#L34">kwik</a></li>
         </ul>
+        <p class="tag" style="color:var(--warn);">v1 only</p>
+        <p class="small"><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a>, <a href="https://github.com/cloudflare/quiche/blob/b9d7b96e727045448b8110234d74cdff84115203/quiche/src/lib.rs#L437">Cloudflare quiche</a>, <a href="https://github.com/facebook/mvfst/blob/efefcbc5eba9d1085140b8a3c021121991601b14/quic/QuicConstants.h#L423">Meta mvfst</a>, <a href="https://github.com/aws/s2n-quic/blob/c340da81d2e7a0fc1bc20c8712995059f18100f0/quic/s2n-quic-transport/src/endpoint/version.rs#L26">AWS s2n-quic</a></p>
       </div>
       <div>
-        <p class="tag" style="color:var(--warn);">v1 only (4)</p>
-        <ul class="small">
-          <li><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a></li>
-          <li><a href="https://github.com/cloudflare/quiche/blob/b9d7b96e727045448b8110234d74cdff84115203/quiche/src/lib.rs#L437">Cloudflare quiche</a></li>
-          <li><a href="https://github.com/facebook/mvfst/blob/efefcbc5eba9d1085140b8a3c021121991601b14/quic/QuicConstants.h#L423">Meta mvfst</a></li>
-          <li><a href="https://github.com/aws/s2n-quic/blob/c340da81d2e7a0fc1bc20c8712995059f18100f0/quic/s2n-quic-transport/src/endpoint/version.rs#L26">AWS s2n-quic</a></li>
+        <p class="tag">Deploys v2 in production (probed)</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> Microsoft Outlook <span style="color:var(--ink-faint)">outlook.office.com (msquic)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> Caddy <span style="color:var(--ink-faint)">caddyserver.com (quic-go)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> LiteSpeed <span style="color:var(--ink-faint)">litespeedtech.com (lsquic)</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Google, YouTube</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Meta, Facebook</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Cloudflare</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Microsoft Bing</span> <span style="color:var(--ink-faint)">v1</span></li>
         </ul>
       </div>
     </div>
-    <p class="small muted">Surveyed 2026-07-11.</p>
+    <p class="small muted">Implementing v2 is common, deploying it is rare. Google&rsquo;s stack implements v2 but its servers run v1; Microsoft runs v2 on Outlook but v1 on Bing. Probed via <a href="https://savearoundtrip.com">savearoundtrip.com</a>, 2026-07-12.</p>
   </section>
 
   <!-- 8. Closing -->
