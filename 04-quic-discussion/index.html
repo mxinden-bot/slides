@@ -219,6 +219,20 @@
     <p class="small muted">Surveyed 2026-07-11.</p>
   </section>
 
+  <!-- 6b. The maturity gap -->
+  <section>
+    <h2>QUIC is not yet as mature as TCP</h2>
+    <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
+    <ul class="small">
+      <li><strong>User space, not the kernel.</strong> Every packet crosses the syscall boundary, and there is no kernel zero-copy path like <code>sendfile</code> or kTLS. TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
+      <li><strong>Offload is younger.</strong> UDP segmentation and receive offload (GSO/GRO) are newer and less universal than TCP&rsquo;s TSO/LRO, so more of the work happens in software (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
+      <li><strong>Higher CPU per byte.</strong> QUIC costs more to send than TCP; where infrastructure is weak it can be a net loss. Netflix fills a NIC at 800&nbsp;MB/s on TCP, not yet on QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
+      <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself; immature client-side control shows up as uploads <strong>5&ndash;8x slower</strong>, enough that operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/ju_UcuwWMkXs1MA-4TEtGHPVoVY/">Tarreau, quic@ietf</a>).</li>
+      <li><strong>Less operational expertise.</strong> Fewer engineers have run QUIC at scale, and the encrypted user-space stack gives operators less visibility than TCP.</li>
+    </ul>
+    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks), but today it is real.</p>
+  </section>
+
   <!-- 7. Open questions -->
   <section>
     <h2>Open questions</h2>
@@ -228,7 +242,7 @@
       <li>Deprecate Alt-Svc for HTTPS RR, or bridge the two? Is <strong>ECH</strong> the reason sites finally publish HTTPS records?</li>
       <li>What should the default be for optimistic QUIC, and who pays the fallback cost on UDP-hostile networks?</li>
       <li>Is QUIC the best ground to deploy <strong>L4S</strong>? ECN is reflected natively in the ACKs, and the sender&rsquo;s response lives in user space.</li>
-      <li>Or is the honest answer that, for many deployments, switching to QUIC is simply <strong>not worth it</strong> on a technical level?</li>
+      <li>Given the maturity gap, is QUIC worth it for many deployments today, and what closes the gap fastest?</li>
     </ul>
   </section>
 
