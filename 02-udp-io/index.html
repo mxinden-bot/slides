@@ -78,10 +78,11 @@
           <li>Median <strong>1</strong>, but the tail batches: P99 <strong>5</strong>, P99.9 <strong>10</strong> segments per send.</li>
           <li>Firefox is a client: mostly downloading, so most sends are small <strong>ACKs</strong> with nothing to batch.</li>
           <li>GSO batches only when there is bulk data to send (uploads).</li>
+          <li>And most connections never get there: only <strong>~6.5%</strong> ever grow their congestion window, of those only <strong>~5-6%</strong> exit slow start.</li>
         </ul>
       </div>
     </div>
-    <figcaption>UDP segments per send syscall, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_sent/explore">GLAM: udp_datagram_segments_sent</a>.</figcaption>
+    <figcaption>UDP segments per send syscall, Firefox Nightly, Linux. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segments_sent/explore">GLAM: udp_datagram_segments_sent</a>. Growth: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_window_growth/explore?activeBuckets=%5B%22no_growth%22%2C%22had_growth%22%2C%22no_growth_but_exit%22%2C%22no_growth_then_exit_then_growth%22%5D&app_id=release">congestion_window_growth</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_slow_start_exited_filtered/explore?activeBuckets=%5B%22not_exited%22%2C%22exited%22%5D&app_id=release">slow_start_exited_filtered</a>.</figcaption>
   </section>
 
   <!-- 4b. Segments per receive syscall (GRO) -->
