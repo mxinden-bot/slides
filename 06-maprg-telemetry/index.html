@@ -62,6 +62,19 @@
     <p class="small muted">Where records exist, most advertise h3 and about half carry address hints, but only <strong>~16%</strong> carry <strong>ECH</strong>, the feature that most needs them.</p>
   </section>
 
+  <!-- 4b. IPv6 and ECH still lag -->
+  <section>
+    <h2>IPv6 and ECH still lag</h2>
+    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
+      <div class="stat"><span class="num">~30%</span><span class="lbl">of connections<br>use IPv6</span></div>
+      <div class="stat"><span class="num">~1%</span><span class="lbl">negotiate<br>real ECH</span></div>
+    </div>
+    <ul class="small">
+      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
+      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE. The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+    </ul>
+  </section>
+
   <!-- 5. Surprise 3: congestion control reality -->
   <section>
     <h2>Most connections never send fast</h2>
@@ -82,6 +95,21 @@
     <div class="chart" id="c-ecn" style="height:430px;"></div>
     <figcaption>What happened to ECN marks on a QUIC connection&rsquo;s path. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM: ecn_path_capability</a> (release).</figcaption>
     <p class="small muted">Only <strong>~37%</strong> of connections see working ECN end to end: nearly half have marks <strong>bleached</strong>, another <strong>16%</strong> are black-holed. A real constraint for L4S deployment.</p>
+  </section>
+
+  <!-- 6b. Connection economics -->
+  <section>
+    <h2>Firefox opens more connections than it uses</h2>
+    <div class="cols" style="justify-content:center; gap:2.4em; margin:0.3em 0;">
+      <div class="stat"><span class="num">52%</span><span class="lbl">of HTTP/2 connections<br>carry zero requests</span></div>
+      <div class="stat"><span class="num">~50%</span><span class="lbl">of connections opened<br>go to a tracker</span></div>
+      <div class="stat"><span class="num">7</span><span class="lbl">median requests<br>per page load</span></div>
+    </div>
+    <ul class="small">
+      <li>Speculative connects, preconnects, and coalescing open many connections that <strong>never carry a request</strong> (52% on HTTP/2, 31% on HTTP/3).</li>
+      <li>Two thirds of connections are third-party, and about <strong>half go to a classified tracker</strong>.</li>
+    </ul>
+    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/spdy_request_per_conn/explore">spdy_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_request_per_conn/explore">http3_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_traffic_analysis/explore">http_traffic_analysis</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_request_per_page/explore">http_request_per_page</a>.</p>
   </section>
 
   <!-- 7. Method: cutting through the noise -->
