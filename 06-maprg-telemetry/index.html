@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Browser&rsquo;s Perspective: Firefox Networking Telemetry</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>A Browser&rsquo;s Perspective</h1>
+    <p class="subtitle">Surprises and insights from Firefox networking telemetry.</p>
+    <span class="venue">MAPRG &middot; IETF 126, Vienna &middot; 23 July 2026 &nbsp;&middot;&nbsp; Oskar Mansfeld &amp; Max Inden &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. The vantage point -->
+  <section>
+    <h2>A client-side vantage point, at scale</h2>
+    <ul>
+      <li>Firefox reports anonymized networking telemetry from <strong>~200M</strong> monthly active users (<a href="https://data.firefox.com/">Firefox Public Data Report</a>).</li>
+      <li>The <strong>client side</strong>, across the globe: it complements server-side and active-probing datasets.</li>
+      <li>Congestion control, DNS timings, path characteristics, QUIC adoption, Happy Eyeballs v3, and more.</li>
+      <li>Collected and aggregated with <a href="https://mozilla.github.io/glean/">Glean</a>, and <strong>entirely public</strong>: anyone can query it.</li>
+    </ul>
+    <p class="small muted">We use it every day to reason about the stack. Here are a few surprises, and how you can use it too.</p>
+  </section>
+
+  <!-- 3. Surprise 1: h3 discovery -->
+  <section>
+    <h2>How connections find HTTP/3</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+        <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>.</figcaption>
+      </div>
+      <div class="col-60">
+        <ul class="small">
+          <li>Only <strong>~42%</strong> of connections are offered HTTP/3 at all.</li>
+          <li>Of those, <strong>~84%</strong> learn it <strong>only from Alt-Svc</strong>, so after a first non-h3 connection: a wasted round trip.</li>
+          <li>An <strong>HTTPS record</strong> would move that discovery into DNS, before connecting, but almost nobody publishes one.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Surprise 2: HTTPS RR contents -->
+  <section>
+    <h2>What HTTPS records actually carry</h2>
+    <div class="chart" id="c-httpsrr" style="height:430px;"></div>
+    <figcaption>Of connections that saw an HTTPS record, what it carried. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
+    <p class="small muted">Where records exist, most advertise h3 and about half carry address hints, but only <strong>~16%</strong> carry <strong>ECH</strong>, the feature that most needs them.</p>
+  </section>
+
+  <!-- 5. Surprise 3: congestion control reality -->
+  <section>
+    <h2>Most connections never send fast</h2>
+    <div class="cols" style="justify-content:center; gap:3em; margin:0.4em 0;">
+      <div class="stat"><span class="num">~6.5%</span><span class="lbl">of connections ever grow<br>their congestion window</span></div>
+      <div class="stat"><span class="num">~5&ndash;6%</span><span class="lbl">of those<br>exit slow start</span></div>
+    </div>
+    <ul class="small">
+      <li>New connections start slow, and many carry <strong>too little data</strong> to ever leave slow start.</li>
+      <li>So high-rate send performance (the QUIC-upload debate) touches a <strong>small slice</strong> of traffic: worth measuring before optimizing.</li>
+    </ul>
+    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_window_growth/explore?activeBuckets=%5B%22no_growth%22%2C%22had_growth%22%2C%22no_growth_but_exit%22%2C%22no_growth_then_exit_then_growth%22%5D&app_id=release">congestion_window_growth</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_slow_start_exited_filtered/explore?activeBuckets=%5B%22not_exited%22%2C%22exited%22%5D&app_id=release">slow_start_exited_filtered</a> (release).</p>
+  </section>
+
+  <!-- 6. Surprise 4: ECN on the path -->
+  <section>
+    <h2>ECN rarely survives the path</h2>
+    <div class="chart" id="c-ecn" style="height:430px;"></div>
+    <figcaption>What happened to ECN marks on a QUIC connection&rsquo;s path. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM: ecn_path_capability</a> (release).</figcaption>
+    <p class="small muted">Only <strong>~37%</strong> of connections see working ECN end to end: nearly half have marks <strong>bleached</strong>, another <strong>16%</strong> are black-holed. A real constraint for L4S deployment.</p>
+  </section>
+
+  <!-- 7. Method: cutting through the noise -->
+  <section>
+    <h2>Cutting through the noise</h2>
+    <ul class="small">
+      <li><strong>Nightly vs release.</strong> Nightly catches regressions within hours; release gives representative scale.</li>
+      <li><strong>Roll out behind experiments.</strong> Compare arms on the same build, so the effect is the change, not the population.</li>
+      <li><strong>Watch the denominator.</strong> Connections, requests, and page loads give different answers to &ldquo;how much HTTP/3?&rdquo;</li>
+      <li><strong>The trap.</strong> A metric gated on an OS feature is buried by the majority OS. UDP GSO/GRO offload looks absent at <code>os:"*"</code> (Windows dominates), and only appears once you filter <code>os:"Linux"</code>.</li>
+    </ul>
+  </section>
+
+  <!-- 8. Use it yourself -->
+  <section>
+    <h2>Public, and yours to query</h2>
+    <div class="cols" style="gap:1.4em;">
+      <div class="card">
+        <p class="tag">Distributions</p>
+        <p class="small"><a href="https://glam.telemetry.mozilla.org/">GLAM</a>: percentiles and label shares per probe, per version and OS. No login.</p>
+      </div>
+      <div class="card">
+        <p class="tag">Dashboards</p>
+        <p class="small"><a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>: curated networking views (DNS, HTTP version share, time to request).</p>
+      </div>
+      <div class="card">
+        <p class="tag">Definitions</p>
+        <p class="small">Every metric is defined in the open: <a href="https://searchfox.org/mozilla-central/source/netwerk/metrics.yaml"><code>netwerk/metrics.yaml</code></a> (Glean).</p>
+      </div>
+    </div>
+    <p class="small muted">Bring a research question and add a browser vantage point. We are happy to help you find the right probe.</p>
+  </section>
+
+  <!-- 9. Takeaways -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Takeaways</h2>
+    <ul class="small" style="color:#e8e6f0; max-width:none;">
+      <li>The client side, at global scale, is <strong>public</strong>: use it.</li>
+      <li>Surprises worth chasing: h3 discovery still wastes a round trip, ECH is barely deployed, most connections never leave slow start, ECN is mostly bleached.</li>
+      <li>Come find us: Oskar Mansfeld &amp; Max Inden, <a href="https://groups.google.com/a/mozilla.com/g/necko">Firefox Networking (Necko)</a>.</li>
+    </ul>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '42%', centerLabel: 'offered h3',
+  }));
+  Charts.register('c-httpsrr', (el) => Charts.bar(el, {
+    x: D.httpsRr.labels, yName: 'share of records', yMax: 90, barLabels: true,
+    yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
+    series: [{ name: 'share', data: D.httpsRr.pct }],
+  }));
+  Charts.register('c-ecn', (el) => Charts.bar(el, {
+    x: D.ecn.labels, yName: 'share of connections', yMax: 60, barLabels: true,
+    yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
+    series: [{ name: 'share', data: D.ecn.pct }],
+  }));
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
