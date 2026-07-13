@@ -5,6 +5,14 @@
  * the slides. Snapshot: mid-2026.
  */
 window.DECK_DATA = {
+  // GLAM networking_http_response_version, Firefox release: HTTP version of
+  // responses received. Splits roughly in thirds.
+  httpVersion: [
+    { name: 'HTTP/1.1', value: 35, color: '#8f8f9d' },
+    { name: 'HTTP/2', value: 35, color: '#2a78d6' },
+    { name: 'HTTP/3', value: 30, color: '#1baf7a' },
+  ],
+
   // GLAM netwerk_happy_eyeballs_h3_discovery, Firefox Nightly (how a connection
   // learns it can use HTTP/3). ~42% of connections are offered h3 at all.
   discovery: [

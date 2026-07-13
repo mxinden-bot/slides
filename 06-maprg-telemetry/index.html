@@ -36,6 +36,24 @@
     <p class="small muted">We use it every day to reason about the stack. Here are a few surprises, and how you can use it too.</p>
   </section>
 
+  <!-- 2b. HTTP version split -->
+  <section>
+    <h2>HTTP splits roughly in thirds</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-httpver"></div>
+        <figcaption>HTTP version of responses Firefox received. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore?activeBuckets=%5B%22http_1%22%2C%22http_2%22%2C%22http_3%22%2C%22unknown%22%5D&timeHorizon=QUARTER">GLAM: http_response_version</a>.</figcaption>
+      </div>
+      <div class="col-60">
+        <ul class="small">
+          <li>Across all responses: <strong>HTTP/3 ~30%</strong>, HTTP/2 ~35%, HTTP/1.1 ~35%.</li>
+          <li>The surprise: <strong>HTTP/1.1 is far from dead</strong>, still as common as HTTP/2.</li>
+          <li>A client-side answer to &ldquo;how much HTTP/3?&rdquo;: ~30% of responses, in line with Cloudflare&rsquo;s request share.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- 3. Surprise 1: h3 discovery -->
   <section>
     <h2>How connections find HTTP/3</h2>
@@ -166,6 +184,9 @@
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
+  Charts.register('c-httpver', (el) => Charts.donut(el, {
+    data: D.httpVersion, centerValue: '30%', centerLabel: 'HTTP/3',
+  }));
   Charts.register('c-discovery', (el) => Charts.donut(el, {
     data: D.discovery, centerValue: '42%', centerLabel: 'offered h3',
   }));
