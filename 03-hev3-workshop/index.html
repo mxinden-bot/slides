@@ -302,6 +302,31 @@ fn connection_attempt_delay() {
     <p class="small muted">Gotchas from the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a> and the <a href="https://github.com/mozilla/happy-eyeballs">happy-eyeballs crate</a>, most now fixed.</p>
   </section>
 
+  <!-- 11c. How to debug Happy Eyeballs -->
+  <section>
+    <h2>Debugging Happy Eyeballs</h2>
+    <div class="cols" style="gap:1.6em;">
+      <div class="col-40">
+        <p class="tag">Inspect live state</p>
+        <ul class="small">
+          <li><code>about:networking</code>: the <strong>HTTP</strong>, <strong>Sockets</strong>, and <strong>DNS</strong> tabs show live connections, open sockets, and cached lookups.</li>
+          <li>The <strong>Alt-Svc</strong> page: which origins advertised h3, and whether it is still valid.</li>
+          <li>The <strong>DNS Lookup</strong> tool: resolve a host on demand and see its A / AAAA and HTTPS records.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <p class="tag">Capture a trace: the Firefox Profiler</p>
+        <ol class="small">
+          <li>Enable it from <a href="https://profiler.firefox.com/">profiler.firefox.com</a> (the page walks you through adding the toolbar button).</li>
+          <li>Start profiling with the <strong>Networking</strong> preset.</li>
+          <li>Load the site you want to debug, then stop.</li>
+          <li>Open the <strong>parent-process Socket Thread</strong> marker chart: each attempt, its timing, and which one won are right there.</li>
+        </ol>
+        <p class="small muted">Example profile: <a href="https://share.firefox.dev/4wOr8Fc">share.firefox.dev/4wOr8Fc</a>.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- 12. Lessons -->
   <section>
     <h2>Lessons and open questions</h2>
