@@ -133,7 +133,7 @@
     <h2>QUIC server-side performance is not yet on par with TCP</h2>
     <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
     <ul class="small">
-      <li><strong>User space, not the kernel.</strong> Every packet crosses the syscall boundary, and there is no kernel zero-copy path like <code>sendfile</code> or kTLS. TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
+      <li><strong>Usually in user space.</strong> Every packet crosses the syscall boundary; <code>io_uring</code> is the emerging zero-copy path, and QUIC can even run in the kernel (msquic). TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
       <li><strong>Offload is less mature.</strong> UDP segmentation and receive offload (GSO/GRO) are newer and less universal than TCP&rsquo;s TSO/LRO, so more of the work happens in software (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
       <li><strong>Higher CPU per byte.</strong> QUIC costs more to send than TCP; where infrastructure is weak it can be a net loss. Netflix fills a NIC at 800&nbsp;MB/s on TCP, not yet on QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
       <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself, and immature client-side control can make uploads slower, enough that some operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
