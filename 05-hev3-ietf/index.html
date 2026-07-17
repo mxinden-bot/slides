@@ -232,7 +232,7 @@ fn connection_attempt_delay() {
       <li><strong>Attempt delay</strong>: a 50 ms base with <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), not the draft&rsquo;s flat 250 ms.</li>
       <li><strong>Resolution delay</strong>: <strong>25 ms</strong>, not 50 ms (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
       <li>Also interleaves <strong>protocol variant</strong> with address family, so QUIC and the other family are reached early.</li>
-      <li><strong>Potential future deviation</strong>: an opt-in flag to <strong>skip waiting for the preferred family</strong> once addresses and the HTTPS record are in (<a href="https://github.com/mozilla/happy-eyeballs/pull/116">PR 116</a>), not enabled today.</li>
+      <li><strong>Potential future deviation</strong>: no longer wait for the preferred family (e.g. IPv6), wait only for the <strong>HTTPS RR</strong> before racing (<a href="https://github.com/mozilla/happy-eyeballs/pull/116">PR 116</a>). Not enabled today.</li>
     </ul>
   </section>
 
