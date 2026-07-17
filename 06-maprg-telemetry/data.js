@@ -29,6 +29,12 @@ window.DECK_DATA = {
     pct: [79.5, 54.4, 51.2, 16.3],
   },
 
+  // GLAM networking_http_3_rtt, Firefox Nightly: smoothed RTT of QUIC connections.
+  rtt: {
+    p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99', 'P99.9'],
+    ms: [5, 14, 25, 46, 174, 377, 1943],
+  },
+
   // GLAM networking_http_3_ecn_path_capability, Firefox release (label shares via
   // non_norm_histogram): what happened to ECN marks on a QUIC connection's path.
   ecn: [

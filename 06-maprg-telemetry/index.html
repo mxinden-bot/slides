@@ -88,7 +88,7 @@
       <div class="stat"><span class="num">~1%</span><span class="lbl">negotiate<br>real ECH</span></div>
     </div>
     <ul class="small">
-      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
+      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale. Curiously, IPv6 and HTTP/3 have <strong>converged</strong>: both sit near ~30% and track each other (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
       <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE. The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
     </ul>
   </section>
@@ -124,6 +124,14 @@
         <p class="small muted">A real base to build L4S on.</p>
       </div>
     </div>
+  </section>
+
+  <!-- 6a. QUIC RTT -->
+  <section>
+    <h2>QUIC round-trip times, from the client</h2>
+    <div class="chart" id="c-rtt" style="height:420px;"></div>
+    <figcaption>Smoothed RTT of QUIC connections, log scale. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking_http_3_rtt</a> (Nightly).</figcaption>
+    <p class="small muted">Median <strong>~25 ms</strong>, but a long tail: P95 <strong>~175 ms</strong>, P99.9 <strong>~2 s</strong>. The client sees the whole world&rsquo;s paths, including the slow ones.</p>
   </section>
 
   <!-- 6b. Connection economics -->
@@ -195,6 +203,12 @@
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
+  const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+  Charts.register('c-rtt', (el) => Charts.bar(el, {
+    x: D.rtt.p, yName: 'ms (log)', yType: 'log', yMin: 1, yMax: 3000, yFormatter: ms,
+    barLabels: true, barLabelFormatter: (p) => ms(p.value),
+    series: [{ name: 'RTT', data: D.rtt.ms }],
+  }));
   Charts.register('c-httpver', (el) => Charts.donut(el, {
     data: D.httpVersion, centerValue: '30%', centerLabel: 'HTTP/3',
   }));
