@@ -172,8 +172,8 @@ fn connection_attempt_delay() {
       </div>
       <div class="col-60">
         <ul>
-          <li><strong>29%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay.</li>
-          <li><strong>21%</strong> via an HTTPS record alone, <strong>19%</strong> via both: no round trip.</li>
+          <li><strong>35%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay: <strong>84%</strong> of the h3-capable ones.</li>
+          <li>Only <strong>~3%</strong> via an HTTPS record alone, <strong>~4%</strong> via both: no round trip.</li>
           <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
         </ul>
       </div>
@@ -185,14 +185,14 @@ fn connection_attempt_delay() {
   <section>
     <h2>What HTTPS records carry</h2>
     <div class="chart" id="c-features"></div>
-    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Nearly all advertise h3; about half carry <strong>ECH</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
+    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Most advertise h3 (~80%) and about half carry address hints; only <strong>~16%</strong> carry <strong>ECH</strong>. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
   </section>
 
   <!-- M10. https_rr_features_by_resolver -->
   <section>
     <h2>HTTPS-RR features, by resolver</h2>
     <div class="chart" id="c-byresolver"></div>
-    <figcaption>Same SvcParams, DoH vs the OS resolver. DoH: 98/96/96/32% (h3/v4/v6/ECH). OS resolver: 96/90/89/<strong>52%</strong>. ECH appears more over the OS resolver. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
+    <figcaption>Same SvcParams, DoH vs the OS resolver. The two look alike: h3 ~76%, hints ~45%, ECH ~16% either way. The record&rsquo;s contents do not depend on how it was resolved. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
   <!-- 5b. The wasted round trip (savearoundtrip) -->
@@ -227,12 +227,14 @@ fn connection_attempt_delay() {
   <!-- 6. Library changes -->
   <section>
     <h2>How Firefox deviates from the draft</h2>
-    <ul>
+    <ul class="small">
       <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: a deterministic, sans-I/O state machine, reusable outside Firefox.</li>
       <li><strong>Attempt delay</strong>: a 50 ms base with <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), not the draft&rsquo;s flat 250 ms.</li>
       <li><strong>Resolution delay</strong>: <strong>25 ms</strong>, not 50 ms (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
       <li>Also interleaves <strong>protocol variant</strong> with address family, so QUIC and the other family are reached early.</li>
+      <li><strong>Optimistic DNS</strong>: Firefox uses DNS answers optimistically rather than blocking on every fresh lookup, so resolution rarely stalls the race (similar to <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">draft-gakiwate-dnsop-optimistic-dns</a>).</li>
       <li><strong>Potential future deviation</strong>: no longer wait for the preferred family&rsquo;s <strong>DNS record response</strong> (e.g. IPv6 / AAAA), wait only for the <strong>HTTPS RR</strong> before racing (<a href="https://github.com/mozilla/happy-eyeballs/pull/116">PR 116</a>). Not enabled today.</li>
+      <li><strong>Potential future addition</strong>: proxy awareness (MASQUE connect-udp vs HTTP CONNECT ordering), WebSocket / WebTransport EXTENDED CONNECT.</li>
     </ul>
   </section>
 
@@ -240,9 +242,6 @@ fn connection_attempt_delay() {
   <section>
     <h2>Real-world edge cases</h2>
     <ul class="small">
-      <li>Racing an <strong>unreachable IPv6</strong> address first added up to <strong>40 ms</strong> on cold DoH connections (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044951">bug 2044951</a>).</li>
-      <li><strong>IPv6 blackholes</strong>: an h3 path that silently drops packets needed explicit handling (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1993300">bug 1993300</a>).</li>
-      <li><strong>0-RTT</strong>: a rejected 0-RTT connection was wrongly kept as usable (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040900">bug 2040900</a>); the fallback when 0-RTT loses the race had to be defined (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1994321">bug 1994321</a>).</li>
       <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
       <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
       <li><strong>Multi-CDN</strong>: a non-standard HTTPS-RR/CNAME consistency check rejected legitimate multi-CDN records; reverted to resolve each <code>TargetName</code> independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>, <a href="https://github.com/mozilla/happy-eyeballs/pull/104">PR 104</a>).</li>
@@ -284,16 +283,6 @@ fn connection_attempt_delay() {
       <li>Signal present: try HTTP/3 first, as today.</li>
       <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
       <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
-    </ul>
-  </section>
-
-  <!-- 7. For the WG -->
-  <section>
-    <h2>For the working group</h2>
-    <ul>
-      <li>The 250 ms Connection Attempt Delay is coarse; a smaller base with back-off works better in practice.</li>
-      <li>Would a shared, deterministic <strong>test suite</strong> for the algorithm help?</li>
-      <li>Open: <strong>proxy awareness</strong> (MASQUE connect-udp vs HTTP CONNECT ordering), WebSocket / WebTransport EXTENDED CONNECT.</li>
     </ul>
   </section>
 
@@ -358,7 +347,7 @@ fn connection_attempt_delay() {
     ],
   }));
   Charts.register('c-discovery', (el) => Charts.donut(el, {
-    data: D.discovery, centerValue: '29%', centerLabel: 'Alt-Svc only',
+    data: D.discovery, centerValue: '35%', centerLabel: 'Alt-Svc only',
   }));
   Charts.register('c-features', (el) => Charts.barH(el, {
     y: D.rrFeatures.labels, data: D.rrFeatures.pct, colorByIndex: false,

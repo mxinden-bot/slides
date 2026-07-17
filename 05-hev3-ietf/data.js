@@ -33,21 +33,22 @@ window.DECK_DATA = {
     https: [14, 80, 349, 4954],
   },
 
-  // h3_discovery: how a connection learned (or did not) that h3 was available (% of connects)
+  // h3_discovery: how a connection learned (or did not) that h3 was available (% of
+  // connects). Real GLAM via savearoundtrip's method (non_norm_histogram, per-build avg).
   discovery: [
-    { name: 'no h3 advertised', value: 31.3, color: '#8f8f9d' },
-    { name: 'Alt-Svc only', value: 29.1, color: '#eb6834' },
-    { name: 'HTTPS record only', value: 20.7, color: '#1baf7a' },
-    { name: 'both', value: 19.0, color: '#2a78d6' },
+    { name: 'no h3 advertised', value: 58.2, color: '#8f8f9d' },
+    { name: 'Alt-Svc only', value: 35.0, color: '#eb6834' },
+    { name: 'both', value: 3.8, color: '#2a78d6' },
+    { name: 'HTTPS record only', value: 2.9, color: '#1baf7a' },
   ],
 
   // https_rr_features: of connections that saw an HTTPS record, share carrying each SvcParam
-  rrFeatures: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'], pct: [97, 86, 86, 53] },
+  rrFeatures: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'], pct: [79.5, 54.4, 51.2, 16.3] },
 
   // https_rr_features_by_resolver: same SvcParams, split by how DNS was resolved (%)
   rrByResolver: {
     labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'],
-    doh:    [98, 96, 96, 32],
-    native: [96, 90, 89, 52],
+    doh:    [76, 48, 42, 16],
+    native: [75, 45, 40, 16],
   },
 };
