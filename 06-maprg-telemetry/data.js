@@ -29,10 +29,12 @@ window.DECK_DATA = {
     pct: [79.5, 54.4, 51.2, 16.3],
   },
 
-  // GLAM networking_http_3_ecn_path_capability, Firefox release: what happened
-  // to ECN marks on the path for a QUIC connection.
-  ecn: {
-    labels: ['ECN bleached', 'ECN capable', 'black-holed'],
-    pct: [47.3, 36.8, 15.9],
-  },
+  // GLAM networking_http_3_ecn_path_capability, Firefox release (label shares via
+  // non_norm_histogram): what happened to ECN marks on a QUIC connection's path.
+  ecn: [
+    { name: 'ECN capable', value: 59.6, color: '#1baf7a' },
+    { name: 'bleached', value: 34.6, color: '#eb6834' },
+    { name: 'unsent ECT(1)', value: 3.0, color: '#c9c9d1' },
+    { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
+  ],
 };

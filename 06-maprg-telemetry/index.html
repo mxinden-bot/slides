@@ -109,10 +109,21 @@
 
   <!-- 6. Surprise 4: ECN on the path -->
   <section>
-    <h2>ECN rarely survives the path</h2>
-    <div class="chart" id="c-ecn" style="height:430px;"></div>
-    <figcaption>What happened to ECN marks on a QUIC connection&rsquo;s path. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM: ecn_path_capability</a> (release).</figcaption>
-    <p class="small muted">Only <strong>~37%</strong> of connections see working ECN end to end: nearly half have marks <strong>bleached</strong>, another <strong>16%</strong> are black-holed. A real constraint for L4S deployment.</p>
+    <h2>ECN works on most paths, and it pays off</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-ecn"></div>
+        <figcaption>ECN marks on a QUIC connection&rsquo;s path. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM: ecn_path_capability</a> (release).</figcaption>
+      </div>
+      <div class="col-60">
+        <ul class="small">
+          <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>bleached</strong>, only <strong>~3%</strong> black-holed.</li>
+          <li>It pays off: on a <strong>CE</strong> mark Firefox reduces its congestion response <strong>without waiting for loss</strong> (<a href="https://github.com/mozilla/neqo/pull/3233">neqo#3233</a>).</li>
+          <li><strong>~1 in 5</strong> congestion responses now comes from a CE mark, not packet loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM: congestion_event_reason</a>).</li>
+        </ul>
+        <p class="small muted">A real base to build L4S on.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 6b. Connection economics -->
@@ -195,10 +206,8 @@
     yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
     series: [{ name: 'share', data: D.httpsRr.pct }],
   }));
-  Charts.register('c-ecn', (el) => Charts.bar(el, {
-    x: D.ecn.labels, yName: 'share of connections', yMax: 60, barLabels: true,
-    yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
-    series: [{ name: 'share', data: D.ecn.pct }],
+  Charts.register('c-ecn', (el) => Charts.donut(el, {
+    data: D.ecn, centerValue: '60%', centerLabel: 'ECN capable',
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
