@@ -30,7 +30,7 @@
     <ul>
       <li>Happy Eyeballs v3 is now <strong>enabled by default in Firefox Nightly</strong>.</li>
       <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, with a couple of tuned delay deviations (see below).</li>
-      <li>Public Glean telemetry is flowing.</li>
+      <li>Public Glean telemetry is available.</li>
     </ul>
   </section>
 
@@ -43,6 +43,69 @@
       <li>Visit any site, e.g. <a href="https://www.happy-eyeballs.net/">happy-eyeballs.net</a>.</li>
     </ol>
     <p class="small muted">Enable DoH to get HTTPS records on all platforms.</p>
+  </section>
+
+  <!-- 3b. The library -->
+  <section>
+    <h2>A reusable library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a></h2>
+    <ul>
+      <li>A <strong>deterministic, sans-I/O state machine</strong>: no network, no clock. The caller drives all I/O and passes <strong>time</strong> in explicitly.</li>
+      <li>No dependency on Firefox; embeds in Necko&rsquo;s C++ event loop.</li>
+      <li>Permissive license (MIT OR Apache-2.0). Input and contributions welcome.</li>
+      <li>Every scenario is a plain unit test, so behaviour is easy to pin down and easy to review.</li>
+    </ul>
+    <p class="small muted"><a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
+  </section>
+
+  <!-- 3c. Testability -->
+  <section>
+    <h2>Testing the state machine</h2>
+    <pre style="font-size:0.72em;"><code class="language-rust" data-trim data-noescape>#[test]
+fn connection_attempt_delay() {
+    let (mut now, mut he) = setup();
+    expect_initial_dns_queries(&mut he, now);
+
+    he.input(in_dns_https_positive_no_alpn(Id::from(0)), now);
+    he.expect(out_resolution_delay(), now);
+    he.input(in_dns_aaaa_positive(Id::from(1)), now);
+    he.expect(out_attempt_v6_h1_h2(Id::from(3)), now);   // preferred family first
+    he.input(in_dns_a_positive(Id::from(2)), now);
+    he.expect(out_connection_attempt_delay(), now);
+
+    now += CONNECTION_ATTEMPT_DELAY;                     // time is an argument
+    he.expect(out_attempt_v4_h1_h2(Id::from(4)), now);   // the staggered second attempt
+}</code></pre>
+    <p class="small muted">Feed inputs, assert the next action, advance time by hand.</p>
+  </section>
+
+  <!-- 3d. Two timers -->
+  <section>
+    <h2>Two timers</h2>
+    <div class="cols">
+      <div>
+        <h3>Resolution Delay</h3>
+        <ul>
+          <li>How long to wait for the preferred family / HTTPS RR before committing.</li>
+          <li>Draft default <strong>50 ms</strong>. Firefox: <strong>25 ms</strong> (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Connection Attempt Delay</h3>
+        <ul>
+          <li>Stagger between successive attempts.</li>
+          <li>Draft default <strong>250 ms</strong>. Firefox: <strong>50 ms with a &times;2 multiplier</strong> (50, 150, 350, 750 ms &hellip;).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="base"></div>
+      <div class="m" style="left:3%;"><div class="dot"></div><div class="t">0 ms</div></div>
+      <div class="m" style="left:9%;"><div class="dot"></div><div class="t">50</div></div>
+      <div class="m" style="left:21%;"><div class="dot"></div><div class="t">150</div></div>
+      <div class="m" style="left:45%;"><div class="dot"></div><div class="t">350</div></div>
+      <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
+    </div>
+    <p class="small muted">Each dot is a staggered connection attempt: a 50 ms base with a &times;2 back-off, versus the draft&rsquo;s single 250 ms.</p>
   </section>
 
   <!-- TELEMETRY divider -->
@@ -132,6 +195,35 @@
     <figcaption>Same SvcParams, DoH vs the OS resolver. DoH: 98/96/96/32% (h3/v4/v6/ECH). OS resolver: 96/90/89/<strong>52%</strong>. ECH appears more over the OS resolver. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
   </section>
 
+  <!-- 5b. The wasted round trip (savearoundtrip) -->
+  <section>
+    <h2>The wasted round trip</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5c. Save a round trip / savearoundtrip.com -->
+  <section>
+    <h2>Save a round trip</h2>
+    <ul>
+      <li>Many sites send <code>Alt-Svc: h3</code> but publish <strong>no HTTPS record</strong>.</li>
+      <li>Every first visit then wastes a round trip: connect over HTTP/2, read the header, upgrade to HTTP/3 only <em>next</em> time.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code> and the client goes straight to QUIC on connection #1.</li>
+      <li>Bonus: the HTTPS record is the <strong>only</strong> way to deliver ECH.</li>
+    </ul>
+    <p style="margin-top:0.7em; font-size:1.1em;"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: check your domain.</p>
+  </section>
+
   <!-- 6. Library changes -->
   <section>
     <h2>How Firefox deviates from the draft</h2>
@@ -141,6 +233,46 @@
       <li><strong>Resolution delay</strong>: <strong>25 ms</strong>, not 50 ms (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
       <li>Also interleaves <strong>protocol variant</strong> with address family; a flag can <strong>skip waiting for the preferred family</strong>.</li>
     </ul>
+  </section>
+
+  <!-- 6b. Real-world edge cases -->
+  <section>
+    <h2>Real-world edge cases</h2>
+    <ul class="small">
+      <li>Racing an <strong>unreachable IPv6</strong> address first added up to <strong>40 ms</strong> on cold DoH connections (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044951">bug 2044951</a>).</li>
+      <li><strong>IPv6 blackholes</strong>: an h3 path that silently drops packets needed explicit handling (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1993300">bug 1993300</a>).</li>
+      <li><strong>0-RTT</strong>: a rejected 0-RTT connection was wrongly kept as usable (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040900">bug 2040900</a>); the fallback when 0-RTT loses the race had to be defined (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1994321">bug 1994321</a>).</li>
+      <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
+      <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
+      <li><strong>Multi-CDN</strong>: a non-standard HTTPS-RR/CNAME consistency check rejected legitimate multi-CDN records; reverted to resolve each <code>TargetName</code> independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>, <a href="https://github.com/mozilla/happy-eyeballs/pull/104">PR 104</a>).</li>
+      <li><strong>Web standards</strong>: <code>dnsLookupEnd</code> stopped matching the Resource Timing spec (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
+    </ul>
+    <p class="small muted">Gotchas from the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a> and the <a href="https://github.com/mozilla/happy-eyeballs">happy-eyeballs crate</a>, most now fixed.</p>
+  </section>
+
+  <!-- 6c. Debugging Happy Eyeballs -->
+  <section>
+    <h2>Debugging Happy Eyeballs</h2>
+    <div class="cols" style="gap:1.6em;">
+      <div class="col-40">
+        <p class="tag">Inspect live state</p>
+        <ul class="small">
+          <li><code>about:networking</code>: the <strong>HTTP</strong>, <strong>Sockets</strong>, and <strong>DNS</strong> tabs show live connections, open sockets, and cached lookups.</li>
+          <li>The <strong>Alt-Svc</strong> page: which origins advertised h3, and whether it is still valid.</li>
+          <li>The <strong>DNS Lookup</strong> tool: resolve a host on demand and see its A / AAAA and HTTPS records.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <p class="tag">Capture a trace: the Firefox Profiler</p>
+        <ol class="small">
+          <li>Enable it from <a href="https://profiler.firefox.com/">profiler.firefox.com</a> (the page walks you through adding the toolbar button).</li>
+          <li>Start profiling with the <strong>Networking</strong> preset.</li>
+          <li>Load the site you want to debug, then stop.</li>
+          <li>Open the <strong>parent-process Socket Thread</strong> marker chart: each attempt, its timing, and which one won are right there.</li>
+        </ol>
+        <p class="small muted">Example profile: <a href="https://share.firefox.dev/4wOr8Fc">share.firefox.dev/4wOr8Fc</a>.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 7. For the WG -->
@@ -180,6 +312,7 @@
 <script src="../lib/reveal/plugin/zoom/zoom.js"></script>
 <script src="../lib/echarts/echarts.min.js"></script>
 <script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
 <script src="data.js"></script>
 <script>
   const D = window.DECK_DATA;
@@ -239,6 +372,18 @@
       { name: 'OS resolver', data: D.rrByResolver.native },
     ],
   }));
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
     hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
