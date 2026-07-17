@@ -134,6 +134,14 @@
     <p class="small muted">Median <strong>~25 ms</strong>, but a long tail: P95 <strong>~175 ms</strong>, P99.9 <strong>~2 s</strong>. The client sees the whole world&rsquo;s paths, including the slow ones.</p>
   </section>
 
+  <!-- 6a2. Server MTUs -->
+  <section>
+    <h2>Reading server MTUs from the client</h2>
+    <div class="chart" id="c-segsize" style="height:420px;"></div>
+    <figcaption>Received QUIC datagram size, i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (Linux, release).</figcaption>
+    <p class="small muted">The median server datagram is <strong>~1217 B</strong>, a conservative QUIC-safe size; only the tail reaches <strong>~1448 B</strong>, near the 1500-byte Ethernet MTU. Most servers leave PMTUD headroom on the table. (The tiny sizes are ACKs.)</p>
+  </section>
+
   <!-- 6b. Connection economics -->
   <section>
     <h2>Firefox opens more connections than it uses</h2>
@@ -204,6 +212,11 @@
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+  Charts.register('c-segsize', (el) => Charts.bar(el, {
+    x: D.segSize.p, yName: 'bytes', yMax: 1600, barLabels: true,
+    yFormatter: (v) => v + ' B', barLabelFormatter: (p) => p.value + ' B',
+    series: [{ name: 'bytes', data: D.segSize.bytes }],
+  }));
   Charts.register('c-rtt', (el) => Charts.bar(el, {
     x: D.rtt.p, yName: 'ms (log)', yType: 'log', yMin: 1, yMax: 3000, yFormatter: ms,
     barLabels: true, barLabelFormatter: (p) => ms(p.value),

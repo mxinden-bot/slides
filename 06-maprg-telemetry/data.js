@@ -29,6 +29,13 @@ window.DECK_DATA = {
     pct: [79.5, 54.4, 51.2, 16.3],
   },
 
+  // GLAM networking_http_3_udp_datagram_segment_size_received, Firefox release,
+  // Linux: size of received QUIC datagrams, i.e. the MTU the server sends at.
+  segSize: {
+    p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99'],
+    bytes: [30, 1166, 1217, 1217, 1448, 1448],
+  },
+
   // GLAM networking_http_3_rtt, Firefox Nightly: smoothed RTT of QUIC connections.
   rtt: {
     p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99', 'P99.9'],
