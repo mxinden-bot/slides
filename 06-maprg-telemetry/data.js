@@ -50,4 +50,30 @@ window.DECK_DATA = {
     { name: 'unsent ECT(1)', value: 3.0, color: '#c9c9d1' },
     { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
   ],
+
+  // Share of Firefox page loads over HTTPS, over time. Historical points (2013-2016)
+  // are verbatim from Let's Encrypt's historical-https-adoption.csv (HTTP_PAGELOAD_IS_SSL);
+  // recent points are the pageload-weighted aggregate of current-https-adoption.csv.
+  // Source: https://letsencrypt.org/stats/ .
+  httpsAdoption: {
+    x: ['2013', '2015', '2016', '2018', '2020', '2022', '2024', '2026'],
+    pct: [29, 31, 46, 72, 81, 80, 82, 83],
+  },
+
+  // Firefox desktop OS mix, data.firefox.com/dashboard/hardware, snapshot 2026-07-06.
+  osMix: [
+    { name: 'Windows 11', value: 48.4, color: '#2a78d6' },
+    { name: 'Windows 10', value: 30.8, color: '#7ea9dd' },
+    { name: 'Windows (older)', value: 6.2, color: '#8f8f9d' },
+    { name: 'macOS', value: 8.5, color: '#1baf7a' },
+    { name: 'Linux', value: 6.1, color: '#eb6834' },
+  ],
+
+  // Firefox Android navigations by network type (7-day avg), performance.mozilla.org
+  // (STMO query 115600). ethernet/unknown (<0.1%) folded into 'not reported'.
+  netType: [
+    { name: 'wifi', value: 60.5, color: '#1baf7a' },
+    { name: 'cellular', value: 28.8, color: '#2a78d6' },
+    { name: 'not reported', value: 10.7, color: '#c9c9d1' },
+  ],
 };

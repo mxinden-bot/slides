@@ -36,6 +36,42 @@
     <p class="small muted">We use it every day to reason about the stack. Here are a few surprises, and how you can use it too.</p>
   </section>
 
+  <!-- 2a. Who we measure -->
+  <section>
+    <h2>Who we measure: the whole population</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-osmix"></div>
+        <figcaption>Firefox desktop OS mix. <a href="https://data.firefox.com/dashboard/hardware">Firefox Hardware Report</a> (2026-07).</figcaption>
+      </div>
+      <div class="col-60">
+        <ul class="small">
+          <li>Windows dominates (<strong>~85%</strong>: Win 11 ~48%, Win 10 ~31%); macOS ~8%, Linux ~6%.</li>
+          <li>A real tail of old and small machines: <strong>~7%</strong> run a <strong>32-bit</strong> OS, a quarter have only <strong>2 CPU cores</strong>, ~11% just <strong>4 GB</strong> of RAM.</li>
+          <li>This is not the developer&rsquo;s laptop. Networking code runs on all of it.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2a2. How they connect -->
+  <section>
+    <h2>On mobile, a third of traffic is cellular</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-nettype"></div>
+        <figcaption>Firefox Android navigations by network type. <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a> (7-day avg).</figcaption>
+      </div>
+      <div class="col-60">
+        <ul class="small">
+          <li>On Android: <strong>~61%</strong> wifi, <strong>~29%</strong> cellular, the rest unreported.</li>
+          <li>Cellular paths bring higher and more variable RTT, more loss, and NAT rebinding: the hard cases cluster here.</li>
+          <li>Desktop has no equivalent split, most of it is wired or wifi.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- 2b. HTTP version split -->
   <section>
     <h2>HTTP splits roughly in thirds</h2>
@@ -49,6 +85,7 @@
           <li>Across all responses: <strong>HTTP/3 ~30%</strong>, HTTP/2 ~35%, HTTP/1.1 ~35%.</li>
           <li>The surprise: <strong>HTTP/1.1 is far from dead</strong>, still as common as HTTP/2.</li>
           <li>A client-side answer to &ldquo;how much HTTP/3?&rdquo;: ~30% of responses, in line with Cloudflare&rsquo;s request share.</li>
+          <li>Within HTTP/3, a new metric tracks <strong>QUIC v1 vs v2</strong>: <strong>~100% v1</strong> today, v2 not yet negotiated at scale (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>, Nightly).</li>
         </ul>
       </div>
     </div>
@@ -78,6 +115,7 @@
     <div class="chart" id="c-httpsrr" style="height:430px;"></div>
     <figcaption>Of connections that saw an HTTPS record, what it carried. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
     <p class="small muted">Where records exist, most advertise h3 and about half carry address hints, but only <strong>~16%</strong> carry <strong>ECH</strong>, the feature that most needs them.</p>
+    <p class="small muted">These records arrive over DNS, yet only <strong>~12%</strong> of desktop DNS resolutions use <strong>DoH</strong> (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>); the rest go through the OS resolver, which may strip them.</p>
   </section>
 
   <!-- 4b. IPv6 and ECH still lag -->
@@ -93,6 +131,24 @@
     </ul>
   </section>
 
+  <!-- 4c. Adoption contrast: HTTPS vs IPv6 -->
+  <section>
+    <h2>Transitions can be fast: HTTPS vs IPv6</h2>
+    <div class="cols">
+      <div class="col-60">
+        <div class="chart short" id="c-https-adopt"></div>
+        <figcaption>Share of Firefox page loads over HTTPS. <a href="https://letsencrypt.org/stats/">Let&rsquo;s Encrypt / Firefox telemetry</a>.</figcaption>
+      </div>
+      <div class="col-40">
+        <ul class="small">
+          <li><strong>HTTPS</strong> went from <strong>~29%</strong> of page loads (2013) to <strong>80%+</strong> in about seven years.</li>
+          <li><strong>IPv6</strong> is still only <strong>~42&ndash;47%</strong> deployed (<a href="https://www.google.com/intl/en/ipv6/statistics.html">Google</a> / <a href="https://stats.labs.apnic.net/ipv6">APNIC</a>) after <strong>25+ years</strong> (RFC 2460, 1998).</li>
+          <li>HTTP/3 sits near <strong>~30%</strong> today. Which curve will it follow?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- 5. Surprise 3: congestion control reality -->
   <section>
     <h2>Most connections never send fast</h2>
@@ -102,9 +158,10 @@
     </div>
     <ul class="small">
       <li>New connections start slow, and many carry <strong>too little data</strong> to ever leave slow start.</li>
+      <li>The median connection never even registers a <strong>congestion event</strong>: <strong>0</strong> at P50 and P95, just <strong>6</strong> at P99.9. Almost nothing ever pushes the path hard enough to see loss or a CE mark.</li>
       <li>So high-rate send performance (the QUIC-upload debate) touches a <strong>small slice</strong> of traffic: worth measuring before optimizing.</li>
     </ul>
-    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_window_growth/explore?activeBuckets=%5B%22no_growth%22%2C%22had_growth%22%2C%22no_growth_but_exit%22%2C%22no_growth_then_exit_then_growth%22%5D&app_id=release">congestion_window_growth</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_slow_start_exited_filtered/explore?activeBuckets=%5B%22not_exited%22%2C%22exited%22%5D&app_id=release">slow_start_exited_filtered</a> (release).</p>
+    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_window_growth/explore?activeBuckets=%5B%22no_growth%22%2C%22had_growth%22%2C%22no_growth_but_exit%22%2C%22no_growth_then_exit_then_growth%22%5D&app_id=release">congestion_window_growth</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_slow_start_exited_filtered/explore?activeBuckets=%5B%22not_exited%22%2C%22exited%22%5D&app_id=release">slow_start_exited_filtered</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_count/explore?app_id=release">congestion_event_count</a> (release).</p>
   </section>
 
   <!-- 6. Surprise 4: ECN on the path -->
@@ -235,6 +292,17 @@
   }));
   Charts.register('c-ecn', (el) => Charts.donut(el, {
     data: D.ecn, centerValue: '60%', centerLabel: 'ECN capable',
+  }));
+  Charts.register('c-osmix', (el) => Charts.donut(el, {
+    data: D.osMix, centerValue: '~85%', centerLabel: 'Windows',
+  }));
+  Charts.register('c-nettype', (el) => Charts.donut(el, {
+    data: D.netType, centerValue: '29%', centerLabel: 'cellular',
+  }));
+  Charts.register('c-https-adopt', (el) => Charts.line(el, {
+    x: D.httpsAdoption.x, yName: '% of page loads', yMin: 0, yMax: 100,
+    yFormatter: (v) => v + '%',
+    series: [{ name: 'HTTPS', data: D.httpsAdoption.pct, area: true }],
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
