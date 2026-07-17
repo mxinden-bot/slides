@@ -15,9 +15,9 @@ window.DECK_DATA = {
 
   // REAL GLAM netwerk_happy_eyeballs_h3_discovery: how connections learn h3.
   discovery: [
-    { name: 'no h3 advertised', value: 31.3, color: '#8f8f9d' },
-    { name: 'Alt-Svc only', value: 29.1, color: '#eb6834' },
-    { name: 'HTTPS record only', value: 20.7, color: '#1baf7a' },
-    { name: 'both', value: 19.0, color: '#2a78d6' },
+    { name: 'no h3 advertised', value: 58.2, color: '#8f8f9d' },
+    { name: 'Alt-Svc only', value: 35.0, color: '#eb6834' },
+    { name: 'both', value: 3.8, color: '#2a78d6' },
+    { name: 'HTTPS record only', value: 2.9, color: '#1baf7a' },
   ],
 };
