@@ -231,7 +231,8 @@ fn connection_attempt_delay() {
       <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: a deterministic, sans-I/O state machine, reusable outside Firefox.</li>
       <li><strong>Attempt delay</strong>: a 50 ms base with <strong>&times;2 back-off</strong> (50, 150, 350, 750 ms), not the draft&rsquo;s flat 250 ms.</li>
       <li><strong>Resolution delay</strong>: <strong>25 ms</strong>, not 50 ms (<a href="https://phabricator.services.mozilla.com/D309547">D309547</a>), tuned from the telemetry above.</li>
-      <li>Also interleaves <strong>protocol variant</strong> with address family; a flag can <strong>skip waiting for the preferred family</strong>.</li>
+      <li>Also interleaves <strong>protocol variant</strong> with address family, so QUIC and the other family are reached early.</li>
+      <li><strong>Potential future deviation</strong>: an opt-in flag to <strong>skip waiting for the preferred family</strong> once addresses and the HTTPS record are in (<a href="https://github.com/mozilla/happy-eyeballs/pull/116">PR 116</a>), not enabled today.</li>
     </ul>
   </section>
 
@@ -275,6 +276,17 @@ fn connection_attempt_delay() {
     </div>
   </section>
 
+  <!-- 6d. Optimistic QUIC -->
+  <section>
+    <h2>Proposal: Optimistic QUIC, Happy-Eyeballs style</h2>
+    <ul>
+      <li>Still listen for an h3 signal (HTTPS RR): it also carries <strong>ECH</strong>, so it remains useful.</li>
+      <li>Signal present: try HTTP/3 first, as today.</li>
+      <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
+      <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
+    </ul>
+  </section>
+
   <!-- 7. For the WG -->
   <section>
     <h2>For the working group</h2>
@@ -292,7 +304,6 @@ fn connection_attempt_delay() {
     <ul>
       <li>Ship Happy Eyeballs v3 to Firefox <strong>Release</strong> in the coming months.</li>
       <li>Tune resolution and connection-attempt delays from the ~99th-percentile data.</li>
-      <li>More telemetry to share at <strong>IETF 126</strong>.</li>
     </ul>
     <p class="small muted">Library: <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a> &middot; Integration: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Bugzilla 1953459</a>.</p>
   </section>
