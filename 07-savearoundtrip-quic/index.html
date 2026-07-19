@@ -48,10 +48,41 @@
     <ul class="small">
       <li>QUIC v2 (<a href="https://www.rfc-editor.org/rfc/rfc9369">RFC 9369</a>) is <strong>functionally identical</strong> to v1: only salts, labels, and codepoints differ, purely anti-ossification.</li>
       <li>Firefox Nightly: <strong>v1 ~100%, v2 ~0%</strong> of version-labeled handshakes (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>). Wider scans agree: v2 on <strong>&lt;0.003%</strong> of QUICv1 domains (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
-      <li><strong>Implementing v2 is common</strong> (10 of 14 stacks), <strong>deploying it is rare</strong>: Microsoft runs v2 on Outlook, but Google, Meta, Cloudflare, and Bing stay on v1.</li>
+      <li><strong>Implementing v2 is common</strong>, yet <strong>deploying it is rare</strong> (next slide).</li>
       <li>v2 buys <strong>no new feature</strong>, only anti-ossification, so nobody moves first. Every visible deployment adds pressure on the holdouts.</li>
     </ul>
     <p class="small muted">Probe any origin&rsquo;s live v1/v2 support at <strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: a cold h3 handshake that reports the versions offered.</p>
+  </section>
+
+  <!-- 3b. Who implements/deploys v2 -->
+  <section>
+    <h2>Who implements QUIC v2, and who runs it?</h2>
+    <div class="cols" style="gap:2em;">
+      <div>
+        <p class="tag" style="color:var(--good);">Implements v2 (10 of 14 stacks)</p>
+        <ul class="small">
+          <li><a href="https://github.com/mozilla/neqo/blob/9b564e79cf0bf0a7bf1cf74170c2a3bbc89d9610/neqo-transport/src/version.rs#L17">neqo</a>, <a href="https://github.com/google/quiche/blob/c61c583fc2ffd0cc6a53db46e154194898f11177/quiche/quic/core/quic_versions.h#L131">google/quiche</a>, <a href="https://github.com/ngtcp2/ngtcp2/blob/ac14c5180486404ecda2a4e3d00bbd918112f79c/lib/includes/ngtcp2/ngtcp2.h#L273">ngtcp2</a></li>
+          <li><a href="https://github.com/microsoft/msquic/blob/ad6ab3f99283f05d6becda5d23bbb3561bbb911d/src/inc/quic_versions.h#L27">msquic</a>, <a href="https://github.com/litespeedtech/lsquic/blob/f8ebaf838d2f4db836bda1182ee35b05d5191cee/src/liblsquic/lsquic_version.c#L127">lsquic</a>, <a href="https://github.com/private-octopus/picoquic/blob/1d416567cc999aad379ad3d9c3b2b7dca66cb1ea/picoquic/picoquic_internal.h#L227">picoquic</a></li>
+          <li><a href="https://github.com/aiortc/aioquic/blob/6d36838d008c2202c337142fa07e8bf80e96bac8/src/aioquic/quic/packet.py#L88">aioquic</a>, <a href="https://github.com/quic-go/quic-go/blob/2b5fd98c239aa65a318bd46165bff702c2639a6e/internal/protocol/version.go#L27">quic-go</a>, <a href="https://github.com/ptrd/kwik/blob/4d5d40f540d70a1b50ea59651f9d36740e77f165/core/src/main/java/tech/kwik/core/impl/Version.java#L34">kwik</a>, <a href="https://github.com/haproxy/haproxy/blob/2ca55723ced8e77a45201d877e3186571ae27d8f/include/haproxy/quic_conn-t.h#L51">HAProxy</a></li>
+        </ul>
+        <p class="tag" style="color:var(--warn);">v1 only</p>
+        <p class="small"><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a>, <a href="https://github.com/cloudflare/quiche/blob/b9d7b96e727045448b8110234d74cdff84115203/quiche/src/lib.rs#L437">Cloudflare quiche</a>, <a href="https://github.com/facebook/mvfst/blob/efefcbc5eba9d1085140b8a3c021121991601b14/quic/QuicConstants.h#L423">Meta mvfst</a>, <a href="https://github.com/aws/s2n-quic/blob/c340da81d2e7a0fc1bc20c8712995059f18100f0/quic/s2n-quic-transport/src/endpoint/version.rs#L26">AWS s2n-quic</a></p>
+      </div>
+      <div>
+        <p class="tag">Deploys v2 in production (probed)</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> Microsoft Outlook <span style="color:var(--ink-faint)">outlook.office.com (msquic)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> Caddy <span style="color:var(--ink-faint)">caddyserver.com (quic-go)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> LiteSpeed <span style="color:var(--ink-faint)">litespeedtech.com (lsquic)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> HAProxy <span style="color:var(--ink-faint)">haproxy.org (HAProxy)</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Google, YouTube</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Meta, Facebook</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Cloudflare</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Microsoft Bing</span> <span style="color:var(--ink-faint)">v1</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">Implementing v2 is common, deploying it is rare. Google&rsquo;s stack implements v2 but its servers run v1; Microsoft runs v2 on Outlook but v1 on Bing. Every visible deployment adds pressure on the holdouts, even those with no technical need. Probed via <a href="https://savearoundtrip.com">savearoundtrip.com</a>, 2026-07-15.</p>
   </section>
 
   <!-- 4. Showcase: the lookup -->
