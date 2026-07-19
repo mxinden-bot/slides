@@ -51,6 +51,11 @@ try {
     await page.waitForFunction(() => document.documentElement.classList.contains('reveal-print')
       || (window.Reveal && window.Reveal.isReady && window.Reveal.isReady()), { timeout: 15000 })
       .catch(() => {});
+    // Ensure every <img> is decoded before printing: Chromium's page.pdf()
+    // embeds nothing for images that have not been rasterized yet.
+    await page.evaluate(() => Promise.all(
+      [...document.images].map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => {})))
+    ));
     await page.waitForTimeout(1200);
     const out = join(outDir, `${deck}.pdf`);
     await page.pdf({ path: out, printBackground: true, preferCSSPageSize: true,
