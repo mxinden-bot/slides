@@ -30,7 +30,7 @@
     <ul>
       <li>Happy Eyeballs v3 is now <strong>enabled by default in Firefox Nightly</strong>.</li>
       <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, with a couple of tuned delay deviations (see below).</li>
-      <li>Public Glean telemetry is available.</li>
+      <li>Public Firefox telemetry is available.</li>
     </ul>
   </section>
 
@@ -172,7 +172,7 @@ fn connection_attempt_delay() {
       </div>
       <div class="col-60">
         <ul>
-          <li><strong>35%</strong> of connections learn h3 <strong>only via Alt-Svc</strong>, a round trip they need not pay: <strong>84%</strong> of the h3-capable ones.</li>
+          <li><strong>35%</strong> of connections (<strong>84%</strong> of the h3-capable ones) learn h3 <strong>only via Alt-Svc</strong>: a round trip they need not pay.</li>
           <li>Only <strong>~3%</strong> via an HTTPS record alone, <strong>~4%</strong> via both: no round trip.</li>
           <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
         </ul>
