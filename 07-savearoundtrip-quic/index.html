@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Save a round trip</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Save a round trip</h1>
+    <p class="subtitle">Publish HTTPS records, and run QUIC v2.</p>
+    <span class="venue">QUIC WG &middot; IETF 126, Vienna &middot; 22 July 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Angle 1: Alt-Svc vs HTTPS RR -->
+  <section>
+    <h2>Alt-Svc vs HTTPS RR: publish the record</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+    <p class="small muted"><strong>35%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong> (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>): a wasted round trip. An HTTPS record (<a href="https://www.rfc-editor.org/rfc/rfc9460">RFC 9460</a>) fixes it and also carries IP hints and <strong>ECH</strong>, yet few publish one beyond a single CDN&rsquo;s automatic default (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>). Publish one with <code>alpn=&quot;h3&quot;</code>.</p>
+  </section>
+
+  <!-- 3. Angle 2: QUIC v2 adoption -->
+  <section>
+    <h2>QUIC adoption: run v2, not just v1</h2>
+    <ul class="small">
+      <li>QUIC v2 (<a href="https://www.rfc-editor.org/rfc/rfc9369">RFC 9369</a>) is <strong>functionally identical</strong> to v1: only salts, labels, and codepoints differ, purely anti-ossification.</li>
+      <li>Firefox Nightly: <strong>v1 ~100%, v2 ~0%</strong> of version-labeled handshakes (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>). Wider scans agree: v2 on <strong>&lt;0.003%</strong> of QUICv1 domains (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
+      <li><strong>Implementing v2 is common</strong> (10 of 14 stacks), <strong>deploying it is rare</strong>: Microsoft runs v2 on Outlook, but Google, Meta, Cloudflare, and Bing stay on v1.</li>
+      <li>v2 buys <strong>no new feature</strong>, only anti-ossification, so nobody moves first. Every visible deployment adds pressure on the holdouts.</li>
+    </ul>
+    <p class="small muted">Probe any origin&rsquo;s live v1/v2 support at <strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: a cold h3 handshake that reports the versions offered.</p>
+  </section>
+
+  <!-- 4. Showcase: the lookup -->
+  <section>
+    <h2>Check any domain: savearoundtrip.com</h2>
+    <p class="small muted" style="margin-top:0;">One lookup, both checks. Real result for <code>cloudflare.com</code>:</p>
+    <div class="cols" style="gap:1.6em; align-items:flex-start;">
+      <div class="card">
+        <p class="tag">HTTPS record (RFC 9460) &nbsp;<span style="color:var(--good)">&#10003; published</span></p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.7;">
+          <li><code>alpn</code> &nbsp; h3, h2</li>
+          <li><code>ipv4hint</code> &nbsp; 104.16.132.229, 104.16.133.229</li>
+          <li><code>ipv6hint</code> &nbsp; 2606:4700::6810:84e5, &hellip;</li>
+          <li><code>ech</code> &nbsp; <span style="color:var(--ink-faint)">&#10007; not set</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="tag">HTTP/3 handshake &nbsp;<span style="color:var(--good)">&#10003; ok</span></p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.7;">
+          <li><code>alt-svc</code> &nbsp; h3=&quot;:443&quot;</li>
+          <li><code>QUIC versions</code> &nbsp; <span style="color:var(--good)">v1</span> &nbsp; <span style="color:var(--ink-faint)">&#10007; no v2</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">Even a leading CDN has room: no ECH in the record, v1 only. Check yours, publish the record, turn on v2. <strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong> &middot; <a href="https://max-inden.de/">max-inden.de</a></p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evolving HTTP/3 &amp; QUIC beyond 30%?</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Increase and evolve HTTP/3 &amp; QUIC</h1>
+    <p class="subtitle">Growing usage and preventing ossification on the Internet.</p>
+    <span class="venue">&ldquo;More QUIC, how?&rdquo; side meeting &middot; IETF 126, Vienna &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Denominators -->
+  <section>
+    <h2>Status quo</h2>
+    <div class="chart" id="c-denom" style="height:450px;"></div>
+    <figcaption>HTTP/3 &ldquo;share&rdquo; depends on the vantage point, and on the denominator. Firefox desktop top-level page loads <a href="https://performance.mozilla.org/networking.html">~17%</a>, Cloudflare likely-human requests <a href="https://radar.cloudflare.com/adoption-and-usage">~30%</a>, sites advertising support <a href="https://w3techs.com/technologies/details/ce-http3">~40% (W3Techs)</a>, Meta first-party <a href="https://engineering.fb.com/2020/10/21/networking-traffic/how-facebook-is-bringing-quic-to-billions/">~75% (2020)</a>.</figcaption>
+  </section>
+
+  <!-- 3. The plateau -->
+  <section>
+    <h2>Different ways of measuring</h2>
+    <ul>
+      <li>Cloudflare&rsquo;s likely-human request share sits ~<strong>30%</strong>, roughly flat over the past year (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
+      <li>Firefox&rsquo;s own view is lower: HTTP/3 is <strong>~17%</strong> of desktop top-level page loads, <strong>~25%</strong> on Android (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>). This counts only the main document the user navigated to, not the ad and tracker subresources that inflate a per-request count.</li>
+      <li>It runs higher by other measures: site support ~40% (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>), hyperscaler first-party far higher (Meta ~75%, 2020).</li>
+      <li>Requests vs connections changes the answer, too: HTTP/3 multiplexes many requests per connection.</li>
+    </ul>
+    <p class="small muted">Is ~30% already good enough, or is the plateau a problem worth solving?</p>
+  </section>
+
+  <!-- 3aa. Server and CDN support -->
+  <section>
+    <h2>Server and CDN support</h2>
+    <div class="cols" style="gap:1.6em;">
+      <div>
+        <p class="tag">Web servers &amp; proxies</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://github.com/caddyserver/caddy/releases/tag/v2.6.0">Caddy</a> <span style="color:var(--ink-faint)">on by default</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://docs.litespeedtech.com/lsws/cp/cpanel/quic-http3/">LiteSpeed</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http3">Envoy</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://h2o.examp1e.net/configure/http3_directives.html">H2O</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://jetty.org/docs/jetty/12.1/programming-guide/server/http3.html">Jetty</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://doc.traefik.io/traefik/routing/entrypoints/#http3">Traefik</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://techcommunity.microsoft.com/blog/networkingblog/enabling-http3-support-on-windows-server-2022/2676880">IIS</a> <span style="color:var(--ink-faint)">opt-in</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://www.haproxy.com/blog/announcing-haproxy-3-4">HAProxy</a></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://bz.apache.org/bugzilla/show_bug.cgi?id=64462">Apache httpd</a></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://lists.apache.org/thread/gwz432gzpq6tprtsswkd5cmqk3s2wplh">Tomcat</a></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag">App frameworks &amp; runtimes</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/http3">ASP.NET Core</a> <span style="color:var(--ink-faint)">GA</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://github.com/pgjones/hypercorn">Hypercorn</a> <span style="color:var(--ink-faint)">Python</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://spring.io/blog/2024/11/26/http3-in-reactor-2024/">Spring / Netty</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://bun.com/blog/bun-v1.3.14">Bun</a> <span style="color:var(--ink-faint)">experimental</span></li>
+          <li><span style="color:var(--accent)">&#10003;</span> <a href="https://nodejs.org/api/quic.html">Node.js</a> <span style="color:var(--ink-faint)">behind a flag</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://pkg.go.dev/github.com/quic-go/quic-go/http3">Go net/http</a> <span style="color:var(--ink-faint)">via quic-go/http3</span></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/hyperium/hyper/issues/1818">Rust hyper / axum</a> <span style="color:var(--ink-faint)">h3 crate only</span></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://github.com/puma/puma">Rails / Puma</a></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="tag">Hosts &amp; CDNs</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://developers.cloudflare.com/speed/optimization/protocol/http3/">Cloudflare</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://www.fastly.com/release-notes/q1-2022">Fastly</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://techdocs.akamai.com/property-mgr/docs/http3-support">Akamai</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://aws.amazon.com/blogs/aws/new-http-3-support-for-amazon-cloudfront/">AWS CloudFront</a></li>
+          <li><span style="color:var(--good)">&#10003;</span> <a href="https://cloud.google.com/blog/products/networking/cloud-cdn-and-load-balancing-support-http3">Google Cloud</a></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://learn.microsoft.com/en-us/answers/questions/5703090/how-can-i-enable-http-3-in-azure-front-door">Azure Front Door</a></span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; <a href="https://community.vercel.com/t/how-do-i-get-http-3-enabled-on-my-site/11723">Vercel</a></span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted" style="margin-bottom:0.2em;"><span style="color:var(--good)">&#10003;</span> shipped &nbsp; <span style="color:var(--accent)">&#10003;</span> experimental &nbsp; <span style="color:var(--ink-faint)">&#10007;</span> none &middot; surveyed 2026-07-11.</p>
+    <p class="small muted">Is QUIC supported widely enough, or does the application-framework layer still hold it back?</p>
+  </section>
+
+  <!-- 3d. Interception corrupts QUIC -->
+  <section>
+    <h2>&ldquo;Security&rdquo; software breaks QUIC</h2>
+    <ul class="small">
+      <li><strong>Avast</strong> fed neqo an ACK for a packet it never sent, crashing it (a top crash in Nightly 133). neqo now closes the connection instead (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>, <a href="https://github.com/mozilla/neqo/pull/2150">neqo#2150</a>); the close is correct, the proxy is at fault (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1923943">1923943</a>, INVALID).</li>
+      <li><strong>Bitdefender</strong> broke Facebook in Firefox 150: a default-off feature (SCONE) still padded every Initial with the bytes <code>0xc8 0x13</code>, which tripped its HTTP/3 inspection. The handshake completed, so no h3-to-h2 fallback fired. Rolled back in <a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>).</li>
+      <li><strong>CrowdStrike Falcon</strong> dropped QUIC crypto frames, so HTTP/3 connections stalled. neqo fell back to h2 correctly, but that fallback path was itself broken (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>).</li>
+      <li><strong>Kaspersky</strong>: a spec-wrong <code>unknown_ca</code> alert on shutdown, despite a trusted root (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</li>
+    </ul>
+    <p class="small muted">Hard to root-cause, and users blame the browser, not the middlebox.</p>
+  </section>
+
+  <!-- 3c. Firefox's own interception handling -->
+  <section>
+    <h2>Firefox turns HTTP/3 off under interception</h2>
+    <ul class="small">
+      <li>A <strong>third-party root CA</strong> in the chain signals the TLS connection is being intercepted (antivirus, enterprise MITM). Firefox then disables HTTP/3 for it (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1925014">bug 1925014</a>, refined in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1929368">1929368</a>).</li>
+      <li>Why: interception middleware often proxies QUIC incorrectly, causing bugs users blame on Firefox; HTTP/2 and HTTP/1.1 are assumed better handled (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1985341#c7">bug 1985341, c7</a>). <strong>Chrome does the same</strong> (<a href="https://www.chromium.org/quic/">chromium.org/quic</a>: to run a MITM proxy, block QUIC and intercept TLS).</li>
+    </ul>
+    <p class="small muted">Should we stop disabling, or find a more specific mechanism than any third-party root?</p>
+  </section>
+
+  <!-- 3e. Making QUIC enterprise-ready -->
+  <section>
+    <h2>QUIC in enterprise environments</h2>
+    <p class="small muted">Enterprises have real reasons to block or drop QUIC. The goal is to remove those reasons, not to blame the admin (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</p>
+    <ul class="small">
+      <li>Firewalls often block <strong>UDP/443</strong> outright.</li>
+      <li>MITM proxies cannot yet inspect QUIC correctly, so it gets disabled on any third-party root.</li>
+      <li>Operators lose the flow visibility TCP gave them.</li>
+      <li>Banks and regulated networks must audit their traffic. They still can where they own the servers: inspect at the endpoint, not as a passive middlebox.</li>
+    </ul>
+    <p class="small muted">How do we get vendors to proxy QUIC correctly (<a href="https://interop.seemann.io/">conformance testing</a>, <a href="https://datatracker.ietf.org/doc/rfc9312/">RFC 9312</a>), and can <a href="https://datatracker.ietf.org/doc/draft-ietf-quic-qlog-main-schema/">qlog</a> give operators back the visibility they need?</p>
+  </section>
+
+  <!-- 3f. Server-side performance gap -->
+  <section>
+    <h2>QUIC server-side performance is not yet on par with TCP</h2>
+    <p class="small muted">For many deployments, the honest answer is that switching is not yet worth it on a technical level.</p>
+    <ul class="small">
+      <li><strong>Usually in user space.</strong> Every packet crosses the syscall boundary; <code>io_uring</code> is the emerging zero-copy path, and QUIC can even run in the kernel (msquic). TCP has decades of kernel tuning and NIC-offloaded TLS behind it.</li>
+      <li><strong>Offload is less mature.</strong> UDP segmentation and receive offload (GSO/GRO) are newer and less universal than TCP&rsquo;s TSO/LRO, so more of the work happens in software (<a href="https://blog.cloudflare.com/accelerating-udp-packet-transmission-for-quic/">Cloudflare</a>).</li>
+      <li><strong>Higher CPU per byte.</strong> QUIC costs more to send than TCP; where infrastructure is weak it can be a net loss. Netflix fills a NIC at 800&nbsp;MB/s on TCP, not yet on QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
+      <li><strong>Congestion control is the hard part.</strong> Matching TCP throughput has been more work than QUIC itself, and immature client-side control can make uploads slower, enough that some operators disable QUIC (<a href="https://mailarchive.ietf.org/arch/msg/quic/Quhcik6ty_L_MGT2KMGa3jbL-cs/">IETF 124 notes</a>).</li>
+      <li><strong>Less operational expertise.</strong> Fewer engineers have run QUIC at scale, and the encrypted user-space stack gives operators less visibility than TCP.</li>
+    </ul>
+    <p class="small muted">The gap is closing (kernel and offload work, maturing stacks): is QUIC worth the switch today, and what closes it fastest?</p>
+  </section>
+
+  <!-- 4. New protocols that could grow the share -->
+  <section>
+    <h2>New use cases that encourage QUIC adoption</h2>
+    <p>HTTP/3-native protocols, each running over QUIC with an HTTP/2 fallback:</p>
+    <div class="cols" style="gap:1.2em; margin-top:0.3em;">
+      <div class="card">
+        <p class="tag">WebTransport</p>
+        <p class="small">Low-latency streams and datagrams for web apps, the WebSocket successor (<a href="https://datatracker.ietf.org/wg/webtrans/about/">IETF webtrans</a>).</p>
+      </div>
+      <div class="card">
+        <p class="tag">Media over QUIC</p>
+        <p class="small">Low-latency live media, one stack for ingest and delivery (<a href="https://datatracker.ietf.org/wg/moq/about/">IETF moq</a>).</p>
+      </div>
+      <div class="card">
+        <p class="tag">MASQUE</p>
+        <p class="small">Proxy UDP, IP, and TCP over HTTP/3, e.g. Apple Private Relay (<a href="https://www.rfc-editor.org/rfc/rfc9298">CONNECT-UDP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9484">CONNECT-IP</a>, <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">CONNECT-TCP</a>).</p>
+      </div>
+    </div>
+    <p class="small" style="margin-top:0.7em;">QUIC also makes <strong>L4S</strong> easier to deploy: every ACK frame already carries precise ECT(0)/ECT(1)/CE counts (<a href="https://www.rfc-editor.org/rfc/rfc9000#section-19.3">RFC 9000</a>), the feedback L4S needs, while TCP is still rolling out AccECN. The sender&rsquo;s response runs in user space, so no kernel change is required (<a href="https://www.rfc-editor.org/rfc/rfc9330">L4S</a>).</p>
+  </section>
+
+  <!-- 5. Upgrade path -->
+  <section>
+    <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul class="small">
+          <li>Alt-Svc is learned <em>after</em> an HTTP/2 connection: the first visit never uses HTTP/3.</li>
+          <li><strong>35%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, i.e. don&rsquo;t do HTTP/3 on the first connection (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>).</li>
+          <li>HTTPS records (RFC 9460) fix this, but <strong>few sites publish one</strong>: <strong>&gt;20%</strong> of the top-1M, and mostly one CDN&rsquo;s default (&gt;70% Cloudflare) (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>).</li>
+          <li>On-path actors also <strong>strip the record</strong> (or just its ECH parameter) to keep the SNI visible, taking the h3 hint with it (<a href="https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-block-TLS-1-3-Encrypted-Client-Hello-ECH-in/ta-p/328324">FortiGate</a>, <a href="https://secure.cisco.com/secure-firewall/docs/encrypted-client-hello-defense-strategies-how-cisco-secure-firewall-tackles-ech">Cisco</a>).</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+        <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>.</figcaption>
+      </div>
+    </div>
+    <p class="small muted">Do we deprecate Alt-Svc, or bridge it (<a href="https://datatracker.ietf.org/doc/draft-thomson-httpbis-alt-svcb/">draft-thomson-httpbis-alt-svcb</a>)?</p>
+  </section>
+
+  <!-- 5b. The wasted round trip (savearoundtrip) -->
+  <section>
+    <h2>The wasted round trip</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc only</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the second connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+    <p class="small muted"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: check whether a domain publishes the record.</p>
+  </section>
+
+  <!-- 6. Optimistic QUIC -->
+  <section>
+    <h2>Proposal: Optimistic QUIC, Happy-Eyeballs style</h2>
+    <ul>
+      <li>Still listen for an h3 signal (HTTPS RR): it also carries <strong>ECH</strong>, so it remains useful.</li>
+      <li>Signal present: try HTTP/3 first, as today.</li>
+      <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
+      <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
+    </ul>
+  </section>
+
+  <!-- 4. QUIC v2 -->
+  <section>
+    <h2>QUIC ossification: v2 is barely deployed</h2>
+    <ul>
+      <li>RFC 9369 is <strong>functionally identical</strong> to v1: only crypto salts, labels and codepoints differ (anti-ossification).</li>
+      <li>Firefox Nightly telemetry: <strong>v1 ~100%</strong>, <strong>v2 ~0%</strong> of version-labeled QUIC handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM</a>).</li>
+      <li>Wider measurement agrees: v2 is on <strong>&lt; 0.003%</strong> of QUICv1 domains (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
+      <li>Is adoption low because there is <strong>no technical incentive</strong>? v2 buys no new feature, only anti-ossification.</li>
+      <li>Probe any origin&rsquo;s live v1/v2 support at <a href="https://savearoundtrip.com">savearoundtrip.com</a> (cold h3 handshake, reports the versions).</li>
+    </ul>
+  </section>
+
+  <!-- 4b. QUIC v2 implement vs deploy -->
+  <section>
+    <h2>Who implements QUIC v2, and who runs it?</h2>
+    <div class="cols" style="gap:2em;">
+      <div>
+        <p class="tag" style="color:var(--good);">Implements v2 (10 of 14 stacks)</p>
+        <ul class="small">
+          <li><a href="https://github.com/mozilla/neqo/blob/9b564e79cf0bf0a7bf1cf74170c2a3bbc89d9610/neqo-transport/src/version.rs#L17">neqo</a>, <a href="https://github.com/google/quiche/blob/c61c583fc2ffd0cc6a53db46e154194898f11177/quiche/quic/core/quic_versions.h#L131">google/quiche</a>, <a href="https://github.com/ngtcp2/ngtcp2/blob/ac14c5180486404ecda2a4e3d00bbd918112f79c/lib/includes/ngtcp2/ngtcp2.h#L273">ngtcp2</a></li>
+          <li><a href="https://github.com/microsoft/msquic/blob/ad6ab3f99283f05d6becda5d23bbb3561bbb911d/src/inc/quic_versions.h#L27">msquic</a>, <a href="https://github.com/litespeedtech/lsquic/blob/f8ebaf838d2f4db836bda1182ee35b05d5191cee/src/liblsquic/lsquic_version.c#L127">lsquic</a>, <a href="https://github.com/private-octopus/picoquic/blob/1d416567cc999aad379ad3d9c3b2b7dca66cb1ea/picoquic/picoquic_internal.h#L227">picoquic</a></li>
+          <li><a href="https://github.com/aiortc/aioquic/blob/6d36838d008c2202c337142fa07e8bf80e96bac8/src/aioquic/quic/packet.py#L88">aioquic</a>, <a href="https://github.com/quic-go/quic-go/blob/2b5fd98c239aa65a318bd46165bff702c2639a6e/internal/protocol/version.go#L27">quic-go</a>, <a href="https://github.com/ptrd/kwik/blob/4d5d40f540d70a1b50ea59651f9d36740e77f165/core/src/main/java/tech/kwik/core/impl/Version.java#L34">kwik</a>, <a href="https://github.com/haproxy/haproxy/blob/2ca55723ced8e77a45201d877e3186571ae27d8f/include/haproxy/quic_conn-t.h#L51">HAProxy</a></li>
+        </ul>
+        <p class="tag" style="color:var(--warn);">v1 only</p>
+        <p class="small"><a href="https://github.com/quinn-rs/quinn/blob/57ea8a5124d67f7f2e7f13941330cd2fb05793fb/quinn-proto/src/lib.rs#L160">quinn</a>, <a href="https://github.com/cloudflare/quiche/blob/b9d7b96e727045448b8110234d74cdff84115203/quiche/src/lib.rs#L437">Cloudflare quiche</a>, <a href="https://github.com/facebook/mvfst/blob/efefcbc5eba9d1085140b8a3c021121991601b14/quic/QuicConstants.h#L423">Meta mvfst</a>, <a href="https://github.com/aws/s2n-quic/blob/c340da81d2e7a0fc1bc20c8712995059f18100f0/quic/s2n-quic-transport/src/endpoint/version.rs#L26">AWS s2n-quic</a></p>
+      </div>
+      <div>
+        <p class="tag">Deploys v2 in production (probed)</p>
+        <ul class="small" style="list-style:none; padding-left:0; line-height:1.5;">
+          <li><span style="color:var(--good)">&#10003;</span> Microsoft Outlook <span style="color:var(--ink-faint)">outlook.office.com (msquic)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> Caddy <span style="color:var(--ink-faint)">caddyserver.com (quic-go)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> LiteSpeed <span style="color:var(--ink-faint)">litespeedtech.com (lsquic)</span></li>
+          <li><span style="color:var(--good)">&#10003;</span> HAProxy <span style="color:var(--ink-faint)">haproxy.org (HAProxy)</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Google, YouTube</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Meta, Facebook</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Cloudflare</span> <span style="color:var(--ink-faint)">v1</span></li>
+          <li><span style="color:var(--ink-faint)">&#10007; Microsoft Bing</span> <span style="color:var(--ink-faint)">v1</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="small muted">Implementing v2 is common, deploying it is rare. Google&rsquo;s stack implements v2 but its servers run v1; Microsoft runs v2 on Outlook but v1 on Bing. Every visible deployment adds pressure on the holdouts, even those with no technical need. Probed via <a href="https://savearoundtrip.com">savearoundtrip.com</a>, 2026-07-15.</p>
+  </section>
+
+  <!-- 8. Closing -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Discussion</h2>
+    <p class="small" style="color:#b3adc4;"><a href="https://max-inden.de/" style="color:#b3adc4;">max-inden.de</a></p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  Charts.register('c-denom', (el) => Charts.bar(el, {
+    x: D.denominators.labels, yName: 'HTTP/3 share', yMax: 80, barLabels: true,
+    yFormatter: (v) => v + '%', barLabelFormatter: (p) => p.value + '%',
+    refLine: 30, refLineLabel: '30%',
+    series: [{ name: 'share', data: D.denominators.pct }],
+  }));
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '35%', centerLabel: 'Alt-Svc only',
+  }));
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'client learns h3 only now: a second connection', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + hints (+ ECH)', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 handshake', hl: true }, { from: 'S', to: 'C', text: 'connected', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
