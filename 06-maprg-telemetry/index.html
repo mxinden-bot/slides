@@ -115,7 +115,7 @@
     <div class="chart" id="c-httpsrr" style="height:430px;"></div>
     <figcaption>Of connections that saw an HTTPS record, what it carried. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
     <p class="small muted">Where records exist, most advertise h3 and about half carry address hints, but only <strong>~16%</strong> carry <strong>ECH</strong>, the feature that most needs them.</p>
-    <p class="small muted">These records arrive over DNS, yet only <strong>~12%</strong> of desktop DNS resolutions use <strong>DoH</strong> (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>); the rest go through the OS resolver, which may strip them.</p>
+    <p class="small muted">These records arrive over DNS, yet only <strong>~12%</strong> of desktop DNS resolutions use <strong>DoH</strong> (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>). Native OS resolvers sometimes return no HTTPS record at all; <strong>enabling DoH</strong> is the reliable way to get them on every platform.</p>
   </section>
 
   <!-- 4b. IPv6 and ECH still lag -->
