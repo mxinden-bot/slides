@@ -133,7 +133,7 @@
         <ul class="small">
           <li>Only <strong>~42%</strong> of connections are offered HTTP/3 at all.</li>
           <li>Of those, <strong>~84%</strong> learn it <strong>only from Alt-Svc</strong>, so after a first non-h3 connection: a wasted round trip.</li>
-          <li>An <strong>HTTPS record</strong> would move that discovery into DNS, before connecting, but almost nobody publishes one.</li>
+          <li>An <strong>HTTPS record</strong> would move that discovery into DNS, before connecting, but almost nobody publishes one (check any domain at <a href="https://savearoundtrip.com">savearoundtrip.com</a>).</li>
           <li>Once on HTTP/3, a new metric tracks <strong>QUIC v1 vs v2</strong>: <strong>~100% v1</strong> today, v2 not yet negotiated at scale (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>, Nightly).</li>
         </ul>
       </div>
