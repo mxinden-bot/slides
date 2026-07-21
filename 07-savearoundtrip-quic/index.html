@@ -107,27 +107,21 @@
 
   <!-- 4. Showcase: the lookup -->
   <section>
-    <h2>Check any domain: savearoundtrip.com</h2>
-    <p class="small muted" style="margin-top:0;">One lookup, both checks. Real result for <code>cloudflare.com</code>:</p>
-    <div class="cols" style="gap:1.6em; align-items:flex-start;">
-      <div class="card">
-        <p class="tag">HTTPS record (RFC 9460) &nbsp;<span style="color:var(--good)">&#10003; published</span></p>
-        <ul class="small" style="list-style:none; padding-left:0; line-height:1.7;">
-          <li><code>alpn</code> &nbsp; h3, h2</li>
-          <li><code>ipv4hint</code> &nbsp; 104.16.132.229, 104.16.133.229</li>
-          <li><code>ipv6hint</code> &nbsp; 2606:4700::6810:84e5, &hellip;</li>
-          <li><code>ech</code> &nbsp; <span style="color:var(--ink-faint)">&#10007; not set</span></li>
-        </ul>
+    <h2><a href="https://savearoundtrip.com">savearoundtrip.com</a></h2>
+    <div class="cols" style="gap:1.8em; align-items:flex-start;">
+      <div class="col-60">
+        <img src="img/savearoundtrip-lookup.png" alt="savearoundtrip.com lookup for quic-go.net: an HTTPS record advertises h3 (alpn h3, h2), and the origin speaks HTTP/3 over QUIC v1 and v2" style="display:block; max-width:100%; max-height:590px; height:auto; margin:0; border:1px solid var(--hairline); border-radius:8px;">
       </div>
-      <div class="card">
-        <p class="tag">HTTP/3 handshake &nbsp;<span style="color:var(--good)">&#10003; ok</span></p>
-        <ul class="small" style="list-style:none; padding-left:0; line-height:1.7;">
-          <li><code>alt-svc</code> &nbsp; h3=&quot;:443&quot;</li>
-          <li><code>QUIC versions</code> &nbsp; <span style="color:var(--good)">v1</span> &nbsp; <span style="color:var(--ink-faint)">&#10007; no v2</span></li>
+      <div class="col-40">
+        <p class="small">One lookup, both checks. Here <code>quic-go.net</code>:</p>
+        <ul class="small">
+          <li>publishes an <strong>HTTPS record</strong> advertising <strong>h3</strong>, so browsers reach HTTP/3 on the <strong>first</strong> connection,</li>
+          <li>and its live handshake offers <strong>QUIC v1 and v2</strong>.</li>
         </ul>
+        <p class="small muted">Check your domain, then publish the record and turn on v2.</p>
+        <p class="small muted"><a href="https://max-inden.de/">max-inden.de</a></p>
       </div>
     </div>
-    <p class="small muted">Even a leading CDN has room: no ECH in the record, v1 only. Check yours, publish the record, turn on v2. <strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong> &middot; <a href="https://max-inden.de/">max-inden.de</a></p>
   </section>
 
 </div>
