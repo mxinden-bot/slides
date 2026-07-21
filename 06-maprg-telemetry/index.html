@@ -72,18 +72,17 @@
 
   <!-- 2b. HTTP version split -->
   <section>
-    <h2>HTTP splits roughly in thirds</h2>
+    <h2>HTTP/3 is ~17% of page loads</h2>
     <div class="cols">
       <div class="col-40">
         <div class="chart short" id="c-httpver"></div>
-        <figcaption>HTTP version of responses Firefox received. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore?activeBuckets=%5B%22http_1%22%2C%22http_2%22%2C%22http_3%22%2C%22unknown%22%5D&timeHorizon=QUARTER">GLAM: http_response_version</a>.</figcaption>
+        <figcaption>HTTP version of Firefox desktop top-level page loads. <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>.</figcaption>
       </div>
       <div class="col-60">
         <ul class="small">
-          <li>Across all responses: <strong>HTTP/3 ~30%</strong>, HTTP/2 ~35%, HTTP/1.1 ~35%.</li>
-          <li>The surprise: <strong>HTTP/1.1 is far from dead</strong>, still as common as HTTP/2.</li>
-          <li>A client-side answer to &ldquo;how much HTTP/3?&rdquo;: ~30% of responses, in line with Cloudflare&rsquo;s request share.</li>
-          <li>Within HTTP/3, a new metric tracks <strong>QUIC v1 vs v2</strong>: <strong>~100% v1</strong> today, v2 not yet negotiated at scale (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>, Nightly).</li>
+          <li>Desktop top-level page loads: <strong>HTTP/2 ~47%</strong>, <strong>HTTP/1.1 ~35%</strong>, <strong>HTTP/3 ~17%</strong>.</li>
+          <li>The surprise: <strong>HTTP/1.1 is far from dead</strong>, still ~35% of page loads.</li>
+          <li>This counts only the <strong>main document</strong>. Per-request counts, inflated by ad and tracker subresources, put HTTP/3 nearer <strong>~30%</strong> (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</li>
         </ul>
       </div>
     </div>
@@ -95,13 +94,14 @@
     <div class="cols">
       <div class="col-40">
         <div class="chart short" id="c-discovery"></div>
-        <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>.</figcaption>
+        <figcaption>How Firefox connections learn h3. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a> (Nightly).</figcaption>
       </div>
       <div class="col-60">
         <ul class="small">
           <li>Only <strong>~42%</strong> of connections are offered HTTP/3 at all.</li>
           <li>Of those, <strong>~84%</strong> learn it <strong>only from Alt-Svc</strong>, so after a first non-h3 connection: a wasted round trip.</li>
           <li>An <strong>HTTPS record</strong> would move that discovery into DNS, before connecting, but almost nobody publishes one.</li>
+          <li>Once on HTTP/3, a new metric tracks <strong>QUIC v1 vs v2</strong>: <strong>~100% v1</strong> today, v2 not yet negotiated at scale (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2040450">http_3_quic_version</a>, Nightly).</li>
         </ul>
       </div>
     </div>
@@ -116,16 +116,15 @@
     <p class="small muted">These records arrive over DNS, yet only <strong>~12%</strong> of desktop DNS resolutions use <strong>DoH</strong> (<a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>). Native OS resolvers sometimes return no HTTPS record at all; <strong>enabling DoH</strong> is the reliable way to get them on every platform.</p>
   </section>
 
-  <!-- 4b. IPv6 and ECH still lag -->
+  <!-- 4b. IPv6 lags -->
   <section>
-    <h2>IPv6 and ECH still lag</h2>
+    <h2>IPv6 still lags</h2>
     <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
       <div class="stat"><span class="num">~30%</span><span class="lbl">of connections<br>use IPv6</span></div>
-      <div class="stat"><span class="num">~1%</span><span class="lbl">negotiate<br>real ECH</span></div>
     </div>
     <ul class="small">
-      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale. Curiously, IPv6 and HTTP/3 have <strong>converged</strong>: both sit near ~30% and track each other (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
-      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE. The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale.</li>
+      <li>Curiously, IPv6 and HTTP/3 have <strong>converged</strong>: both sit near ~30% and track each other (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
     </ul>
   </section>
 
@@ -135,7 +134,7 @@
     <div class="cols">
       <div class="col-60">
         <div class="chart short" id="c-https-adopt"></div>
-        <figcaption>Share of Firefox page loads over HTTPS. <a href="https://letsencrypt.org/stats/">Let&rsquo;s Encrypt / Firefox telemetry</a>.</figcaption>
+        <figcaption>Firefox page loads over HTTPS (<a href="https://letsencrypt.org/stats/">Let&rsquo;s Encrypt</a>) vs global IPv6 adoption (<a href="https://www.google.com/intl/en/ipv6/statistics.html">Google</a>), July of each year.</figcaption>
       </div>
       <div class="col-40">
         <ul class="small">
@@ -145,6 +144,18 @@
         </ul>
       </div>
     </div>
+  </section>
+
+  <!-- 4d. ECH barely deployed -->
+  <section>
+    <h2>ECH is barely deployed</h2>
+    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
+      <div class="stat"><span class="num">~1%</span><span class="lbl">of connections<br>negotiate real ECH</span></div>
+    </div>
+    <ul class="small">
+      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE.</li>
+      <li>The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+    </ul>
   </section>
 
   <!-- 5. Surprise 3: congestion control reality -->
@@ -157,7 +168,6 @@
     <ul class="small">
       <li>New connections start slow, and many carry <strong>too little data</strong> to ever leave slow start.</li>
       <li>The median connection never even registers a <strong>congestion event</strong>: <strong>0</strong> at P50 and P95, just <strong>6</strong> at P99.9. Almost nothing ever pushes the path hard enough to see loss or a CE mark.</li>
-      <li>So high-rate send performance (the QUIC-upload debate) touches a <strong>small slice</strong> of traffic: worth measuring before optimizing.</li>
     </ul>
     <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_window_growth/explore?activeBuckets=%5B%22no_growth%22%2C%22had_growth%22%2C%22no_growth_but_exit%22%2C%22no_growth_then_exit_then_growth%22%5D&app_id=release">congestion_window_growth</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_slow_start_exited_filtered/explore?activeBuckets=%5B%22not_exited%22%2C%22exited%22%5D&app_id=release">slow_start_exited_filtered</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_count/explore?app_id=release">congestion_event_count</a> (release).</p>
   </section>
@@ -172,7 +182,7 @@
       </div>
       <div class="col-60">
         <ul class="small">
-          <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>bleached</strong>, only <strong>~3%</strong> black-holed.</li>
+          <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>removed</strong>, only <strong>~3%</strong> black-holed.</li>
           <li>It pays off: on a <strong>CE</strong> mark Firefox reduces its congestion response <strong>without waiting for loss</strong> (<a href="https://github.com/mozilla/neqo/pull/3233">neqo#3233</a>).</li>
           <li><strong>~1 in 5</strong> congestion responses now comes from a CE mark, not packet loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM: congestion_event_reason</a>).</li>
         </ul>
@@ -278,7 +288,7 @@
     series: [{ name: 'RTT', data: D.rtt.ms }],
   }));
   Charts.register('c-httpver', (el) => Charts.donut(el, {
-    data: D.httpVersion, centerValue: '30%', centerLabel: 'HTTP/3',
+    data: D.httpVersion, centerValue: '17%', centerLabel: 'HTTP/3',
   }));
   Charts.register('c-discovery', (el) => Charts.donut(el, {
     data: D.discovery, centerValue: '42%', centerLabel: 'offered h3',
@@ -298,9 +308,12 @@
     data: D.netType, centerValue: '29%', centerLabel: 'cellular',
   }));
   Charts.register('c-https-adopt', (el) => Charts.line(el, {
-    x: D.httpsAdoption.x, yName: '% of page loads', yMin: 0, yMax: 100,
+    x: D.httpsAdoption.x, yName: '%', yMin: 0, yMax: 100,
     yFormatter: (v) => v + '%',
-    series: [{ name: 'HTTPS', data: D.httpsAdoption.pct, area: true }],
+    series: [
+      { name: 'HTTPS', data: D.httpsAdoption.pct, area: true },
+      { name: 'IPv6', data: D.httpsAdoption.ipv6 },
+    ],
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,

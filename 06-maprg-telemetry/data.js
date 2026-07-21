@@ -5,12 +5,12 @@
  * the slides. Snapshot: mid-2026.
  */
 window.DECK_DATA = {
-  // GLAM networking_http_response_version, Firefox release: HTTP version of
-  // responses received. Splits roughly in thirds.
+  // performance.mozilla.org (STMO query 113403), Firefox desktop top-level page
+  // loads, 7-day moving avg 2026-07-16. Derives from the Glean perf.page_load event.
   httpVersion: [
-    { name: 'HTTP/1.1', value: 35, color: '#8f8f9d' },
-    { name: 'HTTP/2', value: 35, color: '#2a78d6' },
-    { name: 'HTTP/3', value: 30, color: '#1baf7a' },
+    { name: 'HTTP/1.1', value: 35.0, color: '#8f8f9d' },
+    { name: 'HTTP/2', value: 47.5, color: '#2a78d6' },
+    { name: 'HTTP/3', value: 17.5, color: '#1baf7a' },
   ],
 
   // GLAM netwerk_happy_eyeballs_h3_discovery, Firefox Nightly (how a connection
@@ -46,18 +46,19 @@ window.DECK_DATA = {
   // non_norm_histogram): what happened to ECN marks on a QUIC connection's path.
   ecn: [
     { name: 'ECN capable', value: 59.6, color: '#1baf7a' },
-    { name: 'bleached', value: 34.6, color: '#eb6834' },
+    { name: 'removed', value: 34.6, color: '#eb6834' },
     { name: 'unsent ECT(1)', value: 3.0, color: '#c9c9d1' },
     { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
   ],
 
-  // Share of Firefox page loads over HTTPS, over time. Historical points (2013-2016)
-  // are verbatim from Let's Encrypt's historical-https-adoption.csv (HTTP_PAGELOAD_IS_SSL);
-  // recent points are the pageload-weighted aggregate of current-https-adoption.csv.
-  // Source: https://letsencrypt.org/stats/ .
+  // Adoption-speed contrast, July of each year. HTTPS: share of Firefox page loads
+  // over HTTPS (Let's Encrypt historical HTTP_PAGELOAD_IS_SSL + recent aggregate,
+  // https://letsencrypt.org/stats/ ). IPv6: Google's global IPv6 adoption (total %),
+  // https://www.google.com/intl/en/ipv6/statistics.html .
   httpsAdoption: {
-    x: ['2013', '2015', '2016', '2018', '2020', '2022', '2024', '2026'],
-    pct: [29, 31, 46, 72, 81, 80, 82, 83],
+    x:    ['2013', '2015', '2016', '2018', '2020', '2022', '2024', '2026'],
+    pct:  [29, 31, 46, 72, 81, 80, 82, 83],
+    ipv6: [1.4, 6.4, 11.1, 23.1, 30.3, 40.1, 43.3, 47.5],
   },
 
   // Firefox desktop OS mix, data.firefox.com/dashboard/hardware, snapshot 2026-07-06.
