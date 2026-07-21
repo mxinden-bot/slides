@@ -79,6 +79,29 @@
     </div>
   </section>
 
+    <!-- 4b. IPv6 lags -->
+  <section>
+    <h2>IPv6 still lags</h2>
+    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
+      <div class="stat"><span class="num">~20%</span><span class="lbl">of HTTP requests<br>go over IPv6</span></div>
+    </div>
+    <ul class="small">
+      <li><strong>IPv6</strong> is still a minority: only <strong>~20%</strong> of HTTP requests go over it, even at global client scale (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore?activeBuckets=%5B%22http_2_ipv4%22%2C%22http_1_ipv4%22%2C%22http_3_ipv4%22%2C%22http_2_ipv6%22%2C%22http_3_ipv6%22%2C%22http_1_ipv6%22%5D&app_id=release&timeHorizon=QUARTER">GLAM: connection_address_type</a>, release, by HTTP request).</li>
+    </ul>
+  </section>
+
+  <!-- 4d. ECH barely deployed -->
+  <section>
+    <h2>ECH is barely deployed</h2>
+    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
+      <div class="stat"><span class="num">~1%</span><span class="lbl">of connections<br>negotiate real ECH</span></div>
+    </div>
+    <ul class="small">
+      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE.</li>
+      <li>The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+    </ul>
+  </section>
+
   <!-- 2b. HTTP version split -->
   <section>
     <h2>HTTP/3 is ~17% of page loads</h2>
@@ -115,29 +138,6 @@
         </ul>
       </div>
     </div>
-  </section>
-
-<!-- 4d. ECH barely deployed -->
-  <section>
-    <h2>ECH is barely deployed</h2>
-    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
-      <div class="stat"><span class="num">~1%</span><span class="lbl">of connections<br>negotiate real ECH</span></div>
-    </div>
-    <ul class="small">
-      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE.</li>
-      <li>The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
-    </ul>
-  </section>
-
-  <!-- 4b. IPv6 lags -->
-  <section>
-    <h2>IPv6 still lags</h2>
-    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
-      <div class="stat"><span class="num">~20%</span><span class="lbl">of HTTP requests<br>go over IPv6</span></div>
-    </div>
-    <ul class="small">
-      <li><strong>IPv6</strong> is still a minority: only <strong>~20%</strong> of HTTP requests go over it, even at global client scale (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore?activeBuckets=%5B%22http_2_ipv4%22%2C%22http_1_ipv4%22%2C%22http_3_ipv4%22%2C%22http_2_ipv6%22%2C%22http_3_ipv6%22%2C%22http_1_ipv6%22%5D&app_id=release&timeHorizon=QUARTER">GLAM: connection_address_type</a>, release, by HTTP request).</li>
-    </ul>
   </section>
 
       <!-- 5. Surprise 3: congestion control reality -->
