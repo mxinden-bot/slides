@@ -97,8 +97,8 @@
       <div class="stat"><span class="num">~1%</span><span class="lbl">of connections<br>negotiate real ECH</span></div>
     </div>
     <ul class="small">
-      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE.</li>
-      <li>The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+      <li><strong>Real ECH</strong> is negotiated on only <strong>~0.3%</strong> of TLS handshakes (<strong>~1.4%</strong> of HTTP/3); almost everything else is GREASE (<a href="https://glam.telemetry.mozilla.org/fog/probe/ssl_handshake_result_ech/explore">ssl_handshake_result_ech</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_ech_outcome/explore">http3_ech_outcome</a>).</li>
+      <li>The ceiling is the <strong>~16%</strong> of HTTPS records that carry an ECH config (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">https_rr_features</a>, Nightly).</li>
     </ul>
   </section>
 
