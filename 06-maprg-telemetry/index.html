@@ -12,6 +12,16 @@
     const l = document.createElement('link'); l.rel = 'stylesheet';
     if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
   </script>
+  <style>
+    .reveal .nightly-badge {
+      position: absolute; top: 12px; right: 14px; z-index: 40;
+      font: 700 13px/1 var(--font-sans); letter-spacing: 0.02em;
+      color: #fff; background: linear-gradient(90deg, #7542a8, #38215f);
+      padding: 6px 12px; border-radius: 999px; pointer-events: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+    .reveal .card p.small { overflow-wrap: anywhere; }
+  </style>
 </head>
 <body>
 <div class="reveal">
@@ -90,6 +100,7 @@
 
   <!-- 3. Surprise 1: h3 discovery -->
   <section>
+    <div class="nightly-badge">Firefox Nightly</div>
     <h2>How connections find HTTP/3</h2>
     <div class="cols">
       <div class="col-40">
@@ -109,6 +120,7 @@
 
   <!-- 4. Surprise 2: HTTPS RR contents -->
   <section>
+    <div class="nightly-badge">Firefox Nightly</div>
     <h2>What HTTPS records actually carry</h2>
     <div class="chart" id="c-httpsrr" style="height:430px;"></div>
     <figcaption>Of connections that saw an HTTPS record, what it carried. <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM: https_rr_features</a>.</figcaption>
@@ -183,9 +195,9 @@
       <div class="col-60">
         <ul class="small">
           <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>removed</strong>, only <strong>~3%</strong> black-holed.</li>
+          <li>On release, <strong>~20%</strong> of congestion responses come from a <strong>CE mark</strong>, not packet loss (the other <strong>~80%</strong> from loss) (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore?activeBuckets=%5B%22loss%22%2C%22ecn-ce%22%5D&app_id=release&timeHorizon=ALL">GLAM: congestion_event_reason</a>).</li>
           <li>A <strong>CE</strong> mark signals congestion <strong>without a drop</strong>: no retransmit, and no ~1-RTT send gap while loss recovery kicks in.</li>
           <li>Firefox backs off <strong>less</strong> on a CE mark than on loss, per <a href="https://datatracker.ietf.org/doc/html/rfc8511">RFC 8511</a> (Alternative Backoff with ECN).</li>
-          <li><strong>~1 in 5</strong> congestion responses now comes from a CE mark, not packet loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM: congestion_event_reason</a>).</li>
         </ul>
       </div>
     </div>
@@ -193,6 +205,7 @@
 
   <!-- 6a. QUIC RTT -->
   <section>
+    <div class="nightly-badge">Firefox Nightly</div>
     <h2>QUIC round-trip times, from the client</h2>
     <div class="chart" id="c-rtt" style="height:420px;"></div>
     <figcaption>Smoothed RTT of QUIC connections, log scale. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking_http_3_rtt</a> (Nightly).</figcaption>
@@ -203,7 +216,7 @@
   <section>
     <h2>Reading server MTUs from the client</h2>
     <div class="chart" id="c-segsize" style="height:420px;"></div>
-    <figcaption>Received QUIC datagram size, i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (Linux, release).</figcaption>
+    <figcaption>Received QUIC datagram size, i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (release).</figcaption>
     <p class="small muted">The median server datagram is <strong>~1217 B</strong>, a conservative QUIC-safe size; only the tail reaches <strong>~1448 B</strong>, near the 1500-byte Ethernet MTU. Most servers leave PMTUD headroom on the table. (The tiny sizes are ACKs.)</p>
   </section>
 
@@ -216,38 +229,27 @@
       <div class="stat"><span class="num">7</span><span class="lbl">median requests<br>per page load</span></div>
     </div>
     <ul class="small">
-      <li>Speculative connects, preconnects, and coalescing open many connections that <strong>never carry a request</strong> (52% on HTTP/2, 31% on HTTP/3).</li>
-      <li>Two thirds of connections are third-party, and about <strong>half go to a classified tracker</strong>.</li>
+      <li>Speculative connects and preconnects open many connections that <strong>never carry a request</strong> (52% on HTTP/2, 31% on HTTP/3).</li>
+      <li>Two thirds of connections are third-party, and about <strong>half go to a classified tracker</strong> (<a href="https://glam.telemetry.mozilla.org/fog/probe/http_traffic_analysis/explore">GLAM: http_traffic_analysis</a>).</li>
     </ul>
-    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/spdy_request_per_conn/explore">spdy_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_request_per_conn/explore">http3_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_traffic_analysis/explore">http_traffic_analysis</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_request_per_page/explore">http_request_per_page</a>.</p>
-  </section>
-
-  <!-- 7. Method: cutting through the noise -->
-  <section>
-    <h2>Cutting through the noise</h2>
-    <ul class="small">
-      <li><strong>Nightly vs release.</strong> Nightly catches regressions within hours; release gives representative scale.</li>
-      <li><strong>Roll out behind experiments.</strong> Compare arms on the same build, so the effect is the change, not the population.</li>
-      <li><strong>Watch the denominator.</strong> Connections, requests, and page loads give different answers to &ldquo;how much HTTP/3?&rdquo;</li>
-      <li><strong>The trap.</strong> A metric gated on an OS feature is buried by the majority OS. UDP GSO/GRO offload looks absent at <code>os:"*"</code> (Windows dominates), and only appears once you filter <code>os:"Linux"</code>.</li>
-    </ul>
+    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/spdy_request_per_conn/explore">spdy_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_request_per_conn/explore">http3_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_request_per_page/explore">http_request_per_page</a>.</p>
   </section>
 
   <!-- 8. Use it yourself -->
   <section>
-    <h2>Public, and yours to query</h2>
+    <h2>Query it yourself</h2>
     <div class="cols" style="gap:1.4em;">
       <div class="card">
         <p class="tag">Distributions</p>
-        <p class="small"><a href="https://glam.telemetry.mozilla.org/">GLAM</a>: percentiles and label shares per probe, per version and OS. No login.</p>
+        <p class="small"><strong><a href="https://glam.telemetry.mozilla.org/">glam.telemetry.mozilla.org</a></strong><br>Percentiles and label shares per probe, per version and OS. No login.</p>
       </div>
       <div class="card">
         <p class="tag">Dashboards</p>
-        <p class="small"><a href="https://performance.mozilla.org/networking.html">performance.mozilla.org</a>: curated networking views (DNS, HTTP version share, time to request).</p>
+        <p class="small"><strong><a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking.html</a></strong><br>Curated views: DNS, HTTP version, time to request.</p>
       </div>
       <div class="card">
         <p class="tag">Definitions</p>
-        <p class="small">Every metric is defined in the open: <a href="https://searchfox.org/mozilla-central/source/netwerk/metrics.yaml"><code>netwerk/metrics.yaml</code></a> (Glean).</p>
+        <p class="small"><strong><a href="https://searchfox.org/mozilla-central/source/netwerk/metrics.yaml">searchfox.org &rarr; netwerk/metrics.yaml</a></strong><br>Every metric defined in the open (Glean).</p>
       </div>
     </div>
     <p class="small muted">Bring a research question and add a browser vantage point. We are happy to help you find the right probe.</p>
@@ -258,8 +260,8 @@
     <h2 style="color:#ffffff;">Takeaways</h2>
     <ul class="small" style="color:#e8e6f0; max-width:none;">
       <li>The client side, at global scale, is <strong>public</strong>: use it.</li>
-      <li>Surprises worth chasing: h3 discovery still wastes a round trip, ECH is barely deployed, most connections never leave slow start, ECN is mostly bleached.</li>
-      <li>Come find us: Oskar Mansfeld &amp; Max Inden, <a href="https://groups.google.com/a/mozilla.com/g/necko">Firefox Networking (Necko)</a>.</li>
+      <li>Surprises worth chasing: h3 discovery still wastes a round trip, ECH is barely deployed, most connections never leave slow start, and ECN works on most paths.</li>
+      <li>Come find us: Oskar Mansfeld (<a href="mailto:omansfeld@mozilla.com" style="color:#c9b8f0;">omansfeld@mozilla.com</a>) &amp; Max Inden (<a href="mailto:mail@max-inden.de" style="color:#c9b8f0;">mail@max-inden.de</a>).</li>
     </ul>
   </section>
 
