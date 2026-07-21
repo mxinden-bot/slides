@@ -29,13 +29,14 @@ window.DECK_DATA = {
     pct: [79.5, 54.4, 51.2, 16.3],
   },
 
-  // GLAM networking_http_3_udp_datagram_segment_size_received, Firefox release,
-  // all OSes: size of received QUIC datagrams, i.e. the MTU the server sends at.
-  // The receive path (GRO on Linux, URO on Windows) coalesces, so this reads
-  // server MTUs cross-platform.
+  // GLAM networking_http_3_udp_datagram_segment_size_received (release, all OSes):
+  // received QUIC datagram size = the MTU the server sends at. The receive path
+  // (GRO on Linux, URO on Windows) coalesces, so this reads server MTUs
+  // cross-platform. Top sizes by share (non_norm_histogram); the distribution is
+  // discrete: servers cluster at a handful of sizes.
   segSize: {
-    p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99'],
-    bytes: [30, 724, 1217, 1217, 1448, 1448],
+    sizes: ['1217 B', '1166 B', '1448 B', '1271 B', '1386 B', 'other'],
+    pct:   [78.1, 7.9, 5.9, 1.9, 1.0, 5.2],
   },
 
   // GLAM networking_http_3_rtt (Nightly): smoothed RTT of QUIC connections.

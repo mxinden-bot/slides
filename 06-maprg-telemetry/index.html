@@ -157,15 +157,15 @@
     <h2>QUIC round-trip times, from the client</h2>
     <div class="chart" id="c-rtt" style="height:420px;"></div>
     <figcaption>Cumulative distribution of smoothed RTT (log x); dots are GLAM&rsquo;s percentiles. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking_http_3_rtt</a> (Nightly).</figcaption>
-    <p class="small muted">A steep rise from ~10 to ~50 ms, then a long tail out toward ~2 s: the client sees the whole world&rsquo;s paths, including the slow ones.</p>
+    <p class="small muted">A steep rise from ~10 to ~50 ms, then a long tail out toward ~2 s.</p>
   </section>
 
   <!-- 6a2. Server MTUs -->
   <section>
     <h2>Reading server MTUs from the client</h2>
     <div class="chart" id="c-segsize" style="height:420px;"></div>
-    <figcaption>Received QUIC datagram size, i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (release).</figcaption>
-    <p class="small muted">The median server datagram is <strong>~1217 B</strong>, a conservative QUIC-safe size; only the tail reaches <strong>~1448 B</strong>, near the 1500-byte Ethernet MTU. Most servers leave PMTUD headroom on the table. (The tiny sizes are ACKs.)</p>
+    <figcaption>Received QUIC datagram size (top sizes by share), i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (release).</figcaption>
+    <p class="small muted"><strong>78%</strong> of servers send at exactly <strong>1217 B</strong>, a conservative QUIC-safe size; only <strong>~6%</strong> reach <strong>1448 B</strong>, near the 1500-byte Ethernet MTU. Servers cluster at a few discrete MTUs and mostly leave PMTUD headroom on the table.</p>
   </section>
 
   <!-- 5. Surprise 3: congestion control reality -->
@@ -254,10 +254,8 @@
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
-  Charts.register('c-segsize', (el) => Charts.bar(el, {
-    x: D.segSize.p, yName: 'bytes', yMax: 1600, barLabels: true,
-    yFormatter: (v) => v + ' B', barLabelFormatter: (p) => p.value + ' B',
-    series: [{ name: 'bytes', data: D.segSize.bytes }],
+  Charts.register('c-segsize', (el) => Charts.barH(el, {
+    y: D.segSize.sizes, data: D.segSize.pct, xMax: 90, valueFormatter: (v) => v + '%',
   }));
   Charts.register('c-rtt', (el) => Charts.cdf(el, {
     pct: D.rtt.pct, values: D.rtt.ms,
