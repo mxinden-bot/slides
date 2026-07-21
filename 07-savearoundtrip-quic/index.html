@@ -26,11 +26,11 @@
 
   <!-- 2. The upgrade path (data + donut) -->
   <section>
-    <h2>Alt-Svc &rarr; HTTPS RR: the upgrade path</h2>
+    <h2>Two upgrade paths to QUIC: Alt-Svc and HTTPS RR</h2>
     <div class="cols">
       <div class="col-60">
+        <div class="stat" style="margin:0.1em 0 0.6em; align-items:flex-start;"><span class="num">~7%</span><span class="lbl" style="text-align:left;">of connections ever see an HTTPS record advertising h3</span></div>
         <ul class="small">
-          <li>Alt-Svc is learned <em>after</em> an HTTP/2 connection: the first visit never uses HTTP/3.</li>
           <li><strong>35%</strong> of Firefox connections learn h3 <strong>only via Alt-Svc</strong>, i.e. don&rsquo;t do HTTP/3 on the first connection (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM</a>).</li>
           <li>HTTPS records (RFC 9460) fix this, but <strong>few sites publish one</strong>: <strong>&gt;20%</strong> of the top-1M, and mostly one CDN&rsquo;s default (&gt;70% Cloudflare) (<a href="https://arxiv.org/abs/2403.15672">Dong et al., IMC 2024</a>).</li>
           <li>On-path actors also <strong>strip the record</strong> (or just its ECH parameter) to keep the SNI visible, taking the h3 hint with it (<a href="https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-block-TLS-1-3-Encrypted-Client-Hello-ECH-in/ta-p/328324">FortiGate</a>, <a href="https://secure.cisco.com/secure-firewall/docs/encrypted-client-hello-defense-strategies-how-cisco-secure-firewall-tackles-ech">Cisco</a>).</li>
@@ -59,7 +59,6 @@
         <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
       </div>
     </div>
-    <p class="small muted"><strong><a href="https://savearoundtrip.com">savearoundtrip.com</a></strong>: check whether a domain publishes the record.</p>
   </section>
 
   <!-- 4. QUIC v2 barely deployed -->
@@ -70,7 +69,6 @@
       <li>Firefox Nightly telemetry: <strong>v1 ~100%</strong>, <strong>v2 ~0%</strong> of version-labeled QUIC handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_quic_version/explore?activeBuckets=%5B%22v1%22%2C%22v2%22%5D">GLAM</a>).</li>
       <li>Wider measurement agrees: v2 is on <strong>&lt; 0.003%</strong> of QUICv1 domains (<a href="https://dl.acm.org/doi/10.1145/3646547.3689673">IMC 2024</a>).</li>
       <li>Is adoption low because there is <strong>no technical incentive</strong>? v2 buys no new feature, only anti-ossification.</li>
-      <li>Probe any origin&rsquo;s live v1/v2 support at <a href="https://savearoundtrip.com">savearoundtrip.com</a> (cold h3 handshake, reports the versions).</li>
     </ul>
   </section>
 
@@ -116,10 +114,9 @@
         <p class="small">One lookup, both checks. Here <code>quic-go.net</code>:</p>
         <ul class="small">
           <li>publishes an <strong>HTTPS record</strong> advertising <strong>h3</strong>, so browsers reach HTTP/3 on the <strong>first</strong> connection,</li>
-          <li>and its live handshake offers <strong>QUIC v1 and v2</strong>.</li>
+          <li>and its live handshake <strong>succeeds with QUIC v1 and v2</strong>.</li>
         </ul>
         <p class="small muted">Check your domain, then publish the record and turn on v2.</p>
-        <p class="small muted"><a href="https://max-inden.de/">max-inden.de</a></p>
       </div>
     </div>
   </section>
