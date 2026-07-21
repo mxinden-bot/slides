@@ -183,10 +183,10 @@
       <div class="col-60">
         <ul class="small">
           <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>removed</strong>, only <strong>~3%</strong> black-holed.</li>
-          <li>It pays off: on a <strong>CE</strong> mark Firefox reduces its congestion response <strong>without waiting for loss</strong> (<a href="https://github.com/mozilla/neqo/pull/3233">neqo#3233</a>).</li>
+          <li>A <strong>CE</strong> mark signals congestion <strong>without a drop</strong>: no retransmit, and no ~1-RTT send gap while loss recovery kicks in.</li>
+          <li>Firefox backs off <strong>less</strong> on a CE mark than on loss, per <a href="https://datatracker.ietf.org/doc/html/rfc8511">RFC 8511</a> (Alternative Backoff with ECN).</li>
           <li><strong>~1 in 5</strong> congestion responses now comes from a CE mark, not packet loss (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore">GLAM: congestion_event_reason</a>).</li>
         </ul>
-        <p class="small muted">A real base to build L4S on.</p>
       </div>
     </div>
   </section>
