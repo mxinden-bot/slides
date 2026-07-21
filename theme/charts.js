@@ -262,12 +262,65 @@
     return chart;
   }
 
+  /*
+   * CDF (cumulative distribution), drawn THROUGH the given percentile points so
+   * the highlighted percentile markers lie exactly on the curve, and the labels
+   * are the source's official percentile values.
+   *   { pct: [levels %], values: [x at each level], marks: {level: 'P50', ...},
+   *     xName, yName, xMin, xMax, xType ('log'|'value'), xFormatter,
+   *     labelPos?: {level: 'top'|'bottom'|'right'|...}, color?, markColor? }
+   */
+  function cdf(el, o) {
+    const chart = make(el);
+    const color = o.color || '#2a78d6';
+    const accent = o.markColor || v('--accent', '#eb6834');
+    const fmt = o.xFormatter || ((x) => String(x));
+    const marks = o.marks || {};
+    const curve = [[o.xMin, 0]]
+      .concat(o.pct.map((p, i) => [o.values[i], p]))
+      .concat([[o.xMax, 100]]);
+    const points = o.pct
+      .map((p, i) => ({ p, x: o.values[i] }))
+      .filter((d) => marks[d.p] != null)
+      .map((d) => ({
+        value: [d.x, d.p],
+        label: { show: true, position: (o.labelPos && o.labelPos[d.p]) || 'right',
+          formatter: marks[d.p] + ': ' + fmt(d.x), color: INK, fontFamily: FONT,
+          fontSize: LABEL_FS, fontWeight: 700 },
+      }));
+    chart.setOption({
+      animation: false,
+      grid: Object.assign({}, baseGrid, { left: 16, right: 56, top: 24, bottom: 16 }),
+      xAxis: Object.assign(axisCommon(o.xName), {
+        type: o.xType || 'log', min: o.xMin, max: o.xMax,
+        nameLocation: 'middle', nameGap: 42,
+        nameTextStyle: { color: INK_MUTED, fontSize: AXIS_FS, fontFamily: FONT, fontWeight: 600 },
+        axisLabel: { color: INK_FAINT, fontSize: AXIS_FS, fontFamily: FONT, formatter: fmt },
+      }),
+      yAxis: Object.assign(axisCommon(o.yName), {
+        type: 'value', min: 0, max: 100,
+        nameLocation: 'middle', nameGap: 50,
+        nameTextStyle: { color: INK_MUTED, fontSize: AXIS_FS, fontFamily: FONT, fontWeight: 600 },
+        axisLabel: { color: INK_FAINT, fontSize: AXIS_FS, fontFamily: FONT, formatter: '{value}%' },
+      }),
+      series: [
+        { type: 'line', data: curve, showSymbol: false, smooth: false,
+          lineStyle: { width: 3, color }, areaStyle: { color, opacity: 0.10 }, z: 1 },
+        { type: 'scatter', z: 3, symbolSize: 11, itemStyle: { color: accent }, data: points,
+          markLine: { silent: true, symbol: 'none',
+            lineStyle: { type: 'dashed', color: accent, opacity: 0.35, width: 1 },
+            data: points.map((pt) => ([{ coord: [pt.value[0], 0] }, { coord: pt.value }])) } },
+      ],
+    });
+    return chart;
+  }
+
   // Re-fit every chart on load and resize (reveal scales slides via transform,
   // so we render at the slide's intrinsic pixel size).
   const instances = () => document.querySelectorAll('[data-chart]');
 
   window.Charts = {
-    line, bar, barH, donut, area,
+    line, bar, barH, donut, area, cdf,
     palette: PALETTE, other: OTHER,
     // Render all [data-chart] elements once the deck is ready. Each element's
     // render function is registered by the deck via Charts.register(id, fn).

@@ -38,10 +38,11 @@ window.DECK_DATA = {
     bytes: [30, 724, 1217, 1217, 1448, 1448],
   },
 
-  // GLAM networking_http_3_rtt, Firefox Nightly: smoothed RTT of QUIC connections.
+  // GLAM networking_http_3_rtt (Nightly): smoothed RTT of QUIC connections.
+  // Percentile level (%) -> RTT (ms); drawn as a CDF through these points.
   rtt: {
-    p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99', 'P99.9'],
-    ms: [5, 14, 25, 46, 174, 377, 1943],
+    pct: [0.1, 1, 5, 25, 50, 75, 95, 99, 99.9],
+    ms:  [1,   3, 5, 14, 25, 46, 174, 377, 1797],
   },
 
   // GLAM networking_http_3_ecn_path_capability, Firefox release (label shares via

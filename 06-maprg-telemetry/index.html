@@ -156,8 +156,8 @@
     <div class="nightly-badge">Firefox Nightly</div>
     <h2>QUIC round-trip times, from the client</h2>
     <div class="chart" id="c-rtt" style="height:420px;"></div>
-    <figcaption>Smoothed RTT of QUIC connections, log scale. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking_http_3_rtt</a> (Nightly).</figcaption>
-    <p class="small muted">Median <strong>~25 ms</strong>, but a long tail: P95 <strong>~175 ms</strong>, P99.9 <strong>~2 s</strong>. The client sees the whole world&rsquo;s paths, including the slow ones.</p>
+    <figcaption>Cumulative distribution of smoothed RTT (log x); dots are GLAM&rsquo;s percentiles. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking_http_3_rtt</a> (Nightly).</figcaption>
+    <p class="small muted">A steep rise from ~10 to ~50 ms, then a long tail out toward ~2 s: the client sees the whole world&rsquo;s paths, including the slow ones.</p>
   </section>
 
   <!-- 6a2. Server MTUs -->
@@ -259,10 +259,13 @@
     yFormatter: (v) => v + ' B', barLabelFormatter: (p) => p.value + ' B',
     series: [{ name: 'bytes', data: D.segSize.bytes }],
   }));
-  Charts.register('c-rtt', (el) => Charts.bar(el, {
-    x: D.rtt.p, yName: 'ms (log)', yType: 'log', yMin: 1, yMax: 3000, yFormatter: ms,
-    barLabels: true, barLabelFormatter: (p) => ms(p.value),
-    series: [{ name: 'RTT', data: D.rtt.ms }],
+  Charts.register('c-rtt', (el) => Charts.cdf(el, {
+    pct: D.rtt.pct, values: D.rtt.ms,
+    xName: 'RTT', yName: '% of connections ≤ RTT',
+    xMin: 1, xMax: 10000, xType: 'log',
+    xFormatter: (x) => (x >= 1000 ? (x / 1000) + ' s' : x + ' ms'),
+    marks: { 5: 'P5', 25: 'P25', 50: 'P50', 75: 'P75', 95: 'P95', 99: 'P99', 99.9: 'P99.9' },
+    labelPos: { 5: 'bottom', 25: 'right', 50: 'right', 75: 'right', 95: 'right', 99: 'top', 99.9: 'top' },
   }));
   Charts.register('c-httpver', (el) => Charts.donut(el, {
     data: D.httpVersion, centerValue: '17%', centerLabel: 'HTTP/3',
