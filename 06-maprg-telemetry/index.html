@@ -117,37 +117,7 @@
     </div>
   </section>
 
-  <!-- 4b. IPv6 lags -->
-  <section>
-    <h2>IPv6 still lags</h2>
-    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
-      <div class="stat"><span class="num">~30%</span><span class="lbl">of connections<br>use IPv6</span></div>
-    </div>
-    <ul class="small">
-      <li><strong>IPv6</strong> is still a minority of connections (~30%), even at global client scale.</li>
-      <li>Curiously, IPv6 and HTTP/3 have <strong>converged</strong>: both sit near ~30% and track each other (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: connection_address_type</a>).</li>
-    </ul>
-  </section>
-
-  <!-- 4c. Adoption contrast: HTTPS vs IPv6 -->
-  <section>
-    <h2>Transitions can be fast: HTTPS vs IPv6</h2>
-    <div class="cols">
-      <div class="col-60">
-        <div class="chart short" id="c-https-adopt"></div>
-        <figcaption>Firefox page loads over HTTPS (<a href="https://letsencrypt.org/stats/">Let&rsquo;s Encrypt</a>) vs global IPv6 adoption (<a href="https://www.google.com/intl/en/ipv6/statistics.html">Google</a>), July of each year.</figcaption>
-      </div>
-      <div class="col-40">
-        <ul class="small">
-          <li><strong>HTTPS</strong> went from <strong>~29%</strong> of page loads (2013) to <strong>80%+</strong> in about seven years.</li>
-          <li><strong>IPv6</strong> is still only <strong>~42&ndash;47%</strong> deployed (<a href="https://www.google.com/intl/en/ipv6/statistics.html">Google</a> / <a href="https://stats.labs.apnic.net/ipv6">APNIC</a>) after <strong>25+ years</strong> (RFC 2460, 1998).</li>
-          <li>HTTP/3 sits near <strong>~30%</strong> today. Which curve will it follow?</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4d. ECH barely deployed -->
+<!-- 4d. ECH barely deployed -->
   <section>
     <h2>ECH is barely deployed</h2>
     <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
@@ -159,7 +129,18 @@
     </ul>
   </section>
 
-  <!-- 5. Surprise 3: congestion control reality -->
+  <!-- 4b. IPv6 lags -->
+  <section>
+    <h2>IPv6 still lags</h2>
+    <div class="cols" style="justify-content:center; gap:3.5em; margin:0.3em 0;">
+      <div class="stat"><span class="num">~20%</span><span class="lbl">of HTTP requests<br>go over IPv6</span></div>
+    </div>
+    <ul class="small">
+      <li><strong>IPv6</strong> is still a minority: only <strong>~20%</strong> of HTTP requests go over it, even at global client scale (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore?activeBuckets=%5B%22http_2_ipv4%22%2C%22http_1_ipv4%22%2C%22http_3_ipv4%22%2C%22http_2_ipv6%22%2C%22http_3_ipv6%22%2C%22http_1_ipv6%22%5D&app_id=release&timeHorizon=QUARTER">GLAM: connection_address_type</a>, release, by HTTP request).</li>
+    </ul>
+  </section>
+
+      <!-- 5. Surprise 3: congestion control reality -->
   <section>
     <h2>Most connections never send fast</h2>
     <div class="cols" style="justify-content:center; gap:3em; margin:0.4em 0;">
@@ -292,14 +273,6 @@
   }));
   Charts.register('c-nettype', (el) => Charts.donut(el, {
     data: D.netType, centerValue: '29%', centerLabel: 'cellular',
-  }));
-  Charts.register('c-https-adopt', (el) => Charts.line(el, {
-    x: D.httpsAdoption.x, yName: '%', yMin: 0, yMax: 100,
-    yFormatter: (v) => v + '%',
-    series: [
-      { name: 'HTTPS', data: D.httpsAdoption.pct, area: true },
-      { name: 'IPv6', data: D.httpsAdoption.ipv6 },
-    ],
   }));
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,

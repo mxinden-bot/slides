@@ -53,15 +53,6 @@ window.DECK_DATA = {
     { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
   ],
 
-  // Adoption-speed contrast, July of each year. HTTPS: share of Firefox page loads
-  // over HTTPS (Let's Encrypt historical HTTP_PAGELOAD_IS_SSL + recent aggregate,
-  // https://letsencrypt.org/stats/ ). IPv6: Google's global IPv6 adoption (total %),
-  // https://www.google.com/intl/en/ipv6/statistics.html .
-  httpsAdoption: {
-    x:    ['2013', '2015', '2016', '2018', '2020', '2022', '2024', '2026'],
-    pct:  [29, 31, 46, 72, 81, 80, 82, 83],
-    ipv6: [1.4, 6.4, 11.1, 23.1, 30.3, 40.1, 43.3, 47.5],
-  },
 
   // Firefox desktop OS mix, data.firefox.com/dashboard/hardware, snapshot 2026-07-06.
   osMix: [
