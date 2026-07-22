@@ -49,10 +49,10 @@ window.DECK_DATA = {
   // GLAM networking_http_3_ecn_path_capability, Firefox release (label shares via
   // non_norm_histogram): what happened to ECN marks on a QUIC connection's path.
   ecn: [
-    { name: 'ECN capable', value: 59.6, color: '#1baf7a' },
-    { name: 'removed', value: 34.6, color: '#eb6834' },
-    { name: 'unsent ECT(1)', value: 3.0, color: '#c9c9d1' },
+    { name: 'ECN capable', value: 59.5, color: '#1baf7a' },
+    { name: 'removed', value: 35.2, color: '#eb6834' },
     { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
+    { name: 'unsent ECT(1)', value: 2.5, color: '#c9c9d1' },
   ],
 
 
