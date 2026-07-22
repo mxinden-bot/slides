@@ -204,21 +204,6 @@
 
   
 
-  <!-- 6b. Connection economics -->
-  <section>
-    <h2>Firefox opens more connections than it uses</h2>
-    <div class="cols" style="justify-content:center; gap:2.4em; margin:0.3em 0;">
-      <div class="stat"><span class="num">52%</span><span class="lbl">of HTTP/2 connections<br>carry zero requests</span></div>
-      <div class="stat"><span class="num">~50%</span><span class="lbl">of connections opened<br>go to a tracker</span></div>
-      <div class="stat"><span class="num">7</span><span class="lbl">median requests<br>per page load</span></div>
-    </div>
-    <ul class="small">
-      <li>Speculative connects and preconnects open many connections that <strong>never carry a request</strong> (52% on HTTP/2, 31% on HTTP/3).</li>
-      <li>Two thirds of connections are third-party, and about <strong>half go to a classified tracker</strong> (<a href="https://glam.telemetry.mozilla.org/fog/probe/http_traffic_analysis/explore">GLAM: http_traffic_analysis</a>).</li>
-    </ul>
-    <p class="small muted">GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/spdy_request_per_conn/explore">spdy_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http3_request_per_conn/explore">http3_request_per_conn</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/http_request_per_page/explore">http_request_per_page</a>.</p>
-  </section>
-
   <!-- 8. Use it yourself -->
   <section>
     <h2>Query it yourself</h2>
