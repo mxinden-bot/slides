@@ -46,13 +46,13 @@ window.DECK_DATA = {
     ms:  [1,   3, 5, 14, 25, 46, 174, 377, 1797],
   },
 
-  // GLAM networking_http_3_ecn_path_capability, Firefox release (label shares via
-  // non_norm_histogram): what happened to ECN marks on a QUIC connection's path.
+  // GLAM networking_http_3_ecn_path_capability, Firefox release (client-normalized
+  // label shares, latest datapoint): what happened to ECN marks on a QUIC path.
   ecn: [
-    { name: 'ECN capable', value: 59.5, color: '#1baf7a' },
-    { name: 'removed', value: 35.2, color: '#eb6834' },
-    { name: 'black-holed', value: 2.8, color: '#8f8f9d' },
-    { name: 'unsent ECT(1)', value: 2.5, color: '#c9c9d1' },
+    { name: 'ECN capable', value: 61.5, color: '#1baf7a' },
+    { name: 'removed', value: 36.4, color: '#eb6834' },
+    { name: 'black-holed', value: 2.08, color: '#8f8f9d' },
+    { name: 'unsent ECT(1)', value: 0.02, color: '#c9c9d1' },
   ],
 
 
@@ -68,8 +68,8 @@ window.DECK_DATA = {
   // Firefox Android navigations by network type (7-day avg), performance.mozilla.org
   // (STMO query 115600). ethernet/unknown (<0.1%) folded into 'not reported'.
   netType: [
-    { name: 'wifi', value: 60.5, color: '#1baf7a' },
-    { name: 'cellular', value: 28.8, color: '#2a78d6' },
-    { name: 'not reported', value: 10.7, color: '#c9c9d1' },
+    { name: 'wifi', value: 60, color: '#1baf7a' },
+    { name: 'cellular', value: 29, color: '#2a78d6' },
+    { name: 'not reported', value: 11, color: '#c9c9d1' },
   ],
 };

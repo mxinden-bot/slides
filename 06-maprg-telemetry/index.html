@@ -72,7 +72,7 @@
       </div>
       <div class="col-60">
         <ul class="small">
-          <li>On Android: <strong>~61%</strong> wifi, <strong>~29%</strong> cellular, the rest unreported.</li>
+          <li>On Android: <strong>~60%</strong> wifi, <strong>~29%</strong> cellular, the rest unreported.</li>
           <li>Cellular paths bring higher and more variable RTT, more loss, and NAT rebinding: the hard cases cluster here.</li>
         </ul>
       </div>
@@ -183,7 +183,7 @@
 
   <!-- 6. Surprise 4: ECN on the path -->
   <section>
-    <h2>ECN works on most paths, and it pays off</h2>
+    <h2>ECN works on most paths</h2>
     <div class="cols">
       <div class="col-40">
         <div class="chart short" id="c-ecn"></div>
@@ -191,7 +191,7 @@
       </div>
       <div class="col-60">
         <ul class="small">
-          <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>removed</strong>, only <strong>~3%</strong> black-holed.</li>
+          <li><strong>~60%</strong> of QUIC connections see working ECN end to end; ~35% have marks <strong>removed</strong>, only <strong>~2%</strong> black-holed.</li>
           <li>On release, <strong>~15%</strong> of congestion responses come from a <strong>CE mark</strong>, not packet loss (the other <strong>~85%</strong> from loss) (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_congestion_event_reason/explore?activeBuckets=%5B%22loss%22%2C%22ecn-ce%22%5D&app_id=release&timeHorizon=ALL">GLAM: congestion_event_reason</a>).</li>
           <li>A <strong>CE</strong> mark signals congestion <strong>without a drop</strong>: no retransmit, and no ~1-RTT send gap while loss recovery kicks in.</li>
           <li>Firefox backs off <strong>less</strong> on a CE mark than on loss, per <a href="https://datatracker.ietf.org/doc/html/rfc8511">RFC 8511</a> (Alternative Backoff with ECN).</li>
