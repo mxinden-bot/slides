@@ -200,7 +200,24 @@
     </div>
   </section>
 
-  
+  <!-- 6b. ECN receive path -->
+  <section>
+    <div class="nightly-badge">Firefox Nightly</div>
+    <h2>And we observe the ECN receive path, too</h2>
+    <ul>
+      <li>We have new telemetry (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_ect_received/explore?activeBuckets=%5B%22none%22%2C%22ect0%22%2C%22ect0-and-ce%22%2C%22ect1%22%2C%22ect1-and-ce%22%2C%22ect0-and-ect1%22%2C%22ce-only%22%5D&ref=2026072109">GLAM</a>) for our ECN <strong>receive path</strong>, so we observe what the server sees.</li>
+      <li>Those are the first results, just in today, <strong>normalized by client</strong>:
+        <ul>
+          <li><strong>3.96%</strong> of connections have marked <strong>ECT(0)</strong>.</li>
+          <li><strong>0.76%</strong> see <strong>ECT(0)</strong> and <strong>ECN-CE</strong>.</li>
+          <li><strong>0.17%</strong> marked <strong>ECT(1)</strong>.</li>
+          <li><strong>0.02%</strong> see <strong>ECT(1)</strong> and <strong>ECN-CE</strong>.</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+
 
   
 
