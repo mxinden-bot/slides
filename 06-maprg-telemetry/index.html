@@ -164,8 +164,8 @@
   <section>
     <h2>Reading server MTUs from the client</h2>
     <div class="chart" id="c-segsize" style="height:420px;"></div>
-    <figcaption>Received QUIC datagram size (top sizes by share), i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (release).</figcaption>
-    <p class="small muted"><strong>78%</strong> of servers send at exactly <strong>1217 B</strong>, a conservative QUIC-safe size; only <strong>~6%</strong> reach <strong>1448 B</strong>, near the 1500-byte Ethernet MTU. Servers cluster at a few discrete MTUs and mostly leave PMTUD headroom on the table.</p>
+    <figcaption>Received QUIC datagram size, i.e. the size the server sends at. <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_udp_datagram_segment_size_received/explore">GLAM: udp_datagram_segment_size_received</a> (release).</figcaption>
+    <p class="small muted">The median datagram is <strong>1217 B</strong>, a conservative QUIC-safe size, and even <strong>P95 is only 1448 B</strong>, just under the 1500-byte Ethernet MTU: servers mostly leave PMTUD headroom on the table. The low tail (P5 &asymp; 30 B) is ACK-sized control traffic.</p>
   </section>
 
   <!-- 5. Surprise 3: congestion control reality -->
@@ -242,8 +242,13 @@
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
-  Charts.register('c-segsize', (el) => Charts.barH(el, {
-    y: D.segSize.sizes, data: D.segSize.pct, xMax: 90, valueFormatter: (v) => v + '%',
+  Charts.register('c-segsize', (el) => Charts.cdf(el, {
+    pct: D.mtu.pct, values: D.mtu.bytes,
+    xName: 'datagram size', yName: '% of datagrams ≤ size',
+    xMin: 0, xMax: 1500, xType: 'value',
+    xFormatter: (x) => x + ' B',
+    marks: { 5: 'P5', 25: 'P25', 50: 'P50', 95: 'P95' },
+    labelPos: { 5: 'top', 25: 'top', 50: 'left', 95: 'left' },
   }));
   Charts.register('c-rtt', (el) => Charts.cdf(el, {
     pct: D.rtt.pct, values: D.rtt.ms,

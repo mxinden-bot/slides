@@ -30,13 +30,13 @@ window.DECK_DATA = {
   },
 
   // GLAM networking_http_3_udp_datagram_segment_size_received (release, all OSes):
-  // received QUIC datagram size = the MTU the server sends at. The receive path
-  // (GRO on Linux, URO on Windows) coalesces, so this reads server MTUs
-  // cross-platform. Top sizes by share (non_norm_histogram); the distribution is
-  // discrete: servers cluster at a handful of sizes.
-  segSize: {
-    sizes: ['1217 B', '1166 B', '1448 B', '1271 B', '1386 B', 'other'],
-    pct:   [78.1, 7.9, 5.9, 1.9, 1.0, 5.2],
+  // received QUIC datagram size = the size the server sends at. Percentile level
+  // (%) -> datagram size (bytes); drawn as a CDF through these points. The low
+  // tail (P5 ~ 30 B) is ACK-sized control traffic; the mass sits at 1217 B and
+  // the ceiling is 1448 B, just under the 1500-byte Ethernet MTU.
+  mtu: {
+    pct:   [1, 5, 25, 50, 75, 95, 99],
+    bytes: [26, 30, 724, 1217, 1217, 1448, 1448],
   },
 
   // GLAM networking_http_3_rtt (Nightly): smoothed RTT of QUIC connections.
