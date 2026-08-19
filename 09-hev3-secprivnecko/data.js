@@ -63,10 +63,12 @@ window.DECK_DATA = {
       hev3:    [13.22, 27.93, 12.23],
     },
     // 2. Time to request start (navigationStart -> requestStart): DNS + TCP/TLS setup.
-    // % faster under HEv3, DoH-enabled segment. STMO 124709.
+    // DoH-enabled segment, indexed to control = 100 (only per-percentile deltas are
+    // available for this segment, so treatment is shown relative to control). STMO 124709.
     ttrs: {
-      p:      ['P25', 'P50', 'P75', 'P90', 'P95', 'P99'],
-      faster: [7.5, 8.0, 1.0, 7.5, 11.1, 21.7],
+      p:    ['P25', 'P50', 'P75', 'P90', 'P95', 'P99'],
+      ctrl: [100, 100, 100, 100, 100, 100],
+      hev3: [92.5, 92.0, 99.0, 92.5, 88.9, 78.3],
     },
     // 3. First contentful paint: HEv3 delta %, DoH-enabled segment (positive = slower,
     // negative = faster). Crossover: fast half worse, tail better. STMO 124745.
@@ -79,6 +81,14 @@ window.DECK_DATA = {
       x:   ['1', '2', '3', '4'],
       pct: [95.11, 4.42, 0.42, 0.04],
     },
+    // Fenix (Firefox for Android) Nightly, share of responses over HTTP/3 by build
+    // date (client-normalized), GLAM networking_http_response_version. The share
+    // steps up from ~14% to ~18% when HEv3 turned on in late July.
+    fenix: {
+      dates: ['07-20', '07-21', '07-22', '07-23', '07-24', '07-25', '07-26', '07-27', '07-28', '07-29', '07-30', '07-31', '08-01', '08-02', '08-03', '08-04', '08-05', '08-06', '08-07', '08-08', '08-09', '08-10', '08-11', '08-12', '08-13', '08-14', '08-15', '08-16', '08-17'],
+      h3:    [13.6, 14.1, 14.4, 17.8, 17.3, 18.2, 17.7, 18.1, 18.3, 18.1, 18.0, 18.6, 17.9, 17.4, 18.0, 18.7, 18.2, 17.9, 18.4, 18.6, 17.7, 18.0, 18.6, 18.8, 18.7, 18.4, 18.6, 18.2, 19.6],
+    },
+
     // Daily HTTP/3 share, DoH-enabled segment, control vs HEv3 (backup). STMO 124764.
     h3DailyDoh: {
       dates:   ['07-30', '07-31', '08-01', '08-02', '08-03', '08-04', '08-05', '08-06', '08-07', '08-08', '08-09', '08-10', '08-11', '08-12', '08-13', '08-14', '08-15', '08-16', '08-17', '08-18'],
