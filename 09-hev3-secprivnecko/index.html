@@ -286,26 +286,55 @@ fn connection_attempt_delay() {
 
   <!-- EXPERIMENT divider -->
   <section class="divider" data-background-color="#20123a">
-    <h2 style="color:#ffffff;">The rollout experiment</h2>
-    <p class="small" style="color:#b3adc4;">An A/B experiment on Firefox Desktop (Beta and Nightly), plus Firefox for Android (Fenix). Results follow.</p>
+    <h2 style="color:#ffffff;">The Beta experiment</h2>
+    <p class="small" style="color:#b3adc4;">A/B on Firefox Desktop Beta (<code style="color:#ff9d5c;">happyeyeballsv3</code>), 30 Jul&ndash;18 Aug 2026, control vs HEv3, ~46M successful runs/day. Segmented by DoH, because that is where HEv3 has HTTPS records to act on.</p>
+    <p class="small" style="color:#8f8f9d;">STMO: <a href="https://sql.telemetry.mozilla.org/queries/124764" style="color:#8f8f9d;">124764</a> (h3), <a href="https://sql.telemetry.mozilla.org/queries/124709" style="color:#8f8f9d;">124709</a> (TTRS), <a href="https://sql.telemetry.mozilla.org/queries/124745" style="color:#8f8f9d;">124745</a> (FCP), <a href="https://sql.telemetry.mozilla.org/queries/125312" style="color:#8f8f9d;">125312</a> (winning attempt).</p>
   </section>
 
-  <!-- E1. TTFB -->
+  <!-- E1. HTTP/3 usage -->
   <section>
-    <h2>Improved time to first byte</h2>
-    <p class="small muted">A/B result, Firefox Desktop Beta and Nightly. [results to come]</p>
+    <h2>More page loads over HTTP/3</h2>
+    <div class="chart" id="c-exp-h3"></div>
+    <figcaption>Share of page loads over HTTP/3, control vs HEv3, HEv3 higher on 20/20 days. The gain concentrates where HEv3 can act: with DoH, <strong>16.6% &rarr; 27.9%</strong> (+11.3pp, +68%). Without DoH only +1.1pp. STMO <a href="https://sql.telemetry.mozilla.org/queries/124764">124764</a>.</figcaption>
   </section>
 
-  <!-- E2. h3 share in the experiment -->
+  <!-- E2. Time to request start -->
   <section>
-    <h2>Increased HTTP/3 in the experiment</h2>
-    <p class="small muted">A/B result, Firefox Desktop Beta and Nightly. [results to come]</p>
+    <h2>Faster time to request start</h2>
+    <div class="chart" id="c-exp-ttrs"></div>
+    <figcaption>navigationStart &rarr; requestStart (DNS + TCP/TLS setup, where HEv3 acts), % faster under HEv3, DoH enabled. The tail moves most: <strong>P95 -11.1%</strong>, <strong>P99 -21.7%</strong> (2770 ms &rarr; 2168 ms), faster on 20/20 days. Without DoH it is roughly flat, so the pooled number understates the effect. STMO <a href="https://sql.telemetry.mozilla.org/queries/124709">124709</a>.</figcaption>
   </section>
 
-  <!-- E3. h3 share on Fenix -->
+  <!-- E3. First contentful paint -->
+  <section>
+    <h2>First contentful paint: a crossover</h2>
+    <div class="chart" id="c-exp-fcp"></div>
+    <figcaption>HEv3 change in FCP, DoH enabled (below zero is faster). Overall FCP improves slightly everywhere; with DoH the fast half pays a little (<strong>P25 +6.0%</strong>) while the slow tail gains sharply (<strong>P99 -10.0%</strong>, faster on 20/20 days). HEv3 helps where it hurts. STMO <a href="https://sql.telemetry.mozilla.org/queries/124745">124745</a>.</figcaption>
+  </section>
+
+  <!-- E4. Winning attempt index -->
+  <section>
+    <h2>The first attempt almost always wins</h2>
+    <div class="chart" id="c-exp-winidx"></div>
+    <figcaption>Which staggered attempt connected, HEv3 arm, client-normalized. <strong>95.1%</strong> win on the first endpoint, <strong>99.53%</strong> within two, stable across all 19 days (94.9&ndash;95.5%). So HEv3 mainly trims the long tail, not the median. STMO <a href="https://sql.telemetry.mozilla.org/queries/125312">125312</a>.</figcaption>
+  </section>
+
+  <!-- E5. Fenix placeholder -->
   <section>
     <h2>Significantly increased HTTP/3 on Firefox for Android (Fenix)</h2>
-    <p class="small muted">[results to come]</p>
+    <p class="small muted">[Fenix results to come]</p>
+  </section>
+
+  <!-- Backup divider -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Backup</h2>
+  </section>
+
+  <!-- B1. HTTP/3 daily detail -->
+  <section>
+    <h2>HTTP/3 usage, day by day (DoH enabled)</h2>
+    <div class="chart" id="c-exp-h3daily"></div>
+    <figcaption>Daily HTTP/3 share in the DoH-enabled segment: HEv3 sits clearly above control every one of the 20 days. STMO <a href="https://sql.telemetry.mozilla.org/queries/124764">124764</a>.</figcaption>
   </section>
 
   <!-- Library changes -->
@@ -451,6 +480,37 @@ fn connection_attempt_delay() {
     series: [
       { name: 'DoH', data: D.rrByResolver.doh },
       { name: 'OS resolver', data: D.rrByResolver.native },
+    ],
+  }));
+  // --- Beta experiment ---
+  Charts.register('c-exp-h3', (el) => Charts.bar(el, {
+    x: D.exp.h3.x, yName: '% of page loads', yMax: 32,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [
+      { name: 'control', data: D.exp.h3.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.exp.h3.hev3, color: '#1baf7a' },
+    ],
+  }));
+  Charts.register('c-exp-ttrs', (el) => Charts.bar(el, {
+    x: D.exp.ttrs.p, yName: '% faster (DoH on)', yMax: 24,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [{ name: '% faster', data: D.exp.ttrs.faster, color: '#1baf7a' }],
+  }));
+  Charts.register('c-exp-fcp', (el) => Charts.bar(el, {
+    x: D.exp.fcp.p, yName: '% change (DoH on)', yMin: -12, yMax: 8, refLine: 0, refLineLabel: 'no change',
+    barLabels: true, barLabelFormatter: (p) => (p.value > 0 ? '+' : '') + p.value + '%',
+    series: [{ name: 'HEv3 vs control', data: D.exp.fcp.delta, color: '#2a78d6' }],
+  }));
+  Charts.register('c-exp-winidx', (el) => Charts.bar(el, {
+    x: D.exp.winIdx.x, yName: '% of successful runs (by winning attempt)', yMax: 100,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [{ name: 'share', data: D.exp.winIdx.pct, color: '#1baf7a' }],
+  }));
+  Charts.register('c-exp-h3daily', (el) => Charts.line(el, {
+    x: D.exp.h3DailyDoh.dates, yName: '% h3 (DoH on)', yMax: 35, yFormatter: (v) => v + '%',
+    series: [
+      { name: 'control', data: D.exp.h3DailyDoh.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.exp.h3DailyDoh.hev3, color: '#1baf7a' },
     ],
   }));
   const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
