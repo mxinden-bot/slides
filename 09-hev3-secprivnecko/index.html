@@ -480,6 +480,7 @@
   }));
   Charts.register('c-exp-fenix', (el) => Charts.line(el, {
     x: D.exp.fenix.dates, yName: '% of page loads (Android Nightly)', yMax: 35, yFormatter: (v) => v + '%',
+    xInterval: 0,
     series: [{ name: 'HTTP/3', data: D.exp.fenix.h3, color: '#1baf7a', area: true }],
   }));
   Charts.register('c-exp-h3daily', (el) => Charts.line(el, {

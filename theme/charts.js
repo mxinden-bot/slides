@@ -110,6 +110,7 @@
       xAxis: Object.assign(axisCommon(o.xName), {
         type: 'category', boundaryGap: false, data: o.x,
         splitLine: { show: false },
+        axisLabel: { color: INK_FAINT, fontSize: AXIS_FS, fontFamily: FONT, interval: o.xInterval },
       }),
       yAxis: Object.assign(axisCommon(o.yName), {
         type: 'value', max: o.yMax,
