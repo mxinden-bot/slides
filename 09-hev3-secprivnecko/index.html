@@ -173,7 +173,7 @@
   <section>
     <h2>Significantly increased HTTP/3 on Firefox for Android (Fenix)</h2>
     <div class="chart" id="c-exp-fenix"></div>
-    <figcaption>Share of responses over HTTP/3 on Firefox for Android, Nightly, by build date. When HEv3 turned on (late July) the share stepped up from <strong>~14%</strong> to <strong>~18%</strong> and held. Source: <a href="https://glam.telemetry.mozilla.org/fenix/probe/networking_http_response_version/explore">GLAM: networking_http_response_version</a> (Android Nightly).</figcaption>
+    <figcaption>Share of page loads over HTTP/3 on Firefox for Android, Nightly (7-day moving average, one year). After a year around 19&ndash;27%, the share climbs to <strong>~31%</strong> as HEv3 turns on in late July. Source: Fenix Nightly Glean pageload event (<code>http_ver</code>).</figcaption>
   </section>
 
   <!-- Optimistic HTTP/3 -->
@@ -479,7 +479,7 @@
     series: [{ name: 'share', data: D.exp.winIdx.pct, color: '#1baf7a' }],
   }));
   Charts.register('c-exp-fenix', (el) => Charts.line(el, {
-    x: D.exp.fenix.dates, yName: '% HTTP/3 (Android Nightly)', yMax: 22, yFormatter: (v) => v + '%',
+    x: D.exp.fenix.dates, yName: '% of page loads (Android Nightly)', yMax: 35, yFormatter: (v) => v + '%',
     series: [{ name: 'HTTP/3', data: D.exp.fenix.h3, color: '#1baf7a', area: true }],
   }));
   Charts.register('c-exp-h3daily', (el) => Charts.line(el, {
