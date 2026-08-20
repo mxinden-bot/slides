@@ -152,14 +152,14 @@
   <section>
     <h2>Faster time to request start</h2>
     <div class="chart" id="c-exp-ttrs"></div>
-    <figcaption>navigationStart &rarr; requestStart (DNS + TCP/TLS setup, where HEv3 acts), DoH enabled, change vs control (below zero is faster). The tail moves most: <strong>P95 -11.1%</strong>, <strong>P99 -21.7%</strong> (2770 ms &rarr; 2168 ms), faster on 20/20 days. Without DoH it is roughly flat, so the pooled number understates the effect.</figcaption>
+    <figcaption>navigationStart &rarr; requestStart (DNS + TCP/TLS setup, where HEv3 acts), change vs control (below zero is faster). With DoH the tail moves most: <strong>P95 -11.1%</strong>, <strong>P99 -21.7%</strong> (2770 ms &rarr; 2168 ms), faster on 20/20 days. Without DoH it is flat to slightly slower, so the pooled number understates the DoH win.</figcaption>
   </section>
 
   <!-- E3. First contentful paint -->
   <section>
     <h2>First contentful paint: a crossover</h2>
     <div class="chart" id="c-exp-fcp"></div>
-    <figcaption>HEv3 change in FCP, DoH enabled (below zero is faster). Overall FCP improves slightly everywhere; with DoH the fast half pays a little (<strong>P25 +6.0%</strong>) while the slow tail gains sharply (<strong>P99 -10.0%</strong>, faster on 20/20 days). HEv3 helps where it hurts.</figcaption>
+    <figcaption>HEv3 change in FCP, by DoH segment (below zero is faster). Without DoH, FCP improves at every percentile. With DoH, the fast half pays a little (<strong>P25 +6.0%</strong>) while the slow tail gains sharply (<strong>P99 -10.0%</strong>, faster on 20/20 days). The fast-half regression is DoH-only.</figcaption>
   </section>
 
   <!-- E4. Winning attempt index -->
@@ -460,14 +460,18 @@
     ],
   }));
   Charts.register('c-exp-ttrs', (el) => Charts.bar(el, {
-    x: D.exp.ttrs.p, yName: '% change vs control (DoH on)', yMin: -24, yMax: 3, refLine: 0, refLineLabel: 'control',
-    barLabels: true, barLabelFormatter: (p) => (p.value > 0 ? '+' : '') + p.value + '%',
-    series: [{ name: 'HEv3 vs control', data: D.exp.ttrs.delta, color: '#2a78d6' }],
+    x: D.exp.ttrs.p, yName: '% change vs control', yMin: -24, yMax: 12, refLine: 0, refLineLabel: 'control',
+    series: [
+      { name: 'DoH enabled', data: D.exp.ttrs.doh, color: '#2a78d6' },
+      { name: 'DoH disabled', data: D.exp.ttrs.nodoh, color: '#8f8f9d' },
+    ],
   }));
   Charts.register('c-exp-fcp', (el) => Charts.bar(el, {
-    x: D.exp.fcp.p, yName: '% change vs control (DoH on)', yMin: -12, yMax: 8, refLine: 0, refLineLabel: 'control',
-    barLabels: true, barLabelFormatter: (p) => (p.value > 0 ? '+' : '') + p.value + '%',
-    series: [{ name: 'HEv3 vs control', data: D.exp.fcp.delta, color: '#2a78d6' }],
+    x: D.exp.fcp.p, yName: '% change vs control', yMin: -12, yMax: 8, refLine: 0, refLineLabel: 'control',
+    series: [
+      { name: 'DoH enabled', data: D.exp.fcp.doh, color: '#2a78d6' },
+      { name: 'DoH disabled', data: D.exp.fcp.nodoh, color: '#8f8f9d' },
+    ],
   }));
   Charts.register('c-exp-winidx', (el) => Charts.bar(el, {
     x: D.exp.winIdx.x, yName: '% of successful runs (by winning attempt)', yMax: 100,

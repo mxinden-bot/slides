@@ -63,16 +63,19 @@ window.DECK_DATA = {
       hev3:    [13.22, 27.93, 12.23],
     },
     // 2. Time to request start (navigationStart -> requestStart): DNS + TCP/TLS setup.
-    // HEv3 change vs control %, DoH-enabled segment (negative = faster). STMO 124709.
+    // HEv3 change vs control %, by DoH segment (negative = faster). STMO 124709.
     ttrs: {
       p:     ['P25', 'P50', 'P75', 'P90', 'P95', 'P99'],
-      delta: [-7.5, -8.0, -1.0, -7.5, -11.1, -21.7],
+      doh:   [-7.5, -8.0, -1.0, -7.5, -11.1, -21.7],
+      nodoh: [2.3, 9.6, 1.4, -1.3, -0.3, -0.6],
     },
-    // 3. First contentful paint: HEv3 delta %, DoH-enabled segment (positive = slower,
-    // negative = faster). Crossover: fast half worse, tail better. STMO 124745.
+    // 3. First contentful paint: HEv3 change vs control %, by DoH segment (positive =
+    // slower, negative = faster). DoH-on crosses over (fast half worse, tail better);
+    // DoH-off improves everywhere. STMO 124745.
     fcp: {
       p:     ['P05', 'P25', 'P50', 'P75', 'P90', 'P95', 'P99'],
-      delta: [1.3, 6.0, 3.4, -2.0, -4.7, -5.5, -10.0],
+      doh:   [1.3, 6.0, 3.4, -2.0, -4.7, -5.5, -10.0],
+      nodoh: [-2.9, -1.2, -1.6, -2.3, -3.4, -3.6, -4.5],
     },
     // 4. Winning attempt index, treatment arm only, client-normalized %. STMO 125312.
     winIdx: {
