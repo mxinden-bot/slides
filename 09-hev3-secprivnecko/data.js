@@ -82,12 +82,12 @@ window.DECK_DATA = {
       x:   ['1', '2', '3', '4'],
       pct: [95.11, 4.42, 0.42, 0.04],
     },
-    // Fenix (Firefox for Android) Nightly, share of responses over HTTP/3 by build
-    // date (client-normalized), GLAM networking_http_response_version. The share
-    // steps up from ~14% to ~18% when HEv3 turned on in late July.
+    // Fenix (Firefox for Android) Nightly, share of page loads over HTTP/3, Glean
+    // pageload event (http_ver), 7-day moving average, weekly samples over 365 days.
+    // The year-long climb accelerates when HEv3 turns on in late July (~27% -> ~31%).
     fenix: {
-      dates: ['07-20', '07-21', '07-22', '07-23', '07-24', '07-25', '07-26', '07-27', '07-28', '07-29', '07-30', '07-31', '08-01', '08-02', '08-03', '08-04', '08-05', '08-06', '08-07', '08-08', '08-09', '08-10', '08-11', '08-12', '08-13', '08-14', '08-15', '08-16', '08-17'],
-      h3:    [13.6, 14.1, 14.4, 17.8, 17.3, 18.2, 17.7, 18.1, 18.3, 18.1, 18.0, 18.6, 17.9, 17.4, 18.0, 18.7, 18.2, 17.9, 18.4, 18.6, 17.7, 18.0, 18.6, 18.8, 18.7, 18.4, 18.6, 18.2, 19.6],
+      dates: ['Aug', '', 'Sep', '', '', '', 'Oct', '', '', '', '', 'Nov', '', '', '', 'Dec', '', '', '', '', 'Jan', '', '', '', 'Feb', '', '', '', 'Mar', '', '', '', 'Apr', '', '', '', '', 'May', '', '', '', 'Jun', '', '', '', 'Jul', '', '', '', '', 'Aug', '', ''],
+      h3:    [19.1, 19.7, 19.6, 19.3, 19.6, 19.6, 21.1, 23.9, 25.5, 26.0, 26.0, 26.2, 26.8, 23.9, 23.4, 23.1, 22.5, 22.8, 23.2, 24.4, 23.5, 23.1, 23.0, 22.8, 22.6, 22.8, 22.6, 21.5, 21.5, 21.4, 21.6, 22.4, 22.6, 22.7, 21.5, 20.0, 19.2, 18.6, 18.3, 20.9, 23.6, 23.9, 23.6, 24.5, 25.2, 26.2, 27.9, 27.5, 26.9, 29.7, 31.4, 30.6, 30.9],
     },
 
     // Daily HTTP/3 share, DoH-enabled segment, control vs HEv3 (backup). STMO 124764.
