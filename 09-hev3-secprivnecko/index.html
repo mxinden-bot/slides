@@ -21,14 +21,14 @@
   <section class="cover" data-background-color="#ffffff">
     <h1>Happy Eyeballs v3 in Firefox</h1>
     <p class="subtitle">An introduction, and results from the Beta A/B experiment.</p>
-    <span class="venue">Sec-Priv-Necko &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &amp; Kershaw Chang &middot; Mozilla</span>
+    <span class="venue">Sec-Priv-Necko &nbsp;&middot;&nbsp; Kershaw Chang &amp; <a href="https://max-inden.de/">Max Inden</a></span>
   </section>
 
   <!-- 2. Why the name -->
   <section>
     <h2>Why &ldquo;Happy Eyeballs&rdquo;?</h2>
     <ul>
-      <li>On the other end of the network are <strong>eyeballs</strong>: humans, and humans feel <strong>latency</strong>. This is not a server-to-server link, where throughput is what counts.</li>
+      <li>The <strong>eyeballs</strong> are the users: real people waiting on a page, and people feel <strong>latency</strong>. This is not a server-to-server link, where throughput is what counts.</li>
       <li>Happy eyeballs means <strong>happy users</strong>: race the options in parallel, take the first that answers, so a slow or dead path never makes someone wait.</li>
       <li>It has a history: <a href="https://www.rfc-editor.org/rfc/rfc6555">v1 (RFC 6555)</a> for IPv4 vs IPv6, widely implemented; <a href="https://www.rfc-editor.org/rfc/rfc8305">v2 (RFC 8305)</a> refined it, but saw little uptake.</li>
       <li><strong>v3</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft</a>) is being implemented now, widening the race to <strong>protocols</strong> (QUIC vs TCP) and <strong>DNS</strong> (HTTPS records).</li>
@@ -119,7 +119,6 @@
     <ul>
       <li>Happy Eyeballs v3 is <strong>enabled by default in Nightly</strong>, and now <strong>rolling out on Beta</strong> on the way to Release.</li>
       <li>Tracking the draft closely: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>, with a couple of tuned delay deviations.</li>
-      <li>Public Firefox telemetry is available.</li>
     </ul>
   </section>
 
@@ -135,29 +134,11 @@
     <p class="small muted"><a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
-  <!-- 9. h3 discovery (kept in the main flow) -->
-  <section>
-    <h2>How connections learn about h3</h2>
-    <div class="cols">
-      <div class="col-40">
-        <div class="chart short" id="c-discovery"></div>
-      </div>
-      <div class="col-60">
-        <ul>
-          <li><strong>35%</strong> of connections (<strong>84%</strong> of the h3-capable ones) learn h3 <strong>only via Alt-Svc</strong>: a round trip they need not pay.</li>
-          <li>Only <strong>~3%</strong> via an HTTPS record alone, <strong>~4%</strong> via both: no round trip.</li>
-          <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
-        </ul>
-      </div>
-    </div>
-    <figcaption>Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
-  </section>
-
   <!-- EXPERIMENT divider -->
+  <!-- STMO queries: 124764 (h3), 124709 (TTRS), 124745 (FCP), 125312 (winning attempt) -->
   <section class="divider" data-background-color="#20123a">
     <h2 style="color:#ffffff;">The Beta experiment</h2>
-    <p class="small" style="color:#b3adc4;">A/B on Firefox Desktop Beta, 30 Jul&ndash;18 Aug 2026, control vs HEv3, ~46M successful runs/day. Segmented by DoH, because that is where HEv3 has HTTPS records to act on.</p>
-    <p class="small" style="color:#8f8f9d;">Source: Firefox Beta A/B telemetry (Kershaw Chang), STMO queries for <a href="https://sql.telemetry.mozilla.org/queries/124764" style="color:#8f8f9d;">HTTP/3 usage</a>, <a href="https://sql.telemetry.mozilla.org/queries/124709" style="color:#8f8f9d;">time to request start</a>, <a href="https://sql.telemetry.mozilla.org/queries/124745" style="color:#8f8f9d;">FCP</a>, and <a href="https://sql.telemetry.mozilla.org/queries/125312" style="color:#8f8f9d;">winning attempt</a>.</p>
+    <p class="small" style="color:#b3adc4;">A/B on Firefox Desktop Beta, 30 Jul&ndash;18 Aug 2026, control vs HEv3, ~46M successful runs/day. Segmented by DoH, since it strongly affects how often an HTTPS record is available for HEv3 to act on (the OS resolver returns them too).</p>
   </section>
 
   <!-- E1. HTTP/3 usage -->
@@ -171,7 +152,7 @@
   <section>
     <h2>Faster time to request start</h2>
     <div class="chart" id="c-exp-ttrs"></div>
-    <figcaption>navigationStart &rarr; requestStart (DNS + TCP/TLS setup, where HEv3 acts), DoH enabled, treatment relative to control. The tail moves most: <strong>P95 -11.1%</strong>, <strong>P99 -21.7%</strong> (2770 ms &rarr; 2168 ms), faster on 20/20 days. Without DoH it is roughly flat, so the pooled number understates the effect.</figcaption>
+    <figcaption>navigationStart &rarr; requestStart (DNS + TCP/TLS setup, where HEv3 acts), DoH enabled, change vs control (below zero is faster). The tail moves most: <strong>P95 -11.1%</strong>, <strong>P99 -21.7%</strong> (2770 ms &rarr; 2168 ms), faster on 20/20 days. Without DoH it is roughly flat, so the pooled number understates the effect.</figcaption>
   </section>
 
   <!-- E3. First contentful paint -->
@@ -195,14 +176,14 @@
     <figcaption>Share of responses over HTTP/3 on Firefox for Android, Nightly, by build date. When HEv3 turned on (late July) the share stepped up from <strong>~14%</strong> to <strong>~18%</strong> and held. Source: <a href="https://glam.telemetry.mozilla.org/fenix/probe/networking_http_response_version/explore">GLAM: networking_http_response_version</a> (Android Nightly).</figcaption>
   </section>
 
-  <!-- Optimistic QUIC -->
+  <!-- Optimistic HTTP/3 -->
   <section>
-    <h2>Proposal: Optimistic QUIC, Happy-Eyeballs style</h2>
-    <ul>
-      <li>Still listen for an h3 signal (HTTPS RR): it also carries <strong>ECH</strong>, so it remains useful.</li>
-      <li>Signal present: try HTTP/3 first, as today.</li>
-      <li>No signal: <strong>try HTTP/3 anyway</strong>, racing it against HTTP/2 instead of waiting for a later Alt-Svc hint.</li>
-      <li>With Happy Eyeballs v3 and a low connection-attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
+    <h2>Proposal: try HTTP/3 optimistically</h2>
+    <p><strong>Step 1, Optimistic Alt-Svc</strong> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a>): if we have <em>ever</em> seen <code>Alt-Svc: h3</code> for an origin, reuse that mapping even after it expires. Race HTTP/3 on the next visit instead of falling back to HTTP/2 and re-learning it.</p>
+    <p><strong>Step 2, Optimistic QUIC</strong>: with <em>no</em> prior signal at all, try HTTP/3 anyway, racing it against HTTP/2.</p>
+    <ul class="small">
+      <li>Still listen for an HTTPS RR: it also carries <strong>ECH</strong>, so it stays useful.</li>
+      <li>With Happy Eyeballs v3 and a low attempt delay, a failed QUIC race costs little: TCP is already in flight beside it.</li>
     </ul>
   </section>
 
@@ -285,6 +266,24 @@
     <h2>HTTPS-RR features, by resolver</h2>
     <div class="chart" id="c-byresolver"></div>
     <figcaption>Same SvcParams, DoH vs the OS resolver. The two look alike: h3 ~76%, hints ~45%, ECH ~16% either way. The record&rsquo;s contents do not depend on how it was resolved. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: by_resolver</a>.</figcaption>
+  </section>
+
+  <!-- B: h3 discovery -->
+  <section>
+    <h2>How connections learn about h3</h2>
+    <div class="cols">
+      <div class="col-40">
+        <div class="chart short" id="c-discovery"></div>
+      </div>
+      <div class="col-60">
+        <ul>
+          <li><strong>35%</strong> of connections (<strong>84%</strong> of the h3-capable ones) learn h3 <strong>only via Alt-Svc</strong>: a round trip they need not pay.</li>
+          <li>Only <strong>~3%</strong> via an HTTPS record alone, <strong>~4%</strong> via both: no round trip.</li>
+          <li>Motivation for publishing HTTPS records with <code>alpn=h3</code>.</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: h3_discovery</a>.</figcaption>
   </section>
 
   <!-- B: Wasted round trip -->
@@ -461,17 +460,12 @@
     ],
   }));
   Charts.register('c-exp-ttrs', (el) => Charts.bar(el, {
-    x: D.exp.ttrs.p, yName: 'relative to control (DoH on)', yMin: 0, yMax: 110,
-    yFormatter: (v) => v + '%',
-    barLabels: true, barLabelFormatter: (p) => (p.seriesName === 'HEv3'
-      ? (p.value - 100 > 0 ? '+' : '') + (p.value - 100).toFixed(1) + '%' : ''),
-    series: [
-      { name: 'control', data: D.exp.ttrs.ctrl, color: '#8f8f9d' },
-      { name: 'HEv3', data: D.exp.ttrs.hev3, color: '#1baf7a' },
-    ],
+    x: D.exp.ttrs.p, yName: '% change vs control (DoH on)', yMin: -24, yMax: 3, refLine: 0, refLineLabel: 'control',
+    barLabels: true, barLabelFormatter: (p) => (p.value > 0 ? '+' : '') + p.value + '%',
+    series: [{ name: 'HEv3 vs control', data: D.exp.ttrs.delta, color: '#2a78d6' }],
   }));
   Charts.register('c-exp-fcp', (el) => Charts.bar(el, {
-    x: D.exp.fcp.p, yName: '% change (DoH on)', yMin: -12, yMax: 8, refLine: 0, refLineLabel: 'no change',
+    x: D.exp.fcp.p, yName: '% change vs control (DoH on)', yMin: -12, yMax: 8, refLine: 0, refLineLabel: 'control',
     barLabels: true, barLabelFormatter: (p) => (p.value > 0 ? '+' : '') + p.value + '%',
     series: [{ name: 'HEv3 vs control', data: D.exp.fcp.delta, color: '#2a78d6' }],
   }));
