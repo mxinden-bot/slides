@@ -32,14 +32,14 @@
     .reveal .hol .pkt.wide { width: auto; padding: 0 14px; font-size: 0.6em; }
     .reveal .hol .pkt.blocked { opacity: 0.32; }
     .reveal .hol .streamlbl { font-size: 0.5em; font-weight: 700; color: var(--ink-faint); width: 92px; white-space: nowrap; }
-    /* connection migration */
-    .reveal .cmig { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0.6em 0 0.2em; }
-    .reveal .cmig .net { border: 1.5px solid var(--hairline); border-radius: 11px; padding: 14px 18px; text-align: center; min-width: 128px; background: var(--surface); }
-    .reveal .cmig .net .n { font-weight: 700; font-size: 0.62em; color: var(--ink); }
-    .reveal .cmig .net .ip { font-size: 0.46em; color: var(--ink-faint); margin-top: 5px; }
-    .reveal .cmig .move { flex: 0 0 96px; height: 2px; background: var(--hairline); position: relative; }
-    .reveal .cmig .move::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 8px solid var(--hairline); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
-    .reveal .cmig .move .cid { position: absolute; top: -26px; left: 0; right: 0; text-align: center; font-size: 0.44em; font-weight: 700; color: #a5430b; }
+    /* connection migration: link states + centred label, on top of theme .hops */
+    .reveal .hops .link.broken { background: repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 12px); }
+    .reveal .hops .link.broken::after { border-left-color: var(--warn); }
+    .reveal .hops .link.ok { background: var(--good); }
+    .reveal .hops .link.ok::after { border-left-color: var(--good); }
+    .reveal .hops .link .llbl { position: absolute; top: -24px; left: 0; right: 0; text-align: center; font-size: 0.42em; font-weight: 700; letter-spacing: 0.02em; }
+    .reveal .hops .link.broken .llbl { color: #a5430b; }
+    .reveal .hops .link.ok .llbl { color: var(--good); }
   </style>
 </head>
 <body>
@@ -163,14 +163,28 @@
   <!-- 8. Connection migration -->
   <section>
     <h2>Connection migration</h2>
-    <div class="cmig">
-      <div class="net"><div class="n">Home Wi-Fi</div><div class="ip">IP address #1</div></div>
-      <div class="move"><span class="cid">same connection?</span></div>
-      <div class="net"><div class="n">Mobile 5G</div><div class="ip">IP address #2</div></div>
+    <div class="hops">
+      <div>
+        <div class="hlabel">On home Wi-Fi</div>
+        <div class="chain">
+          <div class="node"><div class="name">client</div><div class="sees">192.0.2.10</div></div>
+          <div class="link"><span class="llbl">connected</span></div>
+          <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="hlabel">Walk out the door, now on mobile</div>
+        <div class="chain">
+          <div class="node both"><div class="name">client</div><div class="sees">198.51.100.7<br>new address</div></div>
+          <div class="link broken"><span class="llbl">connection breaks</span></div>
+          <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
+        </div>
+      </div>
     </div>
-    <ul class="small" style="margin-top:0.6em;">
-      <li>Move networks and your IP address changes, so a TCP connection (and its WebSocket) <strong>breaks</strong> and has to be re-established.</li>
-      <li>WebSocket: <span class="warn"><strong>no</strong></span> migration.</li>
+    <ul class="small" style="margin-top:0.5em;">
+      <li>TCP identifies a connection by its <strong>four-tuple</strong>: source IP, source port, destination IP, destination port.</li>
+      <li>Change networks and the source IP changes, so it is a <strong>different connection</strong>. The old one is dead.</li>
+      <li>Everything is paid again: TCP handshake, TLS handshake, WebSocket upgrade, and any session state on top.</li>
     </ul>
   </section>
 
@@ -282,6 +296,34 @@
     <ul class="small" style="margin-top:0.5em;">
       <li>Same loss, but QUIC knows the gap belongs to <strong>stream B</strong>, so A1 and A2 go up to the application right away.</li>
       <li>Only stream B waits for the retransmission. Unreliable <strong>datagrams</strong> are never held back at all.</li>
+    </ul>
+  </section>
+
+  <!-- 15b. Connection migration, solved -->
+  <section>
+    <h2>Connection migration, on QUIC</h2>
+    <div class="hops">
+      <div>
+        <div class="hlabel">On home Wi-Fi</div>
+        <div class="chain">
+          <div class="node"><div class="name">client</div><div class="sees">192.0.2.10<br>connection ID 0x8f2a</div></div>
+          <div class="link"><span class="llbl">connected</span></div>
+          <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="hlabel">Walk out the door, now on mobile</div>
+        <div class="chain">
+          <div class="node both"><div class="name">client</div><div class="sees">198.51.100.7<br>connection ID 0x8f2a</div></div>
+          <div class="link ok"><span class="llbl">same connection</span></div>
+          <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
+        </div>
+      </div>
+    </div>
+    <ul class="small" style="margin-top:0.5em;">
+      <li>QUIC identifies a connection by a <strong>connection ID</strong>, not by the address it arrives from.</li>
+      <li>The address changes, the connection ID does not, so the server keeps the same connection: no new handshake, no lost state.</li>
+      <li>WebTransport inherits this for free.</li>
     </ul>
   </section>
 
