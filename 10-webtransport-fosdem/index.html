@@ -30,6 +30,7 @@
     .reveal .hol .pkt.b { background: rgba(0,131,135,0.12); border-color: rgba(0,131,135,0.30); color: #026266; }
     .reveal .hol .pkt.lost { background: rgba(230,96,0,0.14); border-color: var(--warn); color: #a5430b; text-decoration: line-through; }
     .reveal .hol .pkt.wide { width: auto; padding: 0 14px; font-size: 0.6em; }
+    .reveal .hol .gap { font-size: 0.42em; color: var(--ink-faint); font-style: italic; padding: 0 6px; white-space: nowrap; }
     .reveal .hol .pkt.blocked { opacity: 0.32; }
     .reveal .hol .streamlbl { font-size: 0.5em; font-weight: 700; color: var(--ink-faint); width: 92px; white-space: nowrap; }
     /* connection migration: link states + centred label, on top of theme .hops */
@@ -134,33 +135,21 @@
         <div class="row">
           <div class="streamlbl">received</div>
           <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a blocked">A2</div>
+          <div class="gap">&hellip; one round trip later &hellip;</div>
+          <div class="pkt b">B1</div><div class="pkt a">A2</div>
         </div>
       </div>
     </div>
     <ul class="small" style="margin-top:0.5em;">
       <li>TCP does not know it carries two messages. It sees a byte range with a <strong>gap</strong> where B1 was.</li>
       <li>A2 <strong>has already arrived</strong> and sits in the receive buffer, but TCP cannot hand it up until the gap is filled.</li>
+      <li>Only once B1 is <strong>retransmitted</strong>, a round trip later, do both go up to the application.</li>
       <li>One lost packet therefore stalls a completely unrelated message: blocking on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
     </ul>
     <p class="small muted">Like a single-lane road: one stalled car holds up everyone behind it, wherever they were going.</p>
   </section>
 
-  <!-- 7. WebSocket scorecard -->
-  <section>
-    <h2>WebSocket, in summary</h2>
-    <table class="cmp">
-      <thead><tr><th style="width:38%;">&nbsp;</th><th>WebSocket</th></tr></thead>
-      <tbody>
-        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td></tr>
-        <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td></tr>
-        <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td></tr>
-        <tr><td class="prop">Connection migration</td><td class="warn">No</td></tr>
-        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- 8. Connection migration -->
+  <!-- 7. Connection migration -->
   <section>
     <h2>Connection migration</h2>
     <div class="hops">
@@ -186,6 +175,21 @@
       <li>Change networks and the source IP changes, so it is a <strong>different connection</strong>. The old one is dead.</li>
       <li>Everything is paid again: TCP handshake, TLS handshake, WebSocket upgrade, and any session state on top.</li>
     </ul>
+  </section>
+
+  <!-- 8. WebSocket scorecard -->
+  <section>
+    <h2>WebSocket, in summary</h2>
+    <table class="cmp">
+      <thead><tr><th style="width:38%;">&nbsp;</th><th>WebSocket</th></tr></thead>
+      <tbody>
+        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td></tr>
+        <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td></tr>
+        <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td></tr>
+        <tr><td class="prop">Connection migration</td><td class="warn">No</td></tr>
+        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- 9. Introducing WebTransport -->
@@ -219,8 +223,8 @@
     <div class="cols">
       <div class="col-60">
         <ul>
-          <li>WebTransport is built <strong>on HTTP/3</strong>, and therefore on <strong>QUIC</strong>.</li>
-          <li>An HTTP/2 fallback is defined for paths where QUIC does not get through.</li>
+          <li>WebTransport is built <strong>on HTTP/3</strong>, and therefore on <strong>QUIC</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/">draft-ietf-webtrans-http3</a>).</li>
+          <li>An HTTP/2 fallback is defined for paths where QUIC does not get through (<a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http2/">draft-ietf-webtrans-http2</a>).</li>
         </ul>
       </div>
       <div class="col-40">
@@ -306,7 +310,7 @@
       <div>
         <div class="hlabel">On home Wi-Fi</div>
         <div class="chain">
-          <div class="node"><div class="name">client</div><div class="sees">192.0.2.10<br>connection ID 0x8f2a</div></div>
+          <div class="node"><div class="name">client</div><div class="sees">192.0.2.10<br>connection ID 42</div></div>
           <div class="link"><span class="llbl">connected</span></div>
           <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
         </div>
@@ -314,7 +318,7 @@
       <div>
         <div class="hlabel">Walk out the door, now on mobile</div>
         <div class="chain">
-          <div class="node both"><div class="name">client</div><div class="sees">198.51.100.7<br>connection ID 0x8f2a</div></div>
+          <div class="node both"><div class="name">client</div><div class="sees">198.51.100.7<br>connection ID 42</div></div>
           <div class="link ok"><span class="llbl">same connection</span></div>
           <div class="node"><div class="name">server</div><div class="sees">203.0.113.5</div></div>
         </div>
@@ -357,9 +361,9 @@
       <div>
         <h3>IETF</h3>
         <ul>
-          <li>Over HTTP/3: <strong>draft 14</strong>.</li>
-          <li>Over HTTP/2: <strong>draft 13</strong>.</li>
-          <li>No major changes expected.</li>
+          <li>Over HTTP/3: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/"><strong>draft 16</strong></a>.</li>
+          <li>Over HTTP/2: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http2/"><strong>draft 15</strong></a>.</li>
+          <li>Both in <strong>working group last call</strong>. No major changes expected.</li>
         </ul>
       </div>
     </div>
@@ -372,15 +376,16 @@
       <li><strong>Low adoption</strong> so far.</li>
       <li>The emerging consumer is <strong>Media over QUIC (MoQ)</strong>: a simple, low-latency media delivery solution for ingest and distribution.</li>
       <li>Targets live streaming, gaming and conferencing, in <strong>browser and non-browser</strong> endpoints.</li>
+      <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>, so Apple, Google, Igalia, Microsoft and Mozilla are all working on making it behave the same everywhere.</li>
     </ul>
-    <p class="small muted">Source: <a href="https://datatracker.ietf.org/wg/moq/about/">IETF Media over QUIC (moq) working group</a>.</p>
+    <p class="small muted">Sources: <a href="https://datatracker.ietf.org/wg/moq/about/">IETF Media over QUIC (moq) working group</a>, <a href="https://wpt.fyi/interop-2026">Interop 2026 dashboard</a>.</p>
   </section>
 
   <!-- 19. Try it out -->
   <section>
     <h2>Try it out</h2>
     <ul>
-      <li>Test against an echo server, e.g. <a href="https://webtransport.day/">webtransport.day</a>.</li>
+      <li>Test against an echo server, e.g. <a href="https://wt-ord.akaleapi.net/echo/">wt-ord.akaleapi.net/echo</a>.</li>
       <li>Deploy your own, e.g. with <a href="https://github.com/quic-go/webtransport-go">webtransport-go</a>.</li>
     </ul>
     <pre style="font-size:0.72em;"><code class="language-javascript" data-trim data-noescape>const transport = new WebTransport(url);
