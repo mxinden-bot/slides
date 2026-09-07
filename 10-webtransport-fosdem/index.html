@@ -28,7 +28,8 @@
     .reveal .hol .pkt { width: 64px; height: 54px; border-radius: 9px; border: 1.5px solid var(--hairline); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78em; background: var(--surface); color: var(--ink-muted); }
     .reveal .hol .pkt.a { background: rgba(0,96,223,0.12); border-color: rgba(0,96,223,0.32); color: #0a4aa0; }
     .reveal .hol .pkt.b { background: rgba(0,131,135,0.12); border-color: rgba(0,131,135,0.30); color: #026266; }
-    .reveal .hol .pkt.lost { background: rgba(230,96,0,0.14); border-color: var(--warn); color: #a5430b; }
+    .reveal .hol .pkt.lost { background: rgba(230,96,0,0.14); border-color: var(--warn); color: #a5430b; text-decoration: line-through; }
+    .reveal .hol .pkt.wide { width: auto; padding: 0 14px; font-size: 0.6em; }
     .reveal .hol .pkt.blocked { opacity: 0.32; }
     .reveal .hol .streamlbl { font-size: 0.5em; font-weight: 700; color: var(--ink-faint); width: 92px; white-space: nowrap; }
     /* connection migration */
@@ -122,18 +123,26 @@
     <h2>Head-of-line blocking</h2>
     <div class="hol">
       <div>
-        <div class="lbl">WebSocket: one ordered byte stream over TCP</div>
+        <div class="lbl">What the application multiplexes: two independent messages</div>
         <div class="row">
-          <div class="streamlbl">TCP</div>
-          <div class="pkt a">1</div><div class="pkt a">2</div><div class="pkt lost">3</div><div class="pkt a blocked">4</div><div class="pkt a blocked">5</div>
+          <div class="streamlbl">sent</div>
+          <div class="pkt a">A1</div><div class="pkt b">B1</div><div class="pkt a">A2</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">What TCP sees: one ordered byte stream, no message boundaries</div>
+        <div class="row">
+          <div class="streamlbl">received</div>
+          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a blocked">A2</div>
         </div>
       </div>
     </div>
     <ul class="small" style="margin-top:0.5em;">
-      <li>Packet 3 is lost. Packets 4 and 5 <strong>have arrived</strong>, but TCP must deliver bytes in order, so they wait for the retransmission.</li>
-      <li>Every WebSocket message behind the loss stalls, even independent ones multiplexed on the same session.</li>
-      <li>So the blocking hits on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
+      <li>TCP does not know it carries two messages. It sees a byte range with a <strong>gap</strong> where B1 was.</li>
+      <li>A2 <strong>has already arrived</strong> and sits in the receive buffer, but TCP cannot hand it up until the gap is filled.</li>
+      <li>One lost packet therefore stalls a completely unrelated message: blocking on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
     </ul>
+    <p class="small muted">Like a single-lane road: one stalled car holds up everyone behind it, wherever they were going.</p>
   </section>
 
   <!-- 7. WebSocket scorecard -->
@@ -252,21 +261,27 @@
     <h2>No head-of-line blocking</h2>
     <div class="hol">
       <div>
-        <div class="lbl">WebTransport: independent streams over QUIC</div>
+        <div class="lbl">What QUIC sees: byte ranges tracked per stream</div>
+        <div class="row">
+          <div class="streamlbl">received</div>
+          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a">A2</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">Delivered to the application</div>
         <div class="row">
           <div class="streamlbl">stream A</div>
-          <div class="pkt a">1</div><div class="pkt a">2</div><div class="pkt a">3</div>
+          <div class="pkt a">A1</div><div class="pkt a">A2</div>
         </div>
         <div class="row">
           <div class="streamlbl">stream B</div>
-          <div class="pkt b">1</div><div class="pkt lost">2</div><div class="pkt b blocked">3</div>
+          <div class="pkt b blocked wide">waits for B1</div>
         </div>
       </div>
     </div>
     <ul class="small" style="margin-top:0.5em;">
-      <li>QUIC tracks delivery <strong>per stream</strong>, so a loss on stream B stalls only stream B.</li>
-      <li>Stream A is delivered on time, and unreliable <strong>datagrams</strong> are never held back at all.</li>
-      <li>That removes the blocking at both the session and the transport level.</li>
+      <li>Same loss, but QUIC knows the gap belongs to <strong>stream B</strong>, so A1 and A2 go up to the application right away.</li>
+      <li>Only stream B waits for the retransmission. Unreliable <strong>datagrams</strong> are never held back at all.</li>
     </ul>
   </section>
 
