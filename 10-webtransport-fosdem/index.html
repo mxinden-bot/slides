@@ -276,8 +276,8 @@
       </div>
       <div class="col-40">
         <ul class="small">
-          <li>An extended HTTP CONNECT opens the session.</li>
-          <li>On a <strong>resumed</strong> QUIC connection the settings are remembered, so the client sends stream data and datagrams <strong>immediately</strong>, without waiting for the response.</li>
+          <li>An extended HTTP CONNECT opens the session, and streams and datagrams can ride in the <strong>same packet train</strong>, without waiting for the response.</li>
+          <li>On a <strong>resumed</strong> QUIC connection the settings are remembered too, so the whole exchange starts at <strong>0-RTT</strong>.</li>
         </ul>
       </div>
     </div>
