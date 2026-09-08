@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Intro to WebTransport: the next WebSocket? (lightning)</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+  <style>
+    /* comparison table */
+    .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.82em; margin-top: 0.2em; }
+    .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.5em 0.7em; text-align: left; vertical-align: top; }
+    .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
+    .reveal .cmp td.prop { color: var(--ink-muted); font-weight: 600; white-space: nowrap; }
+    .reveal .cmp .good { color: var(--good); font-weight: 700; }
+    .reveal .cmp .warn { color: var(--warn); font-weight: 700; }
+    .reveal .cmp col.hl { background: rgba(1,122,61,0.06); }
+    /* head-of-line blocking */
+    .reveal .hol { display: flex; flex-direction: column; gap: 1.1em; margin-top: 0.3em; }
+    .reveal .hol .lbl { font-size: 0.5em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 8px; }
+    .reveal .hol .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+    .reveal .hol .pkt { width: 64px; height: 54px; border-radius: 9px; border: 1.5px solid var(--hairline); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78em; background: var(--surface); color: var(--ink-muted); }
+    .reveal .hol .pkt.a { background: rgba(0,96,223,0.12); border-color: rgba(0,96,223,0.32); color: #0a4aa0; }
+    .reveal .hol .pkt.b { background: rgba(0,131,135,0.12); border-color: rgba(0,131,135,0.30); color: #026266; }
+    .reveal .hol .pkt.lost { background: rgba(230,96,0,0.14); border-color: var(--warn); color: #a5430b; text-decoration: line-through; }
+    .reveal .hol .pkt.wide { width: auto; padding: 0 14px; font-size: 0.6em; }
+    .reveal .hol .gap { font-size: 0.42em; color: var(--ink-faint); font-style: italic; padding: 0 6px; white-space: nowrap; }
+    .reveal .hol .pkt.blocked { opacity: 0.32; }
+    .reveal .hol .pkt.empty { background: transparent; border-style: dashed; border-color: var(--hairline); }
+    .reveal .hol .streamlbl { font-size: 0.5em; font-weight: 700; color: var(--ink-faint); width: 92px; white-space: nowrap; }
+    /* connection migration: link states + centred label, on top of theme .hops */
+    .reveal .hops .link.broken { background: repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 12px); }
+    .reveal .hops .link.broken::after { border-left-color: var(--warn); }
+    .reveal .hops .link.ok { background: var(--good); }
+    .reveal .hops .link.ok::after { border-left-color: var(--good); }
+    .reveal .hops .link .llbl { position: absolute; top: -24px; left: 0; right: 0; text-align: center; font-size: 0.42em; font-weight: 700; letter-spacing: 0.02em; }
+    .reveal .hops .link.broken .llbl { color: #a5430b; }
+    .reveal .hops .link.ok .llbl { color: var(--good); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Intro to WebTransport</h1>
+    <p class="subtitle">The next WebSocket?</p>
+    <span class="venue">Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a></span>
+  </section>
+
+  <!-- 2. About -->
+  <section>
+    <h2>Max Inden</h2>
+    <ul>
+      <li>Software developer at <strong>Mozilla</strong>, on Firefox&rsquo;s networking stack.</li>
+      <li>Focus: <strong>HTTP/3 and QUIC</strong>.</li>
+      <li class="muted"><a href="https://max-inden.de">max-inden.de</a> &middot; mail@max-inden.de &middot; @mxinden</li>
+    </ul>
+  </section>
+
+  <!-- 3. Introducing WebSocket -->
+  <section>
+    <h2>Introducing WebSocket</h2>
+    <ul>
+      <li>An established Web API: a single <strong>reliable, bidirectional, ordered</strong> byte stream.</li>
+    </ul>
+    <table class="cmp">
+      <thead><tr><th>Runs on</th><th>Sessions</th><th>Specification</th></tr></thead>
+      <tbody>
+        <tr><td class="prop">HTTP/1</td><td>one session</td><td><a href="https://www.rfc-editor.org/rfc/rfc6455">RFC 6455</a> (December 2011)</td></tr>
+        <tr><td class="prop">HTTP/2</td><td>many sessions</td><td><a href="https://www.rfc-editor.org/rfc/rfc8441">RFC 8441</a> (September 2018)</td></tr>
+        <tr><td class="prop">HTTP/3</td><td>many sessions</td><td><a href="https://www.rfc-editor.org/rfc/rfc9220">RFC 9220</a> (June 2022), <span class="warn">not widely implemented</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 4. WebSocket stack -->
+  <section>
+    <h2>Where WebSocket sits</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>WebSocket rides on top of HTTP, so it inherits HTTP&rsquo;s transport.</li>
+          <li>On HTTP/1 and HTTP/2 that means <strong>TCP</strong>; on HTTP/3 it would mean <strong>QUIC</strong>.</li>
+        </ul>
+        <p class="small muted">Browser support today: <a href="https://chromestatus.com/feature/5080537855688704">HTTP/1 and HTTP/2</a> only.</p>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="box span accent">WebSocket</div>
+          <div class="box">HTTP/1.1</div><div class="box accent2">HTTP/2</div><div class="box accent3">HTTP/3</div>
+          <div class="box">TLS 1.2+</div><div class="box accent2">TLS 1.2+</div><div class="box accent3">QUIC &middot; TLS 1.3</div>
+          <div class="box">TCP</div><div class="box accent2">TCP</div><div class="box accent3">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. WebSocket upgrade -->
+  <section>
+    <h2>WebSocket upgrade &nbsp;<span class="pill">1-RTT</span></h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div class="col-60">
+        <div id="ws-upgrade"></div>
+      </div>
+      <div class="col-40">
+        <ul class="small">
+          <li>The upgrade costs <strong>one round trip</strong> before any application data flows.</li>
+          <li>Sending data <strong>optimistically</strong> (0-RTT) is not safe on HTTP/1 (<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-optimistic-upgrade/">draft-ietf-httpbis-optimistic-upgrade</a>).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Head-of-line blocking -->
+  <section>
+    <h2>Head-of-line blocking</h2>
+    <div class="hol">
+      <div>
+        <div class="lbl">What the application multiplexes: two independent messages</div>
+        <div class="row">
+          <div class="streamlbl">sent</div>
+          <div class="pkt a">A1</div><div class="pkt b">B1</div><div class="pkt a">A2</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">On the wire: B1 is lost, and only B1 is retransmitted</div>
+        <div class="row">
+          <div class="streamlbl">arrives</div>
+          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a">A2</div>
+          <div class="gap">&hellip; one round trip later &hellip;</div>
+          <div class="pkt b">B1</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">What TCP hands up: one ordered byte stream, so nothing past the gap</div>
+        <div class="row">
+          <div class="streamlbl">delivered</div>
+          <div class="pkt a">A1</div><div class="pkt empty"></div><div class="pkt empty"></div>
+          <div class="gap">&hellip; one round trip later &hellip;</div>
+          <div class="pkt b">B1</div><div class="pkt a">A2</div>
+        </div>
+      </div>
+    </div>
+    <ul class="small" style="margin-top:0.5em;">
+      <li>TCP does not know it carries two messages. It sees a byte range with a <strong>gap</strong> where B1 was.</li>
+      <li>A2 <strong>has already arrived</strong> and sits in the receive buffer, but TCP cannot hand it up until the gap is filled.</li>
+      <li><strong>Only B1 is retransmitted.</strong> A round trip later the gap closes, and B1 and the long-buffered A2 are delivered together.</li>
+      <li>One lost packet therefore stalls a completely unrelated message: blocking on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- 8. WebSocket scorecard -->
+  <section>
+    <h2>WebSocket, in summary</h2>
+    <table class="cmp">
+      <thead><tr><th style="width:38%;">&nbsp;</th><th>WebSocket</th></tr></thead>
+      <tbody>
+        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td></tr>
+        <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td></tr>
+        <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td></tr>
+        <tr><td class="prop">Connection migration</td><td class="warn">No</td></tr>
+        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9. Introducing WebTransport -->
+  <section>
+    <h2>Introducing WebTransport</h2>
+    <ul>
+      <li>A <strong>new</strong> Web API, an ongoing effort at the <strong>IETF</strong> and <strong>W3C</strong>.</li>
+      <li>Focus on <strong>HTTP/3</strong>, with a fallback on HTTP/2.</li>
+      <li>Fine-grained flow control <strong>per session</strong>.</li>
+      <li>Independent <strong>reliable streams</strong> and <strong>unreliable datagrams</strong>.</li>
+      <li><strong>No head-of-line blocking</strong> on the session or the transport.</li>
+    </ul>
+  </section>
+
+  <!-- 10. Use cases -->
+  <section>
+    <h2>WebTransport use cases</h2>
+    <ul class="small">
+      <li><strong>Cloud gaming &amp; remote desktop</strong>: user input (reliable) while receiving high-frequency video and state (unreliable).</li>
+      <li><strong>Live streaming</strong>: pushing media chunks to a server with low overhead.</li>
+      <li><strong>Collaborative editing</strong>: cursor positions (unreliable) while document changes (reliable) are persisted.</li>
+      <li><strong>Internet of Things</strong>: multiplexing sensor data from thousands of devices.</li>
+      <li><strong>Financial tickers</strong>: high-frequency market data where the latest packet matters most.</li>
+    </ul>
+    <p class="small muted">Source: <a href="https://w3c.github.io/webtransport/">WebTransport explainer</a>.</p>
+  </section>
+
+  <!-- 11. WebTransport stack -->
+  <section>
+    <h2>Where WebTransport sits</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>WebTransport is built <strong>on HTTP/3</strong>, and therefore on <strong>QUIC</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/">draft-ietf-webtrans-http3</a>).</li>
+          <li>An HTTP/2 fallback is defined for paths where QUIC does not get through (<a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http2/">draft-ietf-webtrans-http2</a>).</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="box span accent">WebTransport</div>
+          <div class="box faint">HTTP/1.1</div><div class="box accent2">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS 1.2+</div><div class="box accent2">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box faint">TCP</div><div class="box accent2">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IPv4 / IPv6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. QUIC and HTTP/3 -->
+  <section>
+    <h2>What QUIC and HTTP/3 bring</h2>
+    <ul>
+      <li>A general-purpose transport on top of <strong>UDP</strong>, with encrypted (meta)data.</li>
+      <li><strong>1-RTT</strong> connection setup, <strong>0-RTT</strong> on resumption.</li>
+      <li>Reliable <strong>streams</strong> and unreliable <strong>datagrams</strong>, with no head-of-line blocking.</li>
+      <li><strong>Connection migration</strong> across network changes.</li>
+      <li>Easy to evolve, often in user space.</li>
+    </ul>
+  </section>
+
+  <!-- 14. WebTransport upgrade -->
+  <section>
+    <h2>WebTransport upgrade &nbsp;<span class="pill on">0-RTT on resumption</span></h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div class="col-60">
+        <div id="wt-upgrade"></div>
+      </div>
+      <div class="col-40">
+        <ul class="small">
+          <li>An extended HTTP CONNECT opens the session.</li>
+          <li>On a <strong>resumed</strong> QUIC connection the settings are remembered, so the client sends stream data and datagrams <strong>immediately</strong>, without waiting for the response.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. WebTransport and HoL blocking -->
+  <section>
+    <h2>No head-of-line blocking</h2>
+    <div class="hol">
+      <div>
+        <div class="lbl">What QUIC sees: byte ranges tracked per stream</div>
+        <div class="row">
+          <div class="streamlbl">received</div>
+          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a">A2</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">Delivered to the application</div>
+        <div class="row">
+          <div class="streamlbl">stream A</div>
+          <div class="pkt a">A1</div><div class="pkt a">A2</div>
+        </div>
+        <div class="row">
+          <div class="streamlbl">stream B</div>
+          <div class="pkt b blocked wide">waits for B1</div>
+        </div>
+      </div>
+    </div>
+    <ul class="small" style="margin-top:0.5em;">
+      <li>Same loss, but QUIC knows the gap belongs to <strong>stream B</strong>, so A1 and A2 go up to the application right away.</li>
+      <li>Only stream B waits for the retransmission.</li>
+    </ul>
+  </section>
+
+  <!-- 16. Full comparison -->
+  <section>
+    <h2>WebSocket vs WebTransport</h2>
+    <table class="cmp">
+      <colgroup><col><col><col class="hl"></colgroup>
+      <thead><tr><th style="width:30%;">&nbsp;</th><th>WebSocket</th><th>WebTransport</th></tr></thead>
+      <tbody>
+        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td><td class="good">0-RTT on resumption</td></tr>
+        <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td><td class="good">No</td></tr>
+        <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td><td class="good">Yes, via QUIC datagrams</td></tr>
+        <tr><td class="prop">Connection migration</td><td class="warn">No</td><td class="good">Yes, via QUIC</td></tr>
+        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td><td>HTTP/3, HTTP/2 upcoming</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">Support across browsers: <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebTransport">MDN: WebTransport</a>.</p>
+  </section>
+
+  <!-- 17. Standardization status -->
+  <section>
+    <h2>Status at W3C and IETF</h2>
+    <div class="cols">
+      <div>
+        <h3>W3C</h3>
+        <ul>
+          <li>Draft, going to wide review for <strong>Candidate Recommendation</strong> soon.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>IETF</h3>
+        <ul>
+          <li>Over HTTP/3: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/"><strong>draft 16</strong></a>.</li>
+          <li>Over HTTP/2: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http2/"><strong>draft 15</strong></a>.</li>
+          <li>Both in <strong>working group last call</strong>. No major changes expected.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. Users -->
+  <section>
+    <h2>Who is using it?</h2>
+    <ul>
+      <li><strong>Low adoption</strong> so far.</li>
+      <li>The emerging consumer is <strong>Media over QUIC (MoQ)</strong>: a simple, low-latency media delivery solution for ingest and distribution.</li>
+      <li>Targets live streaming, gaming and conferencing, in <strong>browser and non-browser</strong> endpoints.</li>
+      <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>.</li>
+    </ul>
+    <p class="small muted">Sources: <a href="https://datatracker.ietf.org/wg/moq/about/">IETF Media over QUIC (moq) working group</a>, <a href="https://wpt.fyi/interop-2026">Interop 2026 dashboard</a>.</p>
+  </section>
+
+  <!-- 18b. Open question: the SETTINGS round trip -->
+  <section>
+    <h2>The first session still costs a round trip &nbsp;<span class="pill">open question</span></h2>
+    <ul>
+      <li>A client may not open a WebTransport session until the server has told it that WebTransport is supported, which arrives in the HTTP/3 <strong>SETTINGS</strong> frame.</li>
+      <li>The draft is normative about it: the client <strong>MUST wait</strong> for the server&rsquo;s SETTINGS frame before establishing any WebTransport session.</li>
+      <li>So on a <strong>fresh</strong> connection the session cannot be opened in the first flight, however cheap the QUIC handshake was.</li>
+      <li>On a <strong>resumed</strong> connection the settings are remembered, and the session really is 0-RTT.</li>
+      <li>Worth asking: can we do better for the first connection?</li>
+    </ul>
+    <p class="small muted">Source: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/">draft-ietf-webtrans-http3-16</a>, SETTINGS negotiation.</p>
+  </section>
+
+  <!-- 19. Try it out -->
+  <section>
+    <h2>Try it out</h2>
+    <ul>
+      <li>Test against an echo server, e.g. <a href="https://wt-ord.akaleapi.net/echo/">wt-ord.akaleapi.net/echo</a>.</li>
+      <li>Deploy your own, e.g. with <a href="https://github.com/quic-go/webtransport-go">webtransport-go</a>.</li>
+    </ul>
+    <pre style="font-size:0.72em;"><code class="language-javascript" data-trim data-noescape>const transport = new WebTransport(url);
+await transport.ready;
+
+const writer = transport.datagrams.writable.getWriter();
+const data = new Uint8Array([42]);
+writer.write(data);</code></pre>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../theme/seq.js"></script>
+<script>
+
+  const CS = [{ id: 'C', label: 'client' }, { id: 'S', label: 'server' }];
+  Seq.register('ws-upgrade', (el) => Seq.render(el, { actors: CS, messages: [
+    { from: 'C', to: 'S', text: 'GET, Upgrade: websocket' },
+    { from: 'S', to: 'C', text: '101 Switching Protocols', dashed: true },
+    { note: 'bidirectional stream open', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'data', hl: true }, { from: 'S', to: 'C', text: 'data', hl: true, dashed: true },
+  ] }));
+  Seq.register('wt-upgrade', (el) => Seq.render(el, { actors: CS, messages: [
+    { from: 'C', to: 'S', text: 'CONNECT :protocol=webtransport-h3' },
+    { from: 'C', to: 'S', text: 'Stream #1 data + Datagram', hl: true },
+    { from: 'S', to: 'C', text: 'HTTP 200', dashed: true },
+    { note: 'client sent data before the response (0-RTT)', over: ['C', 'S'] },
+  ] }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
