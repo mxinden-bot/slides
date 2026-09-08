@@ -390,6 +390,19 @@
     <p class="small muted">Sources: <a href="https://datatracker.ietf.org/wg/moq/about/">IETF Media over QUIC (moq) working group</a>, <a href="https://wpt.fyi/interop-2026">Interop 2026 dashboard</a>.</p>
   </section>
 
+  <!-- 18b. Open question: the SETTINGS round trip -->
+  <section>
+    <h2>The first session still costs a round trip &nbsp;<span class="pill">open question</span></h2>
+    <ul>
+      <li>A client may not open a WebTransport session until the server has told it that WebTransport is supported, which arrives in the HTTP/3 <strong>SETTINGS</strong> frame.</li>
+      <li>The draft is normative about it: the client <strong>MUST wait</strong> for the server&rsquo;s SETTINGS frame before establishing any WebTransport session.</li>
+      <li>So on a <strong>fresh</strong> connection the session cannot be opened in the first flight, however cheap the QUIC handshake was.</li>
+      <li>On a <strong>resumed</strong> connection the settings are remembered, and the session really is 0-RTT.</li>
+      <li>Worth asking: can we do better for the first connection?</li>
+    </ul>
+    <p class="small muted">Source: <a href="https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/">draft-ietf-webtrans-http3-16</a>, SETTINGS negotiation.</p>
+  </section>
+
   <!-- 19. Try it out -->
   <section>
     <h2>Try it out</h2>
