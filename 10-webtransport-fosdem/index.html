@@ -113,7 +113,7 @@
       </div>
       <div class="col-40">
         <ul class="small">
-          <li>A short handshake turns an HTTP connection into a WebSocket, mostly <strong>one round trip</strong>.</li>
+          <li>The upgrade costs <strong>one round trip</strong> before any application data flows.</li>
           <li>Sending data <strong>optimistically</strong> (0-RTT) is not safe on HTTP/1 (<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-optimistic-upgrade/">draft-ietf-httpbis-optimistic-upgrade</a>).</li>
         </ul>
       </div>
@@ -156,7 +156,6 @@
       <li><strong>Only B1 is retransmitted.</strong> A round trip later the gap closes, and B1 and the long-buffered A2 are delivered together.</li>
       <li>One lost packet therefore stalls a completely unrelated message: blocking on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
     </ul>
-    <p class="small muted">Like a single-lane road: one stalled car holds up everyone behind it, wherever they were going.</p>
   </section>
 
   <!-- 7. Connection migration -->
@@ -270,7 +269,7 @@
 
   <!-- 14. WebTransport upgrade -->
   <section>
-    <h2>WebTransport upgrade &nbsp;<span class="pill on">0-RTT capable</span></h2>
+    <h2>WebTransport upgrade &nbsp;<span class="pill on">0-RTT on resumption</span></h2>
     <div class="cols" style="gap:26px; align-items:flex-start;">
       <div class="col-60">
         <div id="wt-upgrade"></div>
@@ -278,7 +277,7 @@
       <div class="col-40">
         <ul class="small">
           <li>An extended HTTP CONNECT opens the session.</li>
-          <li>On a resumed QUIC connection, the client can send stream data and datagrams <strong>immediately</strong>, without waiting for the response.</li>
+          <li>On a <strong>resumed</strong> QUIC connection the settings are remembered, so the client sends stream data and datagrams <strong>immediately</strong>, without waiting for the response.</li>
         </ul>
       </div>
     </div>
@@ -309,7 +308,7 @@
     </div>
     <ul class="small" style="margin-top:0.5em;">
       <li>Same loss, but QUIC knows the gap belongs to <strong>stream B</strong>, so A1 and A2 go up to the application right away.</li>
-      <li>Only stream B waits for the retransmission. Unreliable <strong>datagrams</strong> are never held back at all.</li>
+      <li>Only stream B waits for the retransmission.</li>
     </ul>
   </section>
 
@@ -348,7 +347,7 @@
       <colgroup><col><col><col class="hl"></colgroup>
       <thead><tr><th style="width:30%;">&nbsp;</th><th>WebSocket</th><th>WebTransport</th></tr></thead>
       <tbody>
-        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td><td class="good">0-RTT capable</td></tr>
+        <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td><td class="good">0-RTT on resumption</td></tr>
         <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td><td class="good">No</td></tr>
         <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td><td class="good">Yes, via QUIC datagrams</td></tr>
         <tr><td class="prop">Connection migration</td><td class="warn">No</td><td class="good">Yes, via QUIC</td></tr>
@@ -386,7 +385,7 @@
       <li><strong>Low adoption</strong> so far.</li>
       <li>The emerging consumer is <strong>Media over QUIC (MoQ)</strong>: a simple, low-latency media delivery solution for ingest and distribution.</li>
       <li>Targets live streaming, gaming and conferencing, in <strong>browser and non-browser</strong> endpoints.</li>
-      <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>, so Apple, Google, Igalia, Microsoft and Mozilla are all working on making it behave the same everywhere.</li>
+      <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>.</li>
     </ul>
     <p class="small muted">Sources: <a href="https://datatracker.ietf.org/wg/moq/about/">IETF Media over QUIC (moq) working group</a>, <a href="https://wpt.fyi/interop-2026">Interop 2026 dashboard</a>.</p>
   </section>
