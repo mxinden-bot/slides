@@ -32,6 +32,7 @@
     .reveal .hol .pkt.wide { width: auto; padding: 0 14px; font-size: 0.6em; }
     .reveal .hol .gap { font-size: 0.42em; color: var(--ink-faint); font-style: italic; padding: 0 6px; white-space: nowrap; }
     .reveal .hol .pkt.blocked { opacity: 0.32; }
+    .reveal .hol .pkt.empty { background: transparent; border-style: dashed; border-color: var(--hairline); }
     .reveal .hol .streamlbl { font-size: 0.5em; font-weight: 700; color: var(--ink-faint); width: 92px; white-space: nowrap; }
     /* connection migration: link states + centred label, on top of theme .hops */
     .reveal .hops .link.broken { background: repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 12px); }
@@ -131,10 +132,19 @@
         </div>
       </div>
       <div>
-        <div class="lbl">What TCP sees: one ordered byte stream, no message boundaries</div>
+        <div class="lbl">On the wire: B1 is lost, and only B1 is retransmitted</div>
         <div class="row">
-          <div class="streamlbl">received</div>
-          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a blocked">A2</div>
+          <div class="streamlbl">arrives</div>
+          <div class="pkt a">A1</div><div class="pkt lost">B1</div><div class="pkt a">A2</div>
+          <div class="gap">&hellip; one round trip later &hellip;</div>
+          <div class="pkt b">B1</div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">What TCP hands up: one ordered byte stream, so nothing past the gap</div>
+        <div class="row">
+          <div class="streamlbl">delivered</div>
+          <div class="pkt a">A1</div><div class="pkt empty"></div><div class="pkt empty"></div>
           <div class="gap">&hellip; one round trip later &hellip;</div>
           <div class="pkt b">B1</div><div class="pkt a">A2</div>
         </div>
@@ -143,7 +153,7 @@
     <ul class="small" style="margin-top:0.5em;">
       <li>TCP does not know it carries two messages. It sees a byte range with a <strong>gap</strong> where B1 was.</li>
       <li>A2 <strong>has already arrived</strong> and sits in the receive buffer, but TCP cannot hand it up until the gap is filled.</li>
-      <li>Only once B1 is <strong>retransmitted</strong>, a round trip later, do both go up to the application.</li>
+      <li><strong>Only B1 is retransmitted.</strong> A round trip later the gap closes, and B1 and the long-buffered A2 are delivered together.</li>
       <li>One lost packet therefore stalls a completely unrelated message: blocking on the <strong>session</strong> and on the <strong>TCP stream</strong>.</li>
     </ul>
     <p class="small muted">Like a single-lane road: one stalled car holds up everyone behind it, wherever they were going.</p>
