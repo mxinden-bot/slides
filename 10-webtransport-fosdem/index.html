@@ -264,7 +264,7 @@
   <section>
     <h2>HTTP/3 adoption</h2>
     <div class="chart" id="c-h3adopt"></div>
-    <figcaption>HTTP/3 share, past 12 months: Firefox desktop responses (<a href="https://sql.telemetry.mozilla.org/queries/114112">STMO 114112</a>) vs Cloudflare&rsquo;s worldwide share of requests (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>). WebTransport runs over HTTP/3.</figcaption>
+    <figcaption>HTTP/3 share of HTTP responses per Firefox desktop release, Fx 141 to 152 at their release month (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking_http_response_version</a>), vs Cloudflare&rsquo;s worldwide share of requests (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>). Counted per request, both sit at about 30%. WebTransport runs over HTTP/3.</figcaption>
   </section>
 
   <!-- 14. WebTransport upgrade -->
@@ -336,7 +336,7 @@
     <ul class="small" style="margin-top:0.5em;">
       <li>QUIC identifies a connection by a <strong>connection ID</strong>, not by the address it arrives from.</li>
       <li>The address changes, the connection ID does not, so the server keeps the same connection: no new handshake, no lost state.</li>
-      <li>WebTransport inherits this for free.</li>
+      <li>WebTransport inherits this where client and server implement it. Firefox does not yet (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1962425">bug 1962425</a>).</li>
     </ul>
   </section>
 
@@ -350,8 +350,8 @@
         <tr><td class="prop">Upgrade</td><td>1-RTT (mostly)</td><td class="good">0-RTT on resumption</td></tr>
         <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td><td class="good">No</td></tr>
         <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td><td class="good">Yes, via QUIC datagrams</td></tr>
-        <tr><td class="prop">Connection migration</td><td class="warn">No</td><td class="good">Yes, via QUIC</td></tr>
-        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td><td>HTTP/3, HTTP/2 upcoming</td></tr>
+        <tr><td class="prop">Connection migration</td><td class="warn">No</td><td class="good">Possible, via QUIC</td></tr>
+        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td><td>HTTP/3, HTTP/2 upcoming (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071107">bug 2071107</a>)</td></tr>
       </tbody>
     </table>
   </section>
@@ -398,7 +398,7 @@
   <section>
     <h2>Who is using it?</h2>
     <ul>
-      <li><strong>Low adoption</strong> so far.</li>
+      <li><strong>Low adoption</strong> so far: WebTransport is used on <a href="https://chromestatus.com/metrics/feature/timeline/popularity/3472">0.007% of Chrome page loads</a>, WebSocket on <a href="https://chromestatus.com/metrics/feature/timeline/popularity/1149">12.8%</a> (September 2026).</li>
       <li>The emerging consumer is <strong>Media over QUIC (MoQ)</strong>: a simple, low-latency media delivery solution for ingest and distribution.</li>
       <li>Targets live streaming, gaming and conferencing, in <strong>browser and non-browser</strong> endpoints.</li>
       <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>.</li>

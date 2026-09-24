@@ -278,7 +278,7 @@
         <tr><td class="prop">Head-of-line blocking</td><td class="warn">On session and TCP stream</td><td class="good">No</td></tr>
         <tr><td class="prop">Unreliable delivery</td><td class="warn">No</td><td class="good">Yes, via QUIC datagrams</td></tr>
         <tr><td class="prop">Connection migration</td><td class="warn">No</td><td class="good">Yes, via QUIC</td></tr>
-        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td><td>HTTP/3, HTTP/2 upcoming</td></tr>
+        <tr><td class="prop">Browser support</td><td>HTTP/1 &amp; HTTP/2</td><td>HTTP/3, HTTP/2 upcoming (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071107">bug 2071107</a>)</td></tr>
       </tbody>
     </table>
     <p class="small muted">Support across browsers: <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebTransport">MDN: WebTransport</a>.</p>
@@ -312,7 +312,7 @@
   <section>
     <h2>Who is using it?</h2>
     <ul>
-      <li><strong>Low adoption</strong> so far.</li>
+      <li><strong>Low adoption</strong> so far: WebTransport is used on <a href="https://chromestatus.com/metrics/feature/timeline/popularity/3472">0.007% of Chrome page loads</a>, WebSocket on <a href="https://chromestatus.com/metrics/feature/timeline/popularity/1149">12.8%</a> (September 2026).</li>
       <li>The emerging consumer is <strong>Media over QUIC (MoQ)</strong>: a simple, low-latency media delivery solution for ingest and distribution.</li>
       <li>Targets live streaming, gaming and conferencing, in <strong>browser and non-browser</strong> endpoints.</li>
       <li>WebTransport is a focus area of <strong><a href="https://github.com/web-platform-tests/interop/blob/main/2026/README.md">Interop 2026</a></strong>.</li>
