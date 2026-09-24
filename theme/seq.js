@@ -21,8 +21,11 @@
         FONT = v('--font-sans', 'system-ui, sans-serif'), ACC = v('--accent', '#e66000');
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+  let uid = 0;
   function render(el, spec) {
     if (typeof el === 'string') el = document.querySelector(el);
+    // Unique per diagram: url(#id) resolves to the first match, possibly on a hidden slide.
+    const mk = `seqah${++uid}`, mkA = `${mk}A`;
     const actors = spec.actors, msgs = spec.messages;
     const W = el.clientWidth || 560;
     const padX = 16, topH = 40, rowH = 34, noteH = 28, botPad = 14;
@@ -32,9 +35,9 @@
     const H = topH + msgs.reduce((h, m) => h + (m.note ? noteH + 6 : rowH), 0) + botPad;
 
     let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" font-family="${FONT}">`;
-    s += `<defs><marker id="seqah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">`
+    s += `<defs><marker id="${mk}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">`
       + `<path d="M0,0 L7,3 L0,6 Z" fill="${MUTED}"/></marker>`
-      + `<marker id="seqahA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">`
+      + `<marker id="${mkA}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">`
       + `<path d="M0,0 L7,3 L0,6 Z" fill="${ACC}"/></marker></defs>`;
 
     // lifelines + actor heads
@@ -56,7 +59,7 @@
       }
       const xa = cx(idx[m.from]), xb = cx(idx[m.to]);
       const yy = y + rowH - 12, dir = xb >= xa ? 1 : -1;
-      const col = m.hl ? ACC : MUTED, mark = m.hl ? 'seqahA' : 'seqah';
+      const col = m.hl ? ACC : MUTED, mark = m.hl ? mkA : mk;
       s += `<text x="${(xa + xb) / 2}" y="${yy - 6}" text-anchor="middle" font-size="12.5" `
         + `fill="${m.hl ? ACC : INK}" font-weight="${m.hl ? 700 : 400}">${esc(m.text)}</text>`;
       s += `<line x1="${xa + dir * 2}" y1="${yy}" x2="${xb - dir * 6}" y2="${yy}" stroke="${col}" `
