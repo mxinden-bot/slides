@@ -125,19 +125,56 @@
     <aside class="notes">Most sites announce HTTP/3 only via Alt-Svc, which costs a round trip on first visit. HTTPS records fix that and enable ECH. DoH: Valentin.</aside>
   </section>
 
-  <!-- 6. WebTransport, MASQUE -->
+  <!-- 6. WebTransport -->
   <section class="topic">
-    <h2>WebTransport and MASQUE</h2>
-    <ul>
-      <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
-      <li><strong>MASQUE</strong>: proxy TCP (<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">connect-tcp</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">connect-udp</a>) through HTTP/3.</li>
-      <li>Firefox VPN uses classic <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a> over HTTP/2 today. Next: HTTP/3 end to end through MASQUE (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
-      <li>Many ways to reach one site: HTTP/1.1, HTTP/2 or HTTP/3; direct, CONNECT or MASQUE; to a proxy over HTTP/1.1, HTTP/2 or HTTP/3; over IPv4 or IPv6.</li>
-    </ul>
-    <aside class="notes">Both build on HTTP/3. Many ways to reach one site. Firefox VPN uses CONNECT over HTTP/2 today; MASQUE brings HTTP/3 end to end.</aside>
+    <h2>WebTransport</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Streams and datagrams for web apps, over HTTP/3. No head-of-line blocking.</li>
+          <li>HTTP/2 fallback upcoming (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071107">bug 2071107</a>).</li>
+          <li>In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
+          <li>Emerging consumer: <a href="https://datatracker.ietf.org/wg/moq/about/">Media over QUIC</a>.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="box span accent">WebTransport</div>
+          <div class="box faint">HTTP/1.1</div><div class="box accent2">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS 1.2+</div><div class="box accent2">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box faint">TCP</div><div class="box accent2">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IP</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">WebTransport: WebSocket's successor for low-latency apps. Shipped everywhere; HTTP/2 fallback next.</aside>
   </section>
 
-  <!-- 7. Robustness -->
+  <!-- 7. MASQUE -->
+  <section class="topic">
+    <h2>MASQUE</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Proxy TCP (<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">connect-tcp</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">connect-udp</a>) through HTTP.</li>
+          <li>Firefox VPN uses classic <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a> over HTTP/2 today. Next: HTTP/3 end to end through MASQUE (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
+          <li>Many ways to reach one site: HTTP/1.1, HTTP/2 or HTTP/3; direct, CONNECT or MASQUE; to a proxy over HTTP/1.1, HTTP/2 or HTTP/3; over IPv4 or IPv6.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="protostack">
+          <div class="box span accent">MASQUE</div>
+          <div class="box faint">HTTP/1.1</div><div class="box accent2">HTTP/2</div><div class="box accent">HTTP/3</div>
+          <div class="box faint">TLS 1.2+</div><div class="box accent2">TLS 1.2+</div><div class="box accent">QUIC &middot; TLS 1.3</div>
+          <div class="box faint">TCP</div><div class="box accent2">TCP</div><div class="box accent">UDP</div>
+          <div class="box span">IP</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Firefox VPN proxies over HTTP/2 today; MASQUE brings HTTP/3 end to end. Many ways to reach one site.</aside>
+  </section>
+
+  <!-- 8. Robustness -->
   <section>
     <h2>When the network interferes</h2>
     <table class="cmp">
@@ -155,7 +192,7 @@
     <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS. Bad networks and "security" software: race and fall back, validate ECN, and fall back. Users blame the browser, not the middlebox.</aside>
   </section>
 
-  <!-- 8. Where to find us -->
+  <!-- 9. Where to find us -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
     <h2 style="color:#ffffff;">Where to find us</h2>
