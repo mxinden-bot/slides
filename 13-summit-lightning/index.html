@@ -22,8 +22,10 @@
     .reveal .interfere .q { color: var(--ink-muted); white-space: nowrap; }
     .reveal .interfere .ar { color: var(--accent); font-weight: 700; }
     .reveal .interfere .r { color: var(--ink); font-weight: 700; }
-    .reveal .interfere .vend { grid-column: 1 / -1; margin: -18px 0 0 1.1em; padding: 0; font-size: 0.6em; color: var(--ink-muted); }
-    .reveal .interfere .vend li { margin-bottom: 0.25em; }
+    .reveal .interfere .vend { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto 1fr; gap: 10px 18px; margin: -14px 0 0 0; padding-left: 16px; border-left: 3px solid var(--hairline); font-size: 0.62em; align-items: baseline; }
+    .reveal .interfere .vn { font-weight: 700; color: var(--ink); }
+    .reveal .interfere .vd { color: var(--ink-muted); }
+    .reveal .interfere .vb { white-space: nowrap; }
     .reveal .interfere-src { position: absolute; bottom: 10px; left: 0; right: 80px; font-size: 0.42em; line-height: 1.4; }
   </style>
 </head>
@@ -192,12 +194,12 @@
       <div class="side"><div class="sh">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div><div class="rows">
         <div class="q">Black holes</div><div class="ar">&rarr;</div><div class="r">Happy Eyeballs</div>
         <div class="q">&ldquo;Security&rdquo; software</div><div class="ar">&rarr;</div><div class="r">Fall back to HTTP/2</div>
-        <ul class="vend">
-          <li>Avast crashed neqo with a bogus ACK (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>)</li>
-          <li>Bitdefender broke Facebook (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>)</li>
-          <li>CrowdStrike dropped crypto frames (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>)</li>
-          <li>Kaspersky sent a bogus TLS alert (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>)</li>
-        </ul>
+        <div class="vend">
+          <span class="vn">Avast</span><span class="vd">crashed neqo with a bogus ACK</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>
+          <span class="vn">Bitdefender</span><span class="vd">broke Facebook</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>
+          <span class="vn">CrowdStrike</span><span class="vd">dropped QUIC crypto frames</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>
+          <span class="vn">Kaspersky</span><span class="vd">sent a bogus TLS alert</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>
+        </div>
       </div></div>
     </div>
     <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
