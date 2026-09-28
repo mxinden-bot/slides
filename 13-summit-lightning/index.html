@@ -15,6 +15,7 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
+    .reveal .loop { font-family: var(--font-mono, monospace); font-size: 0.62em; color: var(--accent); font-weight: 700; margin-top: 0.8em; }
     .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.74em; margin-top: 0.2em; }
     .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.45em 0.7em; text-align: left; vertical-align: top; }
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
@@ -29,10 +30,37 @@
   <section class="cover" data-background-color="#ffffff">
     <h1>Modern Network Protocols in Firefox</h1>
     <p class="subtitle">What the networking team is up to</p>
-    <span class="venue">Mozilla Engineering Summit &middot; Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a></span>
+    <span class="venue">Mozilla Engineering Summit &middot; Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a>, Firefox networking team (aka Necko)</span>
   </section>
 
-  <!-- 2. QUIC and HTTP/3 -->
+  <!-- 2. Thin waist -->
+  <section class="topic">
+    <h2>G&ouml;del, Escher, HTTP</h2>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>HTTP is the <strong>thin waist</strong> of the Internet: consistent, extensible, a strong security model, hard to censor.</li>
+          <li>We keep putting more on top of it: DNS over HTTPS, WebTransport, MASQUE.</li>
+          <li>A <strong>strange loop</strong>: MASQUE carries IP inside HTTP/3, which runs over QUIC, over UDP, over IP.</li>
+          <li><strong>Bootstrapping</strong>: DNS over HTTPS first needs DNS to find its own resolver.</li>
+        </ul>
+        <p class="loop">IP &rarr; UDP &rarr; QUIC &rarr; HTTP/3 &rarr; MASQUE &rarr; IP &rarr; &hellip;</p>
+      </div>
+      <div class="col-40">
+        <div class="hourglass">
+          <div class="tier"><div class="box">www</div><div class="box">DNS</div><div class="box">video</div><div class="box">IP</div></div>
+          <div class="funnel down"></div>
+          <div class="tier"><div class="box waist">HTTP</div></div>
+          <div class="funnel up"></div>
+          <div class="tier"><div class="box">TCP + TLS</div><div class="box">QUIC</div></div>
+          <div class="tier"><div class="box">IPv4</div><div class="box">IPv6</div></div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">HTTP is the thin waist, and we keep adding to it. It even carries IP, which carries HTTP: a strange loop.</aside>
+  </section>
+
+  <!-- 3. QUIC and HTTP/3 -->
   <section class="topic">
     <h2>QUIC and HTTP/3 &nbsp;<span class="pill on">0-RTT</span></h2>
     <div class="cols">
@@ -53,7 +81,7 @@
     <aside class="notes">About a third of our traffic is HTTP/3 already. 0-RTT: on a repeat visit the request goes out with the handshake.</aside>
   </section>
 
-  <!-- 3. Happy Eyeballs v3 -->
+  <!-- 4. Happy Eyeballs v3 -->
   <section class="topic">
     <h2>Happy Eyeballs v3</h2>
     <div class="cols">
@@ -74,7 +102,7 @@
     <aside class="notes">One state machine decides how to connect. The Beta experiment shows the win: far more HTTP/3, most of all with DoH.</aside>
   </section>
 
-  <!-- 4. HTTPS records and ECH -->
+  <!-- 5. HTTPS records and ECH -->
   <section class="topic">
     <h2>HTTPS records and ECH</h2>
     <div class="cols">
@@ -94,15 +122,14 @@
     <aside class="notes">Most sites announce HTTP/3 only via Alt-Svc, which costs a round trip on first visit. HTTPS records fix that and enable ECH. DoH: Valentin.</aside>
   </section>
 
-  <!-- 5. WebTransport, MASQUE, OHTTP -->
+  <!-- 6. WebTransport, MASQUE -->
   <section class="topic">
-    <h2>WebTransport, MASQUE and Oblivious HTTP</h2>
+    <h2>WebTransport and MASQUE</h2>
     <div class="cols">
       <div class="col-40">
         <ul>
           <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
-          <li><strong>MASQUE</strong> (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>): proxy UDP and IP through HTTP/3.</li>
-          <li><strong>Oblivious HTTP</strong> (<a href="https://datatracker.ietf.org/doc/rfc9458/">RFC 9458</a>): a relay splits who asks from what is asked. Used for telemetry and Oblivious DoH.</li>
+          <li><strong>MASQUE</strong>: proxy UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>) and IP (<a href="https://datatracker.ietf.org/doc/rfc9484/">RFC 9484</a>) through HTTP/3.</li>
         </ul>
       </div>
       <div class="col-60">
@@ -110,10 +137,10 @@
         <figcaption>Interop 2026, WebTransport focus area, stable browsers, 27 September 2026. Source: <a href="https://wpt.fyi/interop-2026">wpt.fyi/interop-2026</a>.</figcaption>
       </div>
     </div>
-    <aside class="notes">All three build on HTTP/3. Firefox leads the Interop 2026 WebTransport score.</aside>
+    <aside class="notes">Both build on HTTP/3. Firefox leads the Interop 2026 WebTransport score.</aside>
   </section>
 
-  <!-- 6. Robustness -->
+  <!-- 7. Robustness -->
   <section>
     <h2>When the network interferes</h2>
     <table class="cmp">
@@ -129,7 +156,7 @@
     <aside class="notes">A lot of our work is making new protocols survive real networks: censors, antivirus, enterprise boxes.</aside>
   </section>
 
-  <!-- 7. Where to find us -->
+  <!-- 8. Where to find us -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
     <h2 style="color:#ffffff;">Where to find us</h2>
