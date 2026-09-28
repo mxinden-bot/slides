@@ -29,13 +29,4 @@ window.DECK_DATA = {
     { name: 'Alt-Svc only', value: 35.0, color: '#eb6834' },
     { name: 'both', value: 3.8, color: '#2a78d6' },
   ],
-
-  // Cloudflare speed test in Firefox Nightly, one run per path, 2026-09-11:
-  // direct vs through Firefox VPN (github.com/mxinden/fireflare,
-  // results/report.html). Mbps.
-  proxyTput: {
-    x: ['direct\nHTTP/1.1', 'direct\nHTTP/3', 'proxy HTTP/2\nCONNECT', 'proxy HTTP/3\nCONNECT', 'proxy HTTP/3\nMASQUE'],
-    down: [885.0, 893.6, 890.9, 593.8, 309.9],
-    up:   [401.8, 246.0, 527.8, 448.4, 112.8],
-  },
 };
