@@ -111,7 +111,7 @@
     <div class="cols">
       <div class="col-40">
         <ul>
-          <li>The DNS <strong>HTTPS record</strong> (<a href="https://datatracker.ietf.org/doc/rfc9460/">RFC 9460</a>) says &ldquo;speaks HTTP/3&rdquo; <em>before</em> we connect. Alt-Svc only tells us after a first HTTP/2 connection.</li>
+          <li>The DNS <strong>HTTPS record</strong> (<a href="https://datatracker.ietf.org/doc/rfc9460/">RFC 9460</a>) can signal HTTP/3 support before the first connection. Alt-Svc signals HTTP/3 on the second connection only.</li>
           <li>It also carries the key for <strong>Encrypted Client Hello</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-tls-esni/">ECH</a>), which hides the server name. ~16% of HTTPS records carry one (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>).</li>
           <li>Check a domain: <a href="https://savearoundtrip.com">savearoundtrip.com</a>.</li>
           <li>DNS over HTTPS: see <strong>Valentin&rsquo;s talk</strong>.</li>
