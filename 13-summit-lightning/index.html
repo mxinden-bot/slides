@@ -90,7 +90,7 @@
     <div class="cols">
       <div class="col-40">
         <ul>
-          <li>Race IPv4 and IPv6, TCP and QUIC, A, AAAA and HTTPS records: take whatever connects first.</li>
+          <li>Tries <strong>all</strong> permutations of IPv4 and IPv6, TCP and QUIC, A, AAAA and HTTPS records, and keeps whatever connects first.</li>
           <li>A sans-I/O Rust library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>.</li>
           <li>Follows the IETF draft <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>.</li>
           <li>On in Nightly, rolling out on Beta and Release.</li>
@@ -154,7 +154,7 @@
         <tr><td>Filtering on the server name (SNI).</td><td><strong>SNI slicing</strong> in QUIC: split and reorder the ClientHello across packets (<a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a>). <strong>ECH</strong> encrypts the name.</td></tr>
         <tr><td>Tampering with DNS.</td><td><strong>DNS over HTTPS</strong> (Valentin&rsquo;s talk).</td></tr>
         <tr class="grp"><th colspan="2">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</th></tr>
-        <tr><td>Firewalls block UDP, so QUIC fails.</td><td><strong>Happy Eyeballs</strong> races QUIC against TCP: a blocked path costs a short delay, not an error.</td></tr>
+        <tr><td>Firewalls block UDP, so QUIC fails.</td><td><strong>Happy Eyeballs</strong> tries <strong>all</strong> permutations of IPv4 and IPv6, QUIC and TCP: a blocked path costs a short delay, not an error.</td></tr>
         <tr><td>Black holes: ECN marks stripped on <strong>38%</strong> of QUIC paths, ECN-marked packets dropped on 2% (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>).</td><td>neqo validates ECN per path and stops marking where it fails.</td></tr>
         <tr><td>&ldquo;Security&rdquo; software mangles QUIC: Avast crashed neqo with a bogus ACK (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>), Bitdefender broke Facebook (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>), CrowdStrike dropped crypto frames (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>), Kaspersky sent a bogus TLS alert (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</td><td>Fall back to HTTP/2, and roll back what trips them (<a href="https://github.com/mozilla/neqo/pull/3573">neqo#3573</a>).</td></tr>
       </tbody>
