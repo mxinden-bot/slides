@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modern Network Protocols in Firefox (Mozilla Engineering Summit)</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+  <style>
+    .reveal .topic ul { font-size: 0.8em; }
+    .reveal .topic li { margin-bottom: 0.35em; }
+    .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.74em; margin-top: 0.2em; }
+    .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.45em 0.7em; text-align: left; vertical-align: top; }
+    .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
+    .reveal .cmp td:first-child { color: var(--ink-muted); width: 42%; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Modern Network Protocols in Firefox</h1>
+    <p class="subtitle">What the networking team is up to</p>
+    <span class="venue">Mozilla Engineering Summit &middot; Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a></span>
+  </section>
+
+  <!-- 2. QUIC and HTTP/3 -->
+  <section class="topic">
+    <h2>QUIC and HTTP/3 &nbsp;<span class="pill on">0-RTT</span></h2>
+    <div class="cols">
+      <div class="col-40">
+        <ul>
+          <li>Transport on UDP, encrypted down to the packet headers.</li>
+          <li>1-RTT connection setup, <strong>0-RTT</strong> on resumption: the request goes out with the first packet.</li>
+          <li>No head-of-line blocking between streams.</li>
+          <li>Our QUIC stack is <a href="https://github.com/mozilla/neqo">neqo</a>, in Rust.</li>
+          <li>About <strong>30%</strong> of Firefox requests use HTTP/3, in line with Cloudflare.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <div class="chart short" id="c-h3adopt"></div>
+        <figcaption>HTTP/3 share of HTTP responses per Firefox desktop release, Fx 141 to 152 at their release month (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking_http_response_version</a>), vs Cloudflare&rsquo;s worldwide share of requests (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</figcaption>
+      </div>
+    </div>
+    <aside class="notes">About a third of our traffic is HTTP/3 already. 0-RTT: on a repeat visit the request goes out with the handshake.</aside>
+  </section>
+
+  <!-- 3. Happy Eyeballs v3 -->
+  <section class="topic">
+    <h2>Happy Eyeballs v3</h2>
+    <div class="cols">
+      <div class="col-40">
+        <ul>
+          <li>Race IPv4 and IPv6, TCP and QUIC, A, AAAA and HTTPS records: take whatever connects first.</li>
+          <li>A sans-I/O Rust library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>.</li>
+          <li>Follows the IETF draft <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>.</li>
+          <li>On in Nightly; Beta A/B experiment in August.</li>
+          <li>With DoH, <strong>+68%</strong> page loads over HTTP/3.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <div class="chart short" id="c-hev3"></div>
+        <figcaption>Share of page loads over HTTP/3, Firefox Beta A/B experiment, 30 July to 18 August 2026, control vs HEv3. With DoH <strong>16.6% &rarr; 27.9%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
+      </div>
+    </div>
+    <aside class="notes">One state machine decides how to connect. The Beta experiment shows the win: far more HTTP/3, most of all with DoH.</aside>
+  </section>
+
+  <!-- 4. HTTPS records and ECH -->
+  <section class="topic">
+    <h2>HTTPS records and ECH</h2>
+    <div class="cols">
+      <div class="col-40">
+        <ul>
+          <li>The DNS <strong>HTTPS record</strong> (<a href="https://datatracker.ietf.org/doc/rfc9460/">RFC 9460</a>) says &ldquo;speaks HTTP/3&rdquo; <em>before</em> we connect. Alt-Svc only tells us after a first HTTP/2 connection.</li>
+          <li>It also carries the key for <strong>Encrypted Client Hello</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-tls-esni/">ECH</a>), which hides the server name. ~16% of HTTPS records carry one (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>).</li>
+          <li>Check a domain: <a href="https://savearoundtrip.com">savearoundtrip.com</a>.</li>
+          <li>DNS over HTTPS: see <strong>Valentin&rsquo;s talk</strong>.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <div class="chart short" id="c-discovery"></div>
+        <figcaption>How a connection learned that HTTP/3 was available, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: netwerk_happy_eyeballs_h3_discovery</a>.</figcaption>
+      </div>
+    </div>
+    <aside class="notes">Most sites announce HTTP/3 only via Alt-Svc, which costs a round trip on first visit. HTTPS records fix that and enable ECH. DoH: Valentin.</aside>
+  </section>
+
+  <!-- 5. WebTransport, MASQUE, OHTTP -->
+  <section class="topic">
+    <h2>WebTransport, MASQUE and Oblivious HTTP</h2>
+    <div class="cols">
+      <div class="col-40">
+        <ul>
+          <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
+          <li><strong>MASQUE</strong> (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>): proxy UDP and IP through HTTP/3.</li>
+          <li><strong>Oblivious HTTP</strong> (<a href="https://datatracker.ietf.org/doc/rfc9458/">RFC 9458</a>): a relay splits who asks from what is asked. Used for telemetry and Oblivious DoH.</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <div class="chart short" id="c-wt"></div>
+        <figcaption>Interop 2026, WebTransport focus area, stable browsers, 27 September 2026. Source: <a href="https://wpt.fyi/interop-2026">wpt.fyi/interop-2026</a>.</figcaption>
+      </div>
+    </div>
+    <aside class="notes">All three build on HTTP/3. Firefox leads the Interop 2026 WebTransport score.</aside>
+  </section>
+
+  <!-- 6. Robustness -->
+  <section>
+    <h2>When the network interferes</h2>
+    <table class="cmp">
+      <thead><tr><th>Interference</th><th>Firefox&rsquo;s answer</th></tr></thead>
+      <tbody>
+        <tr><td>Censors read the server name and the DNS answers.</td><td><strong>ECH</strong> hides the server name; <strong>DoH</strong> encrypts DNS (Valentin&rsquo;s talk).</td></tr>
+        <tr><td>Networks block UDP, so QUIC fails.</td><td><strong>Happy Eyeballs</strong> races QUIC against TCP: a blocked path costs a short delay, not an error.</td></tr>
+        <tr><td>Antivirus and enterprise proxies intercept TLS with their own root certificate.</td><td>Firefox trusts roots installed in the OS by default (<a href="https://support.mozilla.org/en-US/kb/how-disable-enterprise-roots-preference">enterprise roots</a>); otherwise a <a href="https://support.mozilla.org/en-US/kb/error-codes-secure-websites">dedicated error page</a> names the interception.</td></tr>
+        <tr><td>Enterprise networks need their own DNS.</td><td>Firefox turns default DoH off on the canary domain <a href="https://support.mozilla.org/en-US/kb/canary-domain-use-application-dnsnet">use-application-dns.net</a> and via enterprise policy.</td></tr>
+        <tr><td>Middleboxes strip ECN marks: <strong>38%</strong> of QUIC paths (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>).</td><td>neqo validates ECN per path and stops marking where it fails.</td></tr>
+      </tbody>
+    </table>
+    <aside class="notes">A lot of our work is making new protocols survive real networks: censors, antivirus, enterprise boxes.</aside>
+  </section>
+
+  <!-- 7. Where to find us -->
+  <section class="divider" data-background-color="#20123a">
+    <p class="kicker" style="color:#ff9d5c;">Thank you</p>
+    <h2 style="color:#ffffff;">Where to find us</h2>
+    <p class="small" style="color:#d8d4e2;">Matrix <a href="https://chat.mozilla.org/#/room/#necko:mozilla.org" style="color:#ff9d5c;">#necko:mozilla.org</a> &middot; necko@mozilla.com</p>
+    <p class="small" style="color:#d8d4e2;">Bugs: <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Core&amp;component=Networking" style="color:#ff9d5c;">Core :: Networking</a> &middot; Docs: <a href="https://firefox-source-docs.mozilla.org/networking/index.html" style="color:#ff9d5c;">firefox-source-docs/networking</a></p>
+    <p class="small" style="color:#d8d4e2;">Code: <a href="https://searchfox.org/mozilla-central/source/netwerk" style="color:#ff9d5c;">netwerk/</a> &middot; <a href="https://github.com/mozilla/neqo" style="color:#ff9d5c;">mozilla/neqo</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs" style="color:#ff9d5c;">mozilla/happy-eyeballs</a></p>
+    <p class="small" style="color:#b3adc4;">mail@max-inden.de &middot; <a href="https://max-inden.de" style="color:#ff9d5c;">max-inden.de</a></p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const pct = (v) => v + '%';
+
+  Charts.register('c-h3adopt', (el) => Charts.line(el, {
+    x: D.months, yName: 'HTTP/3 share', yMax: 40, yFormatter: pct, xInterval: 1,
+    series: [
+      { name: 'Firefox', data: D.h3Adoption.pct, color: '#2a78d6', area: true },
+      { name: 'Cloudflare', data: D.h3Adoption.cf, color: '#eb6834', dashed: true },
+    ],
+  }));
+
+  Charts.register('c-hev3', (el) => Charts.bar(el, {
+    x: D.hev3H3.x, yName: '% of page loads', yMax: 30,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [
+      { name: 'control', data: D.hev3H3.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.hev3H3.hev3, color: '#1baf7a' },
+    ],
+  }));
+
+  Charts.register('c-discovery', (el) => Charts.donut(el, {
+    data: D.discovery, centerValue: '35%', centerLabel: 'Alt-Svc only',
+  }));
+
+  Charts.register('c-wt', (el) => Charts.barH(el, {
+    y: D.wtInterop.browsers, data: D.wtInterop.score, xMax: 100, valueFormatter: pct,
+    colors: ['#2a78d6', '#8f8f9d', '#8f8f9d', '#8f8f9d'],
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>

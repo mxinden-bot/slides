@@ -184,7 +184,7 @@
         inverse: true, splitLine: { show: false } }),
       series: [{
         type: 'bar', data: o.data.map((val, i) => ({ value: val,
-          itemStyle: { color: o.colorByIndex ? PALETTE[i % PALETTE.length] : PALETTE[0] } })),
+          itemStyle: { color: (o.colors && o.colors[i]) || (o.colorByIndex ? PALETTE[i % PALETTE.length] : PALETTE[0]) } })),
         barMaxWidth: 40,
         itemStyle: { borderRadius: [0, 4, 4, 0] },
         label: { show: true, position: 'right', color: INK_MUTED, fontFamily: FONT,
