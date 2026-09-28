@@ -132,14 +132,15 @@
         <ul>
           <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
           <li><strong>MASQUE</strong>: proxy TCP (<a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>) through HTTP/3.</li>
+          <li>Firefox&rsquo;s built-in IP protection proxies over HTTP/2 CONNECT today. HTTP/3 and UDP proxying work end to end, but are not yet as fast (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
         </ul>
       </div>
       <div class="col-60">
-        <div class="chart short" id="c-wt"></div>
-        <figcaption>Interop 2026, WebTransport focus area, stable browsers, 27 September 2026. Source: <a href="https://wpt.fyi/interop-2026">wpt.fyi/interop-2026</a>.</figcaption>
+        <div class="chart short" id="c-proxy"></div>
+        <figcaption>Cloudflare speed test in Firefox Nightly, direct vs through Firefox&rsquo;s IP-protection proxy, Mbps. One run per path, 11 September 2026. Source: <a href="https://github.com/mxinden/fireflare">mxinden/fireflare</a>.</figcaption>
       </div>
     </div>
-    <aside class="notes">Both build on HTTP/3. Firefox leads the Interop 2026 WebTransport score.</aside>
+    <aside class="notes">Both build on HTTP/3. MASQUE is how we want to proxy; the UDP path still needs performance work.</aside>
   </section>
 
   <!-- 7. Robustness -->
@@ -203,9 +204,13 @@
     data: D.discovery, centerValue: '35%', centerLabel: 'Alt-Svc only',
   }));
 
-  Charts.register('c-wt', (el) => Charts.barH(el, {
-    y: D.wtInterop.browsers, data: D.wtInterop.score, xMax: 100, valueFormatter: pct,
-    colors: ['#2a78d6', '#8f8f9d', '#8f8f9d', '#8f8f9d'],
+  Charts.register('c-proxy', (el) => Charts.bar(el, {
+    x: D.proxyTput.x, yName: 'Mbps', yMax: 1000, xInterval: 0,
+    barLabels: true, barLabelFormatter: (p) => Math.round(p.value),
+    series: [
+      { name: 'download', data: D.proxyTput.down, color: '#2a78d6' },
+      { name: 'upload', data: D.proxyTput.up, color: '#1baf7a' },
+    ],
   }));
 
   Reveal.initialize({

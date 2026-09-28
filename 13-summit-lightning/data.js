@@ -30,10 +30,12 @@ window.DECK_DATA = {
     { name: 'both', value: 3.8, color: '#2a78d6' },
   ],
 
-  // Interop 2026 WebTransport focus area, stable browsers, 2026-09-27
-  // (web-platform-tests/results-analysis, interop-2026-stable-v2.csv).
-  wtInterop: {
-    browsers: ['Firefox', 'Safari', 'Chrome', 'Edge'],
-    score: [86.2, 75.0, 65.8, 65.8],
+  // Cloudflare speed test in Firefox Nightly, one run per path, 2026-09-11:
+  // direct vs through Firefox's IP-protection proxy (github.com/mxinden/fireflare,
+  // results/report.html). Mbps.
+  proxyTput: {
+    x: ['direct\nHTTP/1.1', 'direct\nHTTP/3', 'proxy HTTP/2\nCONNECT', 'proxy HTTP/3\nCONNECT', 'proxy HTTP/3\nMASQUE'],
+    down: [885.0, 893.6, 890.9, 593.8, 309.9],
+    up:   [401.8, 246.0, 527.8, 448.4, 112.8],
   },
 };

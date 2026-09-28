@@ -158,6 +158,7 @@
         valueFormatter: o.yFormatter }),
       legend: legend(multi),
       xAxis: Object.assign(axisCommon(o.xName), { type: 'category', data: o.x,
+        axisLabel: { color: INK_FAINT, fontSize: AXIS_FS, fontFamily: FONT, interval: o.xInterval },
         splitLine: { show: false } }),
       yAxis: Object.assign(axisCommon(o.yName), { type: o.yType || 'value',
         max: o.yMax, min: o.yMin,
