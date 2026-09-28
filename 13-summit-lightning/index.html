@@ -15,12 +15,14 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
-    .reveal .threats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 20px; margin-top: 0.4em; }
-    .reveal .threats .row { grid-column: 1 / -1; font-size: 0.46em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-top: 1.1em; }
-    .reveal .threats .tile { border: 1.5px solid var(--hairline); border-top: 5px solid var(--accent); border-radius: 12px; padding: 18px 22px; min-height: 150px; display: flex; flex-direction: column; }
-    .reveal .threats .p { font-size: 0.74em; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-    .reveal .threats .a { font-size: 0.62em; line-height: 1.3; color: var(--ink-muted); }
-    .reveal .threats .n { font-size: 0.44em; line-height: 1.35; color: var(--ink-faint); margin-top: auto; padding-top: 10px; }
+    .reveal .interfere { display: flex; gap: 60px; margin-top: 2.2em; }
+    .reveal .interfere .side { flex: 1; }
+    .reveal .interfere .sh { font-size: 0.5em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); border-bottom: 2px solid var(--hairline); padding-bottom: 8px; margin-bottom: 18px; }
+    .reveal .interfere .rows { display: grid; grid-template-columns: auto auto 1fr; gap: 42px 16px; align-items: baseline; font-size: 0.8em; }
+    .reveal .interfere .q { color: var(--ink-muted); white-space: nowrap; }
+    .reveal .interfere .ar { color: var(--accent); font-weight: 700; }
+    .reveal .interfere .r { color: var(--ink); font-weight: 700; }
+    .reveal .interfere-src { position: absolute; bottom: 10px; left: 0; right: 80px; font-size: 0.42em; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -179,16 +181,19 @@
   <!-- 8. Robustness -->
   <section>
     <h2>When the network interferes</h2>
-    <div class="threats">
-      <div class="row">Censorship</div>
-      <div class="tile"><div class="p">SNI filtering</div><div class="a">SNI slicing in QUIC, ECH</div><div class="n"><a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a></div></div>
-      <div class="tile"><div class="p">DNS tampering</div><div class="a">DNS over HTTPS</div><div class="n">Valentin&rsquo;s talk</div></div>
-      <div class="tile"><div class="p">IP blocking</div><div class="a">Firefox VPN</div></div>
-      <div class="row">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div>
-      <div class="tile"><div class="p">UDP blocked</div><div class="a">Happy Eyeballs tries all permutations</div></div>
-      <div class="tile"><div class="p">Black holes</div><div class="a">Detect and recover; validate ECN</div><div class="n">e.g. 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>), <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a></div></div>
-      <div class="tile"><div class="p">&ldquo;Security&rdquo; software</div><div class="a">Breaks QUIC: fall back to HTTP/2</div><div class="n"><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></div></div>
+    <div class="interfere">
+      <div class="side"><div class="sh">Censorship</div><div class="rows">
+        <div class="q">SNI filtering</div><div class="ar">&rarr;</div><div class="r">ECH, SNI slicing</div>
+        <div class="q">DNS tampering</div><div class="ar">&rarr;</div><div class="r">DNS over HTTPS</div>
+        <div class="q">IP blocking</div><div class="ar">&rarr;</div><div class="r">Firefox VPN</div>
+      </div></div>
+      <div class="side"><div class="sh">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div><div class="rows">
+        <div class="q">UDP blocked</div><div class="ar">&rarr;</div><div class="r">Happy Eyeballs</div>
+        <div class="q">Black holes</div><div class="ar">&rarr;</div><div class="r">Detect and recover</div>
+        <div class="q">&ldquo;Security&rdquo; software</div><div class="ar">&rarr;</div><div class="r">Fall back to HTTP/2</div>
+      </div></div>
     </div>
+    <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>) &middot; &ldquo;security&rdquo; software: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></p>
     <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Bad networks and "security" software: try all permutations, detect black holes, validate ECN, fall back. Users blame the browser, not the middlebox.</aside>
   </section>
 
