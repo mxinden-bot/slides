@@ -138,7 +138,7 @@
       </div>
       <div class="col-60">
         <div class="chart short" id="c-proxy"></div>
-        <figcaption>Cloudflare speed test in Firefox Nightly, direct vs through Firefox VPN, Mbps. One run per path, 11 September 2026. Source: <a href="https://github.com/mxinden/fireflare">mxinden/fireflare</a>.</figcaption>
+        <figcaption>Upload throughput, Cloudflare speed test in Firefox Nightly, direct vs through Firefox VPN, Mbps. One run per path, 11 September 2026. Source: <a href="https://github.com/mxinden/fireflare">mxinden/fireflare</a>.</figcaption>
       </div>
     </div>
     <aside class="notes">Both build on HTTP/3. MASQUE is how we want to proxy; the UDP path still needs performance work.</aside>
@@ -208,12 +208,9 @@
   }));
 
   Charts.register('c-proxy', (el) => Charts.bar(el, {
-    x: D.proxyTput.x, yName: 'Mbps', yMax: 1000, xInterval: 0,
+    x: D.proxyTput.x, yName: 'upload, Mbps', yMax: 600, xInterval: 0,
     barLabels: true, barLabelFormatter: (p) => Math.round(p.value),
-    series: [
-      { name: 'download', data: D.proxyTput.down, color: '#2a78d6' },
-      { name: 'upload', data: D.proxyTput.up, color: '#1baf7a' },
-    ],
+    series: [{ name: 'upload', data: D.proxyTput.up, color: '#2a78d6' }],
   }));
 
   Reveal.initialize({
