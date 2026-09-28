@@ -78,7 +78,7 @@
     <div class="cols">
       <div class="col-40">
         <ul>
-          <li>Transport on UDP. After the handshake only 3 header bits and the connection ID are in the clear (<a href="https://www.rfc-editor.org/rfc/rfc9000.html#name-1-rtt-packet">RFC 9000</a>); neqo randomizes 2 of those bits.</li>
+          <li>Transport on UDP, encrypted down to the packet headers.</li>
           <li>1-RTT connection setup, <strong>0-RTT</strong> on resumption: the request goes out with the first packet.</li>
           <li>No head-of-line blocking between streams.</li>
           <li>Our QUIC stack is <a href="https://github.com/mozilla/neqo">neqo</a>, in Rust.</li>
