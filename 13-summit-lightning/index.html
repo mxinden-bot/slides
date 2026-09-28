@@ -38,7 +38,7 @@
     <h1>Modern Network Protocols</h1>
     <p class="subtitle">Where Firefox (and the Internet?) is heading</p>
     <span class="venue">Mozilla Engineering Summit &middot; Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a>, Firefox networking team (Necko)</span>
-    <aside class="notes">I have given the long version of this talk many times: at universities, at FOSDEM, and elsewhere. This is the five-minute version. Goal: spark interest, not explain in depth. You should leave with more questions than answers; bring them to #necko.</aside>
+    <aside class="notes">I gave this talk many times: at universities, at FOSDEM, ... Lightning talk: spark interest, not explain in depth. Expect to leave with more questions than answers.</aside>
   </section>
 
   <!-- 2. HTTP everywhere -->
@@ -68,7 +68,6 @@
         </div>
       </div>
     </div>
-    <aside class="notes">HTTP is the thin waist, and we keep putting more on top of it: DNS, web apps, proxying.</aside>
   </section>
 
   <!-- 3. QUIC and HTTP/3 -->
@@ -89,7 +88,6 @@
         <figcaption>HTTP/3 share of HTTP responses per Firefox desktop release, Fx 141 to 152 at their release month (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking_http_response_version</a>), vs Cloudflare&rsquo;s worldwide share of requests (<a href="https://radar.cloudflare.com/adoption-and-usage">Cloudflare Radar</a>).</figcaption>
       </div>
     </div>
-    <aside class="notes">About a third of our traffic is HTTP/3 already. 0-RTT: on a repeat visit the request goes out with the handshake.</aside>
   </section>
 
   <!-- 4. Happy Eyeballs v3 -->
@@ -110,7 +108,6 @@
         <figcaption>Share of page loads over HTTP/3, Firefox Beta A/B experiment, 30 July to 18 August 2026, control vs HEv3. With DoH <strong>16.6% &rarr; 27.9%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
       </div>
     </div>
-    <aside class="notes">One state machine decides how to connect. The Beta experiment shows the win: far more HTTP/3, most of all with DoH.</aside>
   </section>
 
   <!-- 5. HTTPS records and ECH -->
@@ -130,7 +127,6 @@
         <figcaption>How a connection learned that HTTP/3 was available, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: netwerk_happy_eyeballs_h3_discovery</a>.</figcaption>
       </div>
     </div>
-    <aside class="notes">Most sites announce HTTP/3 only via Alt-Svc, which costs a round trip on first visit. HTTPS records fix that and enable ECH. DoH: Valentin.</aside>
   </section>
 
   <!-- 6. WebTransport -->
@@ -155,7 +151,6 @@
         </div>
       </div>
     </div>
-    <aside class="notes">WebTransport: WebSocket's successor for low-latency apps. Shipped everywhere; HTTP/2 fallback next.</aside>
   </section>
 
   <!-- 7. MASQUE -->
@@ -179,7 +174,6 @@
         </div>
       </div>
     </div>
-    <aside class="notes">Firefox VPN proxies over HTTP/2 today; MASQUE brings HTTP/3 support. Many ways to reach one site.</aside>
   </section>
 
   <!-- 8. Robustness -->
@@ -203,7 +197,6 @@
       </div></div>
     </div>
     <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
-    <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Black holes: Happy Eyeballs tries all permutations. "Security" software: fall back to HTTP/2. Users blame the browser, not the middlebox.</aside>
   </section>
 
   <!-- 9. Where to find us -->
@@ -213,7 +206,6 @@
     <p style="color:#ffffff; font-size:1.3em; font-weight:700;">#necko</p>
     <p class="small" style="color:#d8d4e2;">necko@mozilla.com</p>
     <p class="small" style="color:#b3adc4;">mail@max-inden.de &middot; <a href="https://max-inden.de" style="color:#ff9d5c;">max-inden.de</a></p>
-    <aside class="notes">More questions than answers? Good. Find us in #necko, on Slack or Matrix.</aside>
   </section>
 
 </div>
