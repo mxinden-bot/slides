@@ -15,11 +15,14 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
-    .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.66em; margin-top: 0.2em; }
-    .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.45em 0.7em; text-align: left; vertical-align: top; }
-    .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
-    .reveal .cmp td:first-child { color: var(--ink-muted); width: 50%; }
-    .reveal .cmp tr.grp th { color: var(--accent); font-weight: 800; padding-top: 0.8em; }
+    .reveal .interf { gap: 28px; align-items: stretch; margin-top: 0.4em; }
+    .reveal .interf .card { flex: 1; background: var(--surface-2); border-radius: 12px; padding: 18px 22px; }
+    .reveal .interf h3 { font-size: 0.74em; margin: 0 0 0.5em; color: var(--ink); }
+    .reveal .interf .pair { margin-bottom: 1.1em; }
+    .reveal .interf .prob { font-size: 0.56em; color: var(--ink-muted); margin-bottom: 4px; }
+    .reveal .interf .ans { font-size: 0.68em; color: var(--ink); }
+    .reveal .interf .ans::before { content: "\2192\00a0"; color: var(--accent); font-weight: 700; }
+    .reveal .interf b { color: var(--ink); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -177,19 +180,21 @@
   <!-- 8. Robustness -->
   <section>
     <h2>When the network interferes</h2>
-    <table class="cmp">
-      <thead><tr><th>Interference</th><th>Firefox&rsquo;s answer</th></tr></thead>
-      <tbody>
-        <tr class="grp"><th colspan="2">Censorship</th></tr>
-        <tr><td>Filtering on the server name (SNI).</td><td><strong>SNI slicing</strong> in QUIC: split and reorder the ClientHello across packets (<a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a>). <strong>ECH</strong> encrypts the name.</td></tr>
-        <tr><td>Tampering with DNS.</td><td><strong>DNS over HTTPS</strong> (Valentin&rsquo;s talk).</td></tr>
-        <tr class="grp"><th colspan="2">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</th></tr>
-        <tr><td>Firewalls block UDP, so QUIC fails.</td><td><strong>Happy Eyeballs</strong> tries <strong>all</strong> permutations of IPv4 and IPv6, QUIC and TCP: a blocked path costs a short delay, not an error.</td></tr>
-        <tr><td>Black holes: paths silently drop HTTP/3 packets mid-connection, or drop ECN-marked ones (2% of QUIC paths); 38% strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>).</td><td>neqo validates ECN per path and stops marking where it fails. Detecting and recovering from HTTP/3 black holes is in progress (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>).</td></tr>
-        <tr><td>&ldquo;Security&rdquo; software mangles QUIC: Avast crashed neqo with a bogus ACK (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>), Bitdefender broke Facebook (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>), CrowdStrike dropped crypto frames (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>), Kaspersky sent a bogus TLS alert (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>).</td><td>Fall back to HTTP/2.</td></tr>
-      </tbody>
-    </table>
-    <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS. Bad networks and "security" software: race and fall back, validate ECN, and fall back. Users blame the browser, not the middlebox.</aside>
+    <div class="cols interf">
+      <div class="card">
+        <h3>Censorship</h3>
+          <div class="pair"><div class="prob">Filtering on the server name (SNI)</div><div class="ans"><b>SNI slicing</b> in QUIC (<a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a>) and <b>ECH</b></div></div>
+          <div class="pair"><div class="prob">Tampering with DNS</div><div class="ans"><b>DNS over HTTPS</b> (Valentin&rsquo;s talk)</div></div>
+          <div class="pair"><div class="prob">Blocking by destination IP address</div><div class="ans"><b>Firefox VPN</b> hides the destination from the network</div></div>
+      </div>
+      <div class="card">
+        <h3>Bad networks, antivirus, enterprise &ldquo;security&rdquo;</h3>
+          <div class="pair"><div class="prob">UDP blocked</div><div class="ans"><b>Happy Eyeballs</b> tries all permutations of IPv4 and IPv6, QUIC and TCP</div></div>
+          <div class="pair"><div class="prob">Black holes, e.g. ECN marks stripped on 38% of QUIC paths, ECN-marked packets dropped on 2% (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</div><div class="ans"><b>Black-hole detection</b> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>) and per-path <b>ECN validation</b></div></div>
+          <div class="pair"><div class="prob">&ldquo;Security&rdquo; software mangles QUIC: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></div><div class="ans"><b>Fall back</b> to HTTP/2</div></div>
+      </div>
+    </div>
+    <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Bad networks and "security" software: try all permutations, detect black holes, validate ECN, fall back. Users blame the browser, not the middlebox.</aside>
   </section>
 
   <!-- 9. Where to find us -->
