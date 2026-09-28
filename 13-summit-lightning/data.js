@@ -31,7 +31,7 @@ window.DECK_DATA = {
   ],
 
   // Cloudflare speed test in Firefox Nightly, one run per path, 2026-09-11:
-  // direct vs through Firefox's IP-protection proxy (github.com/mxinden/fireflare,
+  // direct vs through Firefox VPN (github.com/mxinden/fireflare,
   // results/report.html). Mbps.
   proxyTput: {
     x: ['direct\nHTTP/1.1', 'direct\nHTTP/3', 'proxy HTTP/2\nCONNECT', 'proxy HTTP/3\nCONNECT', 'proxy HTTP/3\nMASQUE'],

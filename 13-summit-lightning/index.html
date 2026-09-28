@@ -133,12 +133,12 @@
         <ul>
           <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
           <li><strong>MASQUE</strong>: proxy TCP (<a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>) through HTTP/3.</li>
-          <li>Firefox&rsquo;s built-in IP protection proxies over HTTP/2 CONNECT today. HTTP/3 and UDP proxying work end to end, but are not yet as fast (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
+          <li>Firefox VPN proxies over HTTP/2 CONNECT today. HTTP/3 and UDP proxying work end to end, but are not yet as fast (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
         </ul>
       </div>
       <div class="col-60">
         <div class="chart short" id="c-proxy"></div>
-        <figcaption>Cloudflare speed test in Firefox Nightly, direct vs through Firefox&rsquo;s IP-protection proxy, Mbps. One run per path, 11 September 2026. Source: <a href="https://github.com/mxinden/fireflare">mxinden/fireflare</a>.</figcaption>
+        <figcaption>Cloudflare speed test in Firefox Nightly, direct vs through Firefox VPN, Mbps. One run per path, 11 September 2026. Source: <a href="https://github.com/mxinden/fireflare">mxinden/fireflare</a>.</figcaption>
       </div>
     </div>
     <aside class="notes">Both build on HTTP/3. MASQUE is how we want to proxy; the UDP path still needs performance work.</aside>
