@@ -15,7 +15,9 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
-    .reveal .interfere { display: flex; gap: 60px; margin-top: 2.2em; }
+    .reveal .interfere { display: flex; gap: 44px; margin-top: 2.2em; }
+    .reveal .interfere .side:first-child { flex: 0.92; }
+    .reveal .interfere .side:last-child { flex: 1.08; }
     .reveal .interfere .side { flex: 1; }
     .reveal .interfere .sh { font-size: 0.5em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); border-bottom: 2px solid var(--hairline); padding-bottom: 8px; margin-bottom: 18px; }
     .reveal .interfere .rows { display: grid; grid-template-columns: auto auto 1fr; gap: 42px 16px; align-items: baseline; font-size: 0.8em; }
@@ -187,7 +189,7 @@
       </div></div>
       <div class="side"><div class="sh">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div><div class="rows">
         <div class="q">Black holes</div><div class="ar">&rarr;</div><div class="r">Happy Eyeballs</div>
-        <div class="q">&ldquo;Security&rdquo; software</div><div class="ar">&rarr;</div><div class="r">Fall back to HTTP/2</div>
+        <div class="q">&ldquo;Security&rdquo; software</div><div class="ar">&rarr;</div><div class="r">Fallback to alternative protocols</div>
         <div class="vend">
           <span class="vn">Avast</span><span class="vd">crashed neqo with a bogus ACK</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>
           <span class="vn">Bitdefender</span><span class="vd">broke Facebook</span><a class="vb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>
