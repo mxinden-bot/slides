@@ -17,20 +17,11 @@
     .reveal .topic li { margin-bottom: 0.35em; }
     .reveal ul.tight { font-size: 0.66em; margin-bottom: 0.4em; }
     .reveal ul.tight li { margin-bottom: 0.2em; }
-    .reveal .conn { display: flex; gap: 22px; align-items: stretch; justify-content: center; margin-top: 0.5em; }
-    .reveal .conn .grp { display: flex; flex-direction: column; align-items: stretch; }
-    .reveal .conn .gh { font-size: 0.42em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); text-align: center; border-bottom: 1px solid var(--hairline); padding-bottom: 4px; margin-bottom: 6px; }
-    .reveal .conn .cols3 { flex: 1; display: flex; gap: 8px; align-items: flex-end; }
-    .reveal .conn .col { width: 158px; display: flex; flex-direction: column; }
-    .reveal .conn .hd { font-size: 0.46em; font-weight: 700; text-align: center; color: var(--ink); }
-    .reveal .conn .tag { font-size: 0.36em; font-weight: 700; text-align: center; color: var(--accent); min-height: 1.4em; }
-    .reveal .conn .stack { display: flex; flex-direction: column; gap: 3px; }
-    .reveal .l { font-size: 0.44em; font-weight: 600; text-align: center; padding: 6px 4px; border-radius: 6px; border: 1.5px solid; }
-    .reveal .l.e2e { background: rgba(0,96,223,0.12); border-color: rgba(0,96,223,0.32); color: #0a4aa0; }
-    .reveal .l.tun { background: rgba(230,96,0,0.14); border-color: rgba(230,96,0,0.45); color: #a5430b; }
-    .reveal .l.px { background: var(--surface-2); border-color: var(--hairline); color: var(--ink-muted); }
-    .reveal .legend { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
-    .reveal .legend .l { padding: 3px 10px; }
+    .reveal .menu { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 0.6em; }
+    .reveal .menu .mcol { display: flex; flex-direction: column; gap: 8px; width: 230px; }
+    .reveal .menu .mh { font-size: 0.42em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); text-align: center; margin-bottom: 2px; }
+    .reveal .menu .opt { font-size: 0.56em; font-weight: 700; text-align: center; padding: 8px 6px; border-radius: 8px; background: rgba(0,96,223,0.10); border: 1.5px solid rgba(0,96,223,0.30); color: #0a4aa0; }
+    .reveal .menu .x { font-size: 1.2em; font-weight: 700; color: var(--accent); }
     .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.66em; margin-top: 0.2em; }
     .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.45em 0.7em; text-align: left; vertical-align: top; }
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
@@ -148,23 +139,17 @@
       <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
       <li><strong>MASQUE</strong>: proxy TCP (<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-connect-tcp/">connect-tcp</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">connect-udp</a>) through HTTP/3. Firefox VPN uses classic <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a> over HTTP/2 today (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1978893">bug 1978893</a>).</li>
     </ul>
-    <div class="conn">
-        <div class="grp"><div class="gh">Direct</div><div class="cols3">
-          <div class="col"><div class="hd">HTTP/1.1</div><div class="tag"></div><div class="stack"><div class="l e2e">HTTP/1.1</div><div class="l e2e">TLS</div><div class="l e2e">TCP</div><div class="l e2e">IP</div></div></div>
-          <div class="col"><div class="hd">HTTP/2</div><div class="tag"></div><div class="stack"><div class="l e2e">HTTP/2</div><div class="l e2e">TLS</div><div class="l e2e">TCP</div><div class="l e2e">IP</div></div></div>
-          <div class="col"><div class="hd">HTTP/3</div><div class="tag"></div><div class="stack"><div class="l e2e">HTTP/3</div><div class="l e2e">QUIC</div><div class="l e2e">UDP</div><div class="l e2e">IP</div></div></div>
-        </div></div>
-        <div class="grp"><div class="gh">CONNECT, through a proxy</div><div class="cols3">
-          <div class="col"><div class="hd">over HTTP/2</div><div class="tag">Firefox VPN today</div><div class="stack"><div class="l e2e">HTTP/1.1 or 2</div><div class="l e2e">TLS</div><div class="l tun">CONNECT</div><div class="l px">HTTP/2</div><div class="l px">TLS</div><div class="l px">TCP</div><div class="l px">IP</div></div></div>
-          <div class="col"><div class="hd">over HTTP/3</div><div class="tag"></div><div class="stack"><div class="l e2e">HTTP/1.1 or 2</div><div class="l e2e">TLS</div><div class="l tun">CONNECT</div><div class="l px">HTTP/3</div><div class="l px">QUIC</div><div class="l px">UDP</div><div class="l px">IP</div></div></div>
-        </div></div>
-        <div class="grp"><div class="gh">MASQUE, through a proxy</div><div class="cols3">
-          <div class="col"><div class="hd">connect-tcp</div><div class="tag">draft, not in Firefox</div><div class="stack"><div class="l e2e">HTTP/1.1 or 2</div><div class="l e2e">TLS</div><div class="l tun">connect-tcp</div><div class="l px">HTTP/3</div><div class="l px">QUIC</div><div class="l px">UDP</div><div class="l px">IP</div></div></div>
-          <div class="col"><div class="hd">connect-udp</div><div class="tag">in progress</div><div class="stack"><div class="l e2e">HTTP/3</div><div class="l e2e">QUIC</div><div class="l tun">connect-udp</div><div class="l px">HTTP/3</div><div class="l px">QUIC</div><div class="l px">UDP</div><div class="l px">IP</div></div></div>
-        </div></div>
+    <div class="menu">
+      <div class="mcol"><div class="mh">To the site</div><div class="opt">HTTP/1.1</div><div class="opt">HTTP/2</div><div class="opt">HTTP/3</div></div>
+      <div class="x">&times;</div>
+      <div class="mcol"><div class="mh">Path</div><div class="opt">direct</div><div class="opt">CONNECT</div><div class="opt">MASQUE TCP</div><div class="opt">MASQUE UDP</div></div>
+      <div class="x">&times;</div>
+      <div class="mcol"><div class="mh">To the proxy</div><div class="opt">HTTP/1.1</div><div class="opt">HTTP/2</div><div class="opt">HTTP/3</div></div>
+      <div class="x">&times;</div>
+      <div class="mcol"><div class="mh">Network</div><div class="opt">IPv4</div><div class="opt">IPv6</div></div>
     </div>
-    <div class="legend"><span class="l e2e">with the origin</span><span class="l tun">tunnel</span><span class="l px">with the proxy</span></div>
-    <aside class="notes">Both build on HTTP/3. The diagram: how Firefox can reach a site, directly or through a proxy. Firefox VPN uses CONNECT over HTTP/2 today; MASQUE connect-udp brings HTTP/3 end to end.</aside>
+    <p class="small muted center" style="margin-top:0.6em;">Firefox VPN today: CONNECT over HTTP/2. Next: HTTP/3 end to end through MASQUE.</p>
+    <aside class="notes">Both build on HTTP/3. One page load, many ways to get there: pick one from each column. Firefox VPN uses CONNECT over HTTP/2 today; MASQUE brings HTTP/3 end to end.</aside>
   </section>
 
   <!-- 7. Robustness -->
