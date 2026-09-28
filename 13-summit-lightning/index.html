@@ -15,7 +15,6 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
-    .reveal .loop { font-family: var(--font-mono, monospace); font-size: 0.62em; color: var(--accent); font-weight: 700; margin-top: 0.8em; }
     .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.74em; margin-top: 0.2em; }
     .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.45em 0.7em; text-align: left; vertical-align: top; }
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; letter-spacing: 0.02em; }
@@ -33,22 +32,25 @@
     <span class="venue">Mozilla Engineering Summit &middot; Lightning talk &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a>, Firefox networking team (aka Necko)</span>
   </section>
 
-  <!-- 2. Thin waist -->
+  <!-- 2. HTTP everywhere -->
   <section class="topic">
-    <h2>G&ouml;del, Escher, HTTP</h2>
+    <h2>HTTP everywhere</h2>
     <div class="cols">
       <div class="col-60">
         <ul>
           <li>HTTP is the <strong>thin waist</strong> of the Internet: consistent, extensible, a strong security model, hard to censor.</li>
-          <li>We keep putting more on top of it: DNS over HTTPS, WebTransport, MASQUE.</li>
-          <li>A <strong>strange loop</strong>: MASQUE carries IP inside HTTP/3, which runs over QUIC, over UDP, over IP.</li>
-          <li><strong>Bootstrapping</strong>: DNS over HTTPS first needs DNS to find its own resolver.</li>
+          <li>More and more runs over it:
+            <ul>
+              <li>DNS: <strong>DNS over HTTPS</strong></li>
+              <li>Web apps&rsquo; own protocols: <strong>WebTransport</strong></li>
+              <li>Proxied TCP and UDP: <strong>MASQUE</strong></li>
+            </ul>
+          </li>
         </ul>
-        <p class="loop">IP &rarr; UDP &rarr; QUIC &rarr; HTTP/3 &rarr; MASQUE &rarr; IP &rarr; &hellip;</p>
       </div>
       <div class="col-40">
         <div class="hourglass">
-          <div class="tier"><div class="box">www</div><div class="box">DNS</div><div class="box">video</div><div class="box">IP</div></div>
+          <div class="tier"><div class="box">www</div><div class="box">DNS</div><div class="box">apps</div><div class="box">proxy</div></div>
           <div class="funnel down"></div>
           <div class="tier"><div class="box waist">HTTP</div></div>
           <div class="funnel up"></div>
@@ -57,7 +59,7 @@
         </div>
       </div>
     </div>
-    <aside class="notes">HTTP is the thin waist, and we keep adding to it. It even carries IP, which carries HTTP: a strange loop.</aside>
+    <aside class="notes">HTTP is the thin waist, and we keep putting more on top of it: DNS, web apps, proxying.</aside>
   </section>
 
   <!-- 3. QUIC and HTTP/3 -->
@@ -129,7 +131,7 @@
       <div class="col-40">
         <ul>
           <li><strong>WebTransport</strong>: streams and datagrams for web apps, over HTTP/3. In all major browsers since March 2026; W3C <a href="https://www.w3.org/TR/webtransport/">Candidate Recommendation</a>.</li>
-          <li><strong>MASQUE</strong>: proxy UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>) and IP (<a href="https://datatracker.ietf.org/doc/rfc9484/">RFC 9484</a>) through HTTP/3.</li>
+          <li><strong>MASQUE</strong>: proxy TCP (<a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">CONNECT</a>) and UDP (<a href="https://datatracker.ietf.org/doc/rfc9298/">RFC 9298</a>) through HTTP/3.</li>
         </ul>
       </div>
       <div class="col-60">
