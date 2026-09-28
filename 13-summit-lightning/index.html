@@ -22,6 +22,8 @@
     .reveal .interfere .q { color: var(--ink-muted); white-space: nowrap; }
     .reveal .interfere .ar { color: var(--accent); font-weight: 700; }
     .reveal .interfere .r { color: var(--ink); font-weight: 700; }
+    .reveal .interfere .vend { grid-column: 1 / -1; margin: -18px 0 0 1.1em; padding: 0; font-size: 0.6em; color: var(--ink-muted); }
+    .reveal .interfere .vend li { margin-bottom: 0.25em; }
     .reveal .interfere-src { position: absolute; bottom: 10px; left: 0; right: 80px; font-size: 0.42em; line-height: 1.4; }
   </style>
 </head>
@@ -188,13 +190,18 @@
         <div class="q">IP blocking</div><div class="ar">&rarr;</div><div class="r">Firefox VPN</div>
       </div></div>
       <div class="side"><div class="sh">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div><div class="rows">
-        <div class="q">UDP blocked</div><div class="ar">&rarr;</div><div class="r">Happy Eyeballs</div>
-        <div class="q">Black holes</div><div class="ar">&rarr;</div><div class="r">Detect and recover</div>
+        <div class="q">Black holes</div><div class="ar">&rarr;</div><div class="r">Happy Eyeballs</div>
         <div class="q">&ldquo;Security&rdquo; software</div><div class="ar">&rarr;</div><div class="r">Fall back to HTTP/2</div>
+        <ul class="vend">
+          <li>Avast crashed neqo with a bogus ACK (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a>)</li>
+          <li>Bitdefender broke Facebook (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a>)</li>
+          <li>CrowdStrike dropped crypto frames (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">bug 1990699</a>)</li>
+          <li>Kaspersky sent a bogus TLS alert (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">bug 1990210</a>)</li>
+        </ul>
       </div></div>
     </div>
-    <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>) &middot; &ldquo;security&rdquo; software: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></p>
-    <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Bad networks and "security" software: try all permutations, detect black holes, validate ECN, fall back. Users blame the browser, not the middlebox.</aside>
+    <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
+    <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Black holes: Happy Eyeballs tries all permutations. "Security" software: fall back to HTTP/2. Users blame the browser, not the middlebox.</aside>
   </section>
 
   <!-- 9. Where to find us -->
