@@ -15,14 +15,12 @@
   <style>
     .reveal .topic ul { font-size: 0.8em; }
     .reveal .topic li { margin-bottom: 0.35em; }
-    .reveal .interf { gap: 28px; align-items: stretch; margin-top: 0.4em; }
-    .reveal .interf .card { flex: 1; background: var(--surface-2); border-radius: 12px; padding: 18px 22px; }
-    .reveal .interf h3 { font-size: 0.74em; margin: 0 0 0.5em; color: var(--ink); }
-    .reveal .interf .pair { margin-bottom: 1.1em; }
-    .reveal .interf .prob { font-size: 0.56em; color: var(--ink-muted); margin-bottom: 4px; }
-    .reveal .interf .ans { font-size: 0.68em; color: var(--ink); }
-    .reveal .interf .ans::before { content: "\2192\00a0"; color: var(--accent); font-weight: 700; }
-    .reveal .interf b { color: var(--ink); font-weight: 700; }
+    .reveal .threats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 20px; margin-top: 0.4em; }
+    .reveal .threats .row { grid-column: 1 / -1; font-size: 0.46em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-top: 1.1em; }
+    .reveal .threats .tile { border: 1.5px solid var(--hairline); border-top: 5px solid var(--accent); border-radius: 12px; padding: 18px 22px; min-height: 150px; display: flex; flex-direction: column; }
+    .reveal .threats .p { font-size: 0.74em; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+    .reveal .threats .a { font-size: 0.62em; line-height: 1.3; color: var(--ink-muted); }
+    .reveal .threats .n { font-size: 0.44em; line-height: 1.35; color: var(--ink-faint); margin-top: auto; padding-top: 10px; }
   </style>
 </head>
 <body>
@@ -181,19 +179,15 @@
   <!-- 8. Robustness -->
   <section>
     <h2>When the network interferes</h2>
-    <div class="cols interf">
-      <div class="card">
-        <h3>Censorship</h3>
-          <div class="pair"><div class="prob">Filtering on the server name (SNI)</div><div class="ans"><b>SNI slicing</b> in QUIC (<a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a>) and <b>ECH</b></div></div>
-          <div class="pair"><div class="prob">Tampering with DNS</div><div class="ans"><b>DNS over HTTPS</b> (Valentin&rsquo;s talk)</div></div>
-          <div class="pair"><div class="prob">Blocking by destination IP address</div><div class="ans"><b>Firefox VPN</b> hides the destination from the network</div></div>
-      </div>
-      <div class="card">
-        <h3>Bad networks, antivirus, enterprise &ldquo;security&rdquo;</h3>
-          <div class="pair"><div class="prob">UDP blocked</div><div class="ans"><b>Happy Eyeballs</b> tries all permutations of IPv4 and IPv6, QUIC and TCP</div></div>
-          <div class="pair"><div class="prob">Black holes, e.g. ECN marks stripped on 38% of QUIC paths, ECN-marked packets dropped on 2% (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</div><div class="ans"><b>Black-hole detection</b> (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>) and per-path <b>ECN validation</b></div></div>
-          <div class="pair"><div class="prob">&ldquo;Security&rdquo; software mangles QUIC: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></div><div class="ans"><b>Fall back</b> to HTTP/2</div></div>
-      </div>
+    <div class="threats">
+      <div class="row">Censorship</div>
+      <div class="tile"><div class="p">SNI filtering</div><div class="a">SNI slicing in QUIC, ECH</div><div class="n"><a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a></div></div>
+      <div class="tile"><div class="p">DNS tampering</div><div class="a">DNS over HTTPS</div><div class="n">Valentin&rsquo;s talk</div></div>
+      <div class="tile"><div class="p">IP blocking</div><div class="a">Firefox VPN</div></div>
+      <div class="row">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div>
+      <div class="tile"><div class="p">UDP blocked</div><div class="a">Happy Eyeballs tries all permutations</div></div>
+      <div class="tile"><div class="p">Black holes</div><div class="a">Detect and recover; validate ECN</div><div class="n">e.g. 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>), <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a></div></div>
+      <div class="tile"><div class="p">&ldquo;Security&rdquo; software</div><div class="a">Breaks QUIC: fall back to HTTP/2</div><div class="n"><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">Avast</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">Bitdefender</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990699">CrowdStrike</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1990210">Kaspersky</a></div></div>
     </div>
     <aside class="notes">Censors: SNI slicing and ECH, DoH for DNS, Firefox VPN for the rest. Bad networks and "security" software: try all permutations, detect black holes, validate ECN, fall back. Users blame the browser, not the middlebox.</aside>
   </section>
