@@ -52,7 +52,7 @@
           <li>HTTP is the <strong>thin waist</strong> of the Internet: consistent, extensible, a strong security model, hard to censor.</li>
           <li>More and more protocols move to HTTP:
             <ul>
-              <li>DNS: <strong>DNS over HTTPS</strong></li>
+              <li>DNS: <strong>DNS over HTTP</strong></li>
               <li>Web apps&rsquo; own protocols: <strong>WebTransport</strong></li>
               <li>Proxied TCP and UDP: <strong>MASQUE</strong></li>
             </ul>
@@ -112,13 +112,13 @@
     </div>
   </section>
 
-  <!-- 5. DNS over HTTPS -->
+  <!-- 5. DNS over HTTP -->
   <section class="topic">
-    <h2>DNS over HTTPS</h2>
+    <h2>DNS over HTTP</h2>
     <div class="cols">
       <div class="col-40">
         <ul>
-          <li>DNS queries over an encrypted HTTPS connection: privacy, integrity, censorship resistance.</li>
+          <li>DNS queries over an encrypted HTTP connection: privacy, integrity, censorship resistance.</li>
           <li>DoH hides the lookup, ECH the server name, HTTPS the content.</li>
         </ul>
       </div>
@@ -182,7 +182,7 @@
     <div class="interfere">
       <div class="side"><div class="sh">Censorship</div><div class="rows">
         <div class="q">SNI filtering</div><div class="ar">&rarr;</div><div class="r">ECH, SNI slicing</div>
-        <div class="q">DNS tampering</div><div class="ar">&rarr;</div><div class="r">DNS over HTTPS</div>
+        <div class="q">DNS tampering</div><div class="ar">&rarr;</div><div class="r">DNS over HTTP</div>
         <div class="q">IP blocking</div><div class="ar">&rarr;</div><div class="r">Firefox VPN</div>
       </div></div>
       <div class="side"><div class="sh">Bad networks, antivirus, enterprise &ldquo;security&rdquo;</div><div class="rows">
