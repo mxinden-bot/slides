@@ -121,7 +121,6 @@
           <li>The DNS <strong>HTTPS record</strong> (<a href="https://datatracker.ietf.org/doc/rfc9460/">RFC 9460</a>) can signal HTTP/3 support before the first connection. Alt-Svc signals HTTP/3 on the second connection only.</li>
           <li>It also carries the key for <strong>Encrypted Client Hello</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-tls-esni/">ECH</a>), which hides the server name. ~16% of HTTPS records carry one (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>).</li>
           <li>Check a domain: <a href="https://savearoundtrip.com">savearoundtrip.com</a>.</li>
-          <li>DNS over HTTPS: see <strong>Valentin&rsquo;s talk</strong>.</li>
         </ul>
       </div>
       <div class="col-60">
@@ -198,7 +197,7 @@
         </div>
       </div></div>
     </div>
-    <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; DoH: Valentin&rsquo;s talk &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
+    <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
   </section>
 
   <!-- 9. Where to find us -->
