@@ -112,25 +112,7 @@
     </div>
   </section>
 
-  <!-- 5. HTTPS records and ECH -->
-  <section class="topic">
-    <h2>HTTPS records and ECH</h2>
-    <div class="cols">
-      <div class="col-40">
-        <ul>
-          <li>The DNS <strong>HTTPS record</strong> (<a href="https://datatracker.ietf.org/doc/rfc9460/">RFC 9460</a>) can signal HTTP/3 support before the first connection. Alt-Svc signals HTTP/3 on the second connection only.</li>
-          <li>It also carries the key for <strong>Encrypted Client Hello</strong> (<a href="https://datatracker.ietf.org/doc/draft-ietf-tls-esni/">ECH</a>), which hides the server name. ~16% of HTTPS records carry one (<a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features/explore">GLAM</a>).</li>
-          <li>Check a domain: <a href="https://savearoundtrip.com">savearoundtrip.com</a>.</li>
-        </ul>
-      </div>
-      <div class="col-60">
-        <div class="chart short" id="c-discovery"></div>
-        <figcaption>How a connection learned that HTTP/3 was available, Firefox Nightly. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery/explore">GLAM: netwerk_happy_eyeballs_h3_discovery</a>.</figcaption>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. WebTransport -->
+  <!-- 5. WebTransport -->
   <section class="topic">
     <h2>WebTransport</h2>
     <div class="cols">
@@ -154,7 +136,7 @@
     </div>
   </section>
 
-  <!-- 7. MASQUE -->
+  <!-- 6. MASQUE -->
   <section class="topic">
     <h2>MASQUE</h2>
     <div class="cols">
@@ -177,7 +159,7 @@
     </div>
   </section>
 
-  <!-- 8. Robustness -->
+  <!-- 7. Robustness -->
   <section>
     <h2>Make Firefox networking more robust</h2>
     <div class="interfere">
@@ -200,7 +182,7 @@
     <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
   </section>
 
-  <!-- 9. Where to find us -->
+  <!-- 8. Where to find us -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
     <h2 style="color:#ffffff;">Where to find us</h2>
@@ -241,9 +223,6 @@
     ],
   }));
 
-  Charts.register('c-discovery', (el) => Charts.donut(el, {
-    data: D.discovery, centerValue: '35%', centerLabel: 'Alt-Svc only',
-  }));
 
 
   Reveal.initialize({

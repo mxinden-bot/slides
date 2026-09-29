@@ -20,13 +20,4 @@ window.DECK_DATA = {
     control: [11.45, 16.62, 11.12],
     hev3:    [13.22, 27.93, 12.23],
   },
-
-  // GLAM netwerk_happy_eyeballs_h3_discovery, Firefox Nightly: how a connection
-  // learned that h3 was available (% of connects). Small slices kept apart so labels don't collide.
-  discovery: [
-    { name: 'no h3 advertised', value: 58.2, color: '#8f8f9d' },
-    { name: 'HTTPS record only', value: 2.9, color: '#1baf7a' },
-    { name: 'Alt-Svc only', value: 35.0, color: '#eb6834' },
-    { name: 'both', value: 3.8, color: '#2a78d6' },
-  ],
 };
