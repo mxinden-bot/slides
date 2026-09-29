@@ -20,4 +20,11 @@ window.DECK_DATA = {
     control: [11.45, 16.62, 11.12],
     hev3:    [13.22, 27.93, 12.23],
   },
+
+  // DNS resolution method, Firefox desktop, worldwide, 7-day average on 2026-09-24
+  // (performance.mozilla.org/networking, STMO query 112861).
+  dohShare: [
+    { name: 'DoH', value: 11.65, color: '#2a78d6' },
+    { name: 'native', value: 88.35, color: '#8f8f9d' },
+  ],
 };

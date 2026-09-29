@@ -112,7 +112,25 @@
     </div>
   </section>
 
-  <!-- 5. WebTransport -->
+  <!-- 5. DNS over HTTPS -->
+  <section class="topic">
+    <h2>DNS over HTTPS</h2>
+    <div class="cols">
+      <div class="col-40">
+        <ul>
+          <li>DNS queries over an encrypted HTTPS connection: privacy, integrity, censorship resistance.</li>
+          <li>Moving to HTTP/3: on in Nightly (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2011643">bug 2011643</a>).</li>
+          <li>On the critical path of every page load, so it has to be robust: HTTP/3 black-hole detection (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>).</li>
+        </ul>
+      </div>
+      <div class="col-60">
+        <div class="chart short" id="c-doh"></div>
+        <figcaption>DNS resolution method, Firefox desktop, worldwide, 7-day average, 24 September 2026. Source: <a href="https://performance.mozilla.org/networking.html">performance.mozilla.org/networking</a>.</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. WebTransport -->
   <section class="topic">
     <h2>WebTransport</h2>
     <div class="cols">
@@ -136,7 +154,7 @@
     </div>
   </section>
 
-  <!-- 6. MASQUE -->
+  <!-- 7. MASQUE -->
   <section class="topic">
     <h2>MASQUE</h2>
     <div class="cols">
@@ -159,7 +177,7 @@
     </div>
   </section>
 
-  <!-- 7. Robustness -->
+  <!-- 8. Robustness -->
   <section>
     <h2>Make Firefox networking more robust</h2>
     <div class="interfere">
@@ -182,7 +200,7 @@
     <p class="small muted interfere-src">SNI slicing: <a href="https://github.com/mozilla/neqo/pull/2228">neqo#2228</a> &middot; black holes: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060483">bug 2060483</a>, 38% of QUIC paths strip ECN marks (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_ecn_path_capability/explore">GLAM</a>)</p>
   </section>
 
-  <!-- 8. Where to find us -->
+  <!-- 9. Where to find us -->
   <section class="divider" data-background-color="#20123a">
     <p class="kicker" style="color:#ff9d5c;">Thank you</p>
     <h2 style="color:#ffffff;">Where to find us</h2>
@@ -224,6 +242,10 @@
   }));
 
 
+
+  Charts.register('c-doh', (el) => Charts.donut(el, {
+    data: D.dohShare, centerValue: '12%', centerLabel: 'via DoH',
+  }));
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
