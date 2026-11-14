@@ -18,12 +18,16 @@
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; }
     .reveal .cmp td + td, .reveal .cmp th + th { text-align: right; }
     .reveal .cmp tr.hl td { font-weight: 800; color: var(--ink); }
-    .reveal .ground { display: grid; grid-template-columns: auto auto auto auto; gap: 22px 30px; align-items: baseline; font-size: 0.72em; margin-top: 0.8em; }
-    .reveal .ground .gn { font-weight: 800; color: var(--ink); white-space: nowrap; }
-    .reveal .ground .gd { color: var(--ink-muted); }
-    .reveal .ground .gb { white-space: nowrap; }
-    .reveal .ground .gs { font-size: 0.8em; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
-    .reveal .ground .gs.done { color: var(--good); }
+    .reveal .share { display: flex; height: 64px; border-radius: 8px; overflow: hidden; margin-top: 1.2em; font-size: 0.56em; font-weight: 700; }
+    .reveal .share .seg { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+    .reveal .share .new { background: #2a78d6; color: #fff; }
+    .reveal .share .reuse { background: #e6e6ea; color: var(--ink-muted); }
+    .reveal .ground2 ul { list-style: none; margin-left: 0; font-size: 0.72em; }
+    .reveal .ground2 li { margin-bottom: 0.9em; }
+    .reveal .ground2 .gd { color: var(--ink-muted); }
+    .reveal .ground2 .gb { font-size: 0.8em; margin-left: 4px; }
+    .reveal .ground2 .st { font-size: 0.62em; font-weight: 700; color: var(--ink-faint); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 9px; margin-left: 6px; vertical-align: middle; }
+    .reveal .ground2 .st.done { color: var(--good); border-color: rgba(1,122,61,0.35); }
   </style>
 </head>
 <body>
@@ -45,7 +49,6 @@
       <li><strong>Beta</strong>: 75% Happy Eyeballs v3, 25% control.</li>
       <li><strong>Release</strong>: rolled out to 50%.</li>
       <li><strong>Release experiment</strong>, Firefox 160: 5% Happy Eyeballs v3, 5% control.</li>
-      <li>The Connection Attempt Delay Multiplier, proposed by Firefox at IETF 126, is in <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-05</a> (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
       <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: 0.11.0, 1.0.0, 1.1.0, 2.0.0.</li>
     </ul>
   </section>
@@ -53,17 +56,20 @@
   <!-- 3. Delays now in the draft -->
   <section>
     <h2>Firefox&rsquo;s delays are now in the draft</h2>
+    <p class="muted" style="font-size:0.8em;">A reminder from IETF 126, now in <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-05</a>:</p>
     <div class="cols">
       <div>
         <h3>Resolution Delay</h3>
         <ul>
-          <li>Recommended: <strong>25 ms</strong>, was 50 ms (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/148">#148</a>).</li>
+          <li>Firefox reduced it to <strong>25 ms</strong>. The draft now recommends 25 ms too (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/148">#148</a>).</li>
+          <li>More data on the next slide.</li>
         </ul>
       </div>
       <div>
         <h3>Connection Attempt Delay Multiplier</h3>
         <ul>
-          <li>New, optional. A <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier starts attempts at 0, 50, 150, 350 and 750 ms (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
+          <li>Proposed by Firefox at IETF 126: a <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier.</li>
+          <li>Now in the draft (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
         </ul>
       </div>
     </div>
@@ -75,7 +81,6 @@
       <div class="m" style="left:45%;"><div class="dot"></div><div class="t">350</div></div>
       <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
     </div>
-    <p class="small muted">Both proposed from Firefox telemetry at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
   </section>
 
   <!-- 4. DNS answer spread -->
@@ -86,38 +91,34 @@
     <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) in a Happy Eyeballs run, including answers that arrive after connecting started, cumulative share of runs. 53.7% of runs get all answers at once, about 98.6% within 100 ms. Firefox Beta 161 (Release on 24 November 2026), 5 to 13 November 2026, 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a> (<code>until_end</code>).</figcaption>
   </section>
 
-  <!-- RELEASE divider -->
-  <section class="divider" data-background-color="#20123a">
-    <h2 style="color:#ffffff;">Release experiment</h2>
-    <p class="small" style="color:#b3adc4;">Firefox 160, first results.</p>
-  </section>
-
-  <!-- 6. Release setup -->
+  <!-- 5. Release experiment -->
   <section>
-    <h2>Setup</h2>
+    <h2>Release experiment: focus on Firefox 160</h2>
     <ul>
-      <li>Firefox Desktop Release, version 160. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
-      <li>Control: Happy Eyeballs v3 off. Treatment: Happy Eyeballs v3 on.</li>
-      <li>5 to 13 November 2026.</li>
-      <li>Only page loads whose main document opened a <strong>new connection</strong>: about 23% of all page loads. That is where Happy Eyeballs acts.</li>
+      <li>Firefox Desktop Release 160, 5 to 13 November 2026.</li>
+      <li>Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch: Happy Eyeballs v3 on, and off as control.</li>
+      <li>Only page loads whose main document opened a <strong>new connection</strong>. That is where Happy Eyeballs acts.</li>
     </ul>
+    <div class="share">
+      <div class="seg new" style="width:23%">new connection: about 23%</div><div class="seg reuse" style="width:77%">reused connection: about 77% of page loads</div>
+    </div>
   </section>
 
-  <!-- 7. Release HTTP version -->
+  <!-- 6. Release HTTP version -->
   <section>
     <h2>More page loads over HTTP/3</h2>
     <div class="chart short" id="c-rel-version"></div>
-    <figcaption>HTTP version of the main document, page loads on a new connection: 7.7M (control) and 8.0M (HEv3), 1.6% with unknown version excluded. HTTP/3 goes from <strong>19.6% to 24.6%</strong>, mostly taken from HTTP/2. All established connections: 20.5% to 26.2%. All page loads, including reused connections: 17.2% to 19.1%.</figcaption>
+    <figcaption>HTTP version of the main document, page loads on a new connection: 7.7M (control) and 8.0M (HEv3). HTTP/3 goes from <strong>19.6% to 24.6%</strong>, mostly taken from HTTP/2.</figcaption>
   </section>
 
-  <!-- 8. Release FCP -->
+  <!-- 7. Release FCP -->
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
     <div class="chart" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
   </section>
 
-  <!-- 9. Changes since IETF 126 -->
+  <!-- 8. Changes since IETF 126 -->
   <section>
     <h2>Changes since IETF 126</h2>
     <ul>
@@ -127,34 +128,34 @@
     </ul>
   </section>
 
-  <!-- 10. Groundwork -->
+  <!-- 9. Groundwork -->
   <section>
     <h2>Happy Eyeballs is the groundwork</h2>
-    <div class="ground">
-      <span class="gn">Optimistic DNS</span><span class="gd">Race a stale answer, revalidate in parallel</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><span class="gs done">done</span>
-      <span class="gn">Network change</span><span class="gd">Mark DNS cache entries stale instead of deleting them</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><span class="gs proposed">proposed</span>
-      <span class="gn">Persistent DNS cache</span><span class="gd">Keep answers and HTTPS records across restarts</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><span class="gs in-progress">in progress</span>
-      <span class="gn">Optimistic Alt-Svc</span><span class="gd">Reuse an expired HTTP/3 Alt-Svc mapping</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a><span class="gs proposed">proposed</span>
-      <span class="gn">Optimistic HTTP/3</span><span class="gd">Race QUIC with no prior HTTP/3 signal</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1914201">bug 1914201</a><span class="gs proposed">proposed</span>
-      <span class="gn">Proxies</span><span class="gd">Race HTTP/3 against HTTP/2 through the proxy tunnel</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071358">bug 2071358</a><span class="gs proposed">proposed</span>
+    <div class="cols ground2">
+      <div>
+        <h3>DNS</h3>
+        <ul>
+          <li><strong>Optimistic DNS</strong> <span class="st done">done</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><br><span class="gd">Race a stale answer, revalidate in parallel.</span></li>
+          <li><strong>Network change</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><br><span class="gd">Mark DNS cache entries stale instead of deleting them.</span></li>
+          <li><strong>Persistent DNS cache</strong> <span class="st in-progress">in progress</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><br><span class="gd">Keep answers and HTTPS records across restarts.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>HTTP/3</h3>
+        <ul>
+          <li><strong>Optimistic Alt-Svc</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a><br><span class="gd">Reuse an expired HTTP/3 Alt-Svc mapping.</span></li>
+          <li><strong>Optimistic HTTP/3</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1914201">bug 1914201</a><br><span class="gd">Race QUIC with no prior HTTP/3 signal.</span></li>
+          <li><strong>Proxies</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071358">bug 2071358</a><br><span class="gd">Race HTTP/3 against HTTP/2 through the proxy tunnel.</span></li>
+        </ul>
+      </div>
     </div>
   </section>
 
   <!-- Closing -->
   <section class="divider" data-background-color="#20123a">
     <h2 style="color:#ffffff;">Questions?</h2>
-    <p class="small" style="color:#b3adc4;"><a href="https://github.com/mozilla/happy-eyeballs/issues" style="color:#ff9d5c;">github.com/mozilla/happy-eyeballs/issues</a> &middot; <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459" style="color:#ff9d5c;">bug 1953459</a> &middot; <a href="https://max-inden.de/" style="color:#ff9d5c;">max-inden.de</a></p>
-  </section>
-
-  <!-- ================= BACKUP ================= -->
-  <section class="divider" data-background-color="#3a1230">
-    <h2 style="color:#ffffff;">Backup</h2>
-  </section>
-
-  <section>
-    <h2>Release: first contentful paint in milliseconds</h2>
-    <div class="chart" id="c-rel-fcp-abs"></div>
-    <figcaption>First contentful paint, control vs HEv3, Firefox 160 Release, page loads on a new connection. Log scale.</figcaption>
+    <p style="color:#d8d4e2; font-size:0.8em;"><a href="https://github.com/mozilla/happy-eyeballs/issues" style="color:#ff9d5c;">github.com/mozilla/happy-eyeballs/issues</a> &middot; <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459" style="color:#ff9d5c;">bug 1953459</a></p>
+    <p style="color:#d8d4e2; font-size:0.8em;">mail@max-inden.de &middot; necko@mozilla.com</p>
   </section>
 
 </div>
@@ -215,13 +216,6 @@
     x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
     barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
     series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
-  }));
-  Charts.register('c-rel-fcp-abs', (el) => Charts.bar(el, {
-    x: D.release.p, yName: 'FCP (log)', yType: 'log', yMin: 100, yMax: 20000, yFormatter: ms,
-    series: [
-      { name: 'control', data: D.release.control, color: '#8f8f9d' },
-      { name: 'HEv3', data: D.release.hev3, color: '#1baf7a' },
-    ],
   }));
 
   Reveal.initialize({
