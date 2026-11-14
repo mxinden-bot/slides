@@ -80,27 +80,9 @@
 
   <!-- 4. Is 25 ms long enough? -->
   <section>
-    <h2>The 25 ms delay cuts off 0.23% of runs</h2>
-    <div class="chart short" id="c-spread"></div>
-    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, share of Happy Eyeballs runs. Firefox Beta 161, 5 to 13 November 2026, 167M runs. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
-  </section>
-
-  <!-- 5. Spread percentiles -->
-  <section>
-    <h2>Most runs have nothing to wait for</h2>
-    <table class="cmp">
-      <thead><tr><th>Spread before the first attempt</th><th>Beta 161</th></tr></thead>
-      <tbody>
-        <tr><td>Runs with zero spread</td><td>72.7%</td></tr>
-        <tr><td>P50</td><td>0 ms</td></tr>
-        <tr><td>P95</td><td>0.12 ms</td></tr>
-        <tr><td>P99</td><td>7.1 ms</td></tr>
-        <tr><td>P99.9</td><td>43.5 ms</td></tr>
-        <tr class="hl"><td>Runs reaching the 25 ms delay</td><td>0.23%</td></tr>
-      </tbody>
-    </table>
-    <p class="small">In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right and 5% too low.</p>
-    <p class="small muted">5 to 13 November 2026, 69,641 clients, 167M runs. Not yet on Release. Percentiles are histogram bucket lower bounds (buckets about 9% wide), pooled over runs. Values above 25 ms are timers that fired late on a busy machine. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM</a>.</p>
+    <h2>The 25 ms Resolution Delay cuts off 0.23% of runs</h2>
+    <div class="chart" id="c-spread" style="height:500px;"></div>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, cumulative share of Happy Eyeballs runs (dots are measured points). 72.7% of runs get all answers at once, 99% within 7.1 ms. Above 25 ms: timers that fired late on a busy machine. In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right. Firefox Beta 161, 5 to 13 November 2026, 69,641 clients, 167M runs, histogram buckets about 9% wide. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
   </section>
 
   <!-- RELEASE divider -->
@@ -190,17 +172,48 @@
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
   const pct = (v) => v + '%';
 
-  Charts.register('c-spread', (el) => Charts.barH(el, {
-    y: D.spread.x, data: D.spread.pct, xMax: 100, valueFormatter: pct,
-    colors: ['#2a78d6', '#2a78d6', '#2a78d6', '#2a78d6', '#eb6834'],
-  }));
+  Charts.register('c-spread', (el) => {
+    const prev = echarts.getInstanceByDom(el); if (prev) prev.dispose();
+    const c = echarts.init(el, null, { renderer: 'svg' });
+    const css = getComputedStyle(document.documentElement);
+    const v = (n, f) => css.getPropertyValue(n).trim() || f;
+    const INK = v('--ink', '#1c1b22'), MUTED = v('--ink-muted', '#5b5b66'), FAINT = v('--ink-faint', '#8f8f9d'),
+      HAIR = v('--hairline', '#d7d7db'), FONT = v('--font-sans', 'Inter, sans-serif');
+    const lab = (t, col) => ({ show: true, formatter: t, color: col, fontFamily: FONT, fontSize: 18, fontWeight: 700 });
+    c.setOption({
+      animation: false,
+      grid: { left: 8, right: 30, top: 30, bottom: 8, containLabel: true },
+      xAxis: { type: 'value', min: 0, max: 45,
+        axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false }, splitLine: { show: false },
+        axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x + ' ms' } },
+      yAxis: { type: 'value', min: 98, max: 100, interval: 0.5,
+        axisLine: { show: false }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR, type: 'dotted' } },
+        axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x.toFixed(1) + '%' } },
+      series: [{
+        type: 'line', data: D.spreadCdf, showSymbol: true, symbol: 'circle', symbolSize: 7, itemStyle: { color: '#2a78d6' }, clip: true,
+        lineStyle: { color: '#2a78d6', width: 3 },
+        markArea: { silent: true, data: [
+          [{ xAxis: 0, itemStyle: { color: 'rgba(42,120,214,0.08)' },
+             label: Object.assign(lab('99.77% of runs:\nall answers before the delay ends', '#1d5fae'), { position: 'insideBottom', distance: 40 }) },
+           { xAxis: 25 }],
+          [{ xAxis: 25, itemStyle: { color: 'rgba(235,104,52,0.10)' },
+             label: Object.assign(lab('0.23%:\ncut off', '#b4471a'), { position: 'insideBottom', distance: 40 }) },
+           { xAxis: 45 }],
+        ] },
+        markLine: { silent: true, symbol: 'none', data: [{ xAxis: 25 }],
+          lineStyle: { color: '#eb6834', width: 2, type: 'dashed' },
+          label: { formatter: '25 ms Resolution Delay', color: '#b4471a', fontFamily: FONT, fontSize: 15, position: 'end' } },
+      }],
+    });
+    return c;
+  });
   Charts.register('c-rel-version', (el) => Charts.bar(el, {
-    x: ['control', 'HEv3'], yName: '% of page loads on a new connection', yMax: 60,
+    x: D.release.version.x, yName: '% of page loads on a new connection', yMax: 60,
     barLabels: true, barLabelFormatter: (p) => p.value + '%',
     series: [
-      { name: 'HTTP/1.1', data: [D.release.version.control[0], D.release.version.hev3[0]], color: '#c9c9d1' },
-      { name: 'HTTP/2', data: [D.release.version.control[1], D.release.version.hev3[1]], color: '#8f8f9d' },
-      { name: 'HTTP/3', data: [D.release.version.control[2], D.release.version.hev3[2]], color: '#1baf7a' },
+      { name: 'control', data: D.release.version.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.release.version.hev3, color: '#1baf7a' },
     ],
   }));
   Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
