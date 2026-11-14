@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Happy Eyeballs v3 in Firefox: partial rollout report (IETF 127)</title>
+  <title>Happy Eyeballs v3 in Firefox: update since IETF 126 (IETF 127)</title>
   <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
   <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
   <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
@@ -24,14 +24,6 @@
     .reveal .ground .gb { white-space: nowrap; }
     .reveal .ground .gs { font-size: 0.8em; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
     .reveal .ground .gs.done { color: var(--good); }
-    .reveal .sbars { display: flex; flex-direction: column; gap: 28px; margin: 2.2em 0 1.4em; }
-    .reveal .sbrow { display: flex; align-items: center; gap: 18px; }
-    .reveal .sblab { width: 110px; font-size: 0.7em; font-weight: 800; color: var(--ink); text-align: right; }
-    .reveal .sb { flex: 1; display: flex; height: 92px; border-radius: 8px; overflow: hidden; }
-    .reveal .seg { display: flex; align-items: center; justify-content: center; font-size: 0.56em; font-weight: 700; white-space: nowrap; }
-    .reveal .seg.h1 { background: #d7d7db; color: var(--ink-muted); }
-    .reveal .seg.h2 { background: #8f8f9d; color: #fff; }
-    .reveal .seg.h3 { background: #1baf7a; color: #fff; font-size: 0.66em; }
   </style>
 </head>
 <body>
@@ -41,7 +33,7 @@
   <!-- 1. Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Happy Eyeballs v3 in Firefox</h1>
-    <p class="subtitle">Partial rollout report</p>
+    <p class="subtitle">Update since IETF 126: partial rollout</p>
     <span class="venue"><a href="https://datatracker.ietf.org/meeting/127/session/happy">IETF 127 &middot; HAPPY</a> &middot; 16 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
   </section>
 
@@ -50,10 +42,11 @@
     <h2>Since IETF 126</h2>
     <ul>
       <li><strong>Nightly</strong>: on by default.</li>
-      <li><strong>Beta</strong>: A/B experiment, 30 July to 18 August 2026.</li>
-      <li><strong>Release</strong>: rolled out to <strong>50%</strong> of users, plus a 10% A/B experiment on Firefox 160 (5% per branch).</li>
-      <li>The draft adopted Firefox&rsquo;s tuned delays (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/05/">draft-05</a>).</li>
-      <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a> 2.0.0.</li>
+      <li><strong>Beta</strong>: 75% Happy Eyeballs v3, 25% control.</li>
+      <li><strong>Release</strong>: rolled out to 50%.</li>
+      <li><strong>Release experiment</strong>, Firefox 160: 5% Happy Eyeballs v3, 5% control.</li>
+      <li>The Connection Attempt Delay Multiplier, proposed by Firefox at IETF 126, is in <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-05</a> (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
+      <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: 0.11.0, 1.0.0, 1.1.0, 2.0.0.</li>
     </ul>
   </section>
 
@@ -64,13 +57,13 @@
       <div>
         <h3>Resolution Delay</h3>
         <ul>
-          <li>Recommended: <strong>25 ms</strong> (was 50 ms).</li>
+          <li>Recommended: <strong>25 ms</strong>, was 50 ms (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/148">#148</a>).</li>
         </ul>
       </div>
       <div>
         <h3>Connection Attempt Delay Multiplier</h3>
         <ul>
-          <li>Optional. A <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier starts attempts at 0, 50, 150, 350 and 750 ms.</li>
+          <li>New, optional. A <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier starts attempts at 0, 50, 150, 350 and 750 ms (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
         </ul>
       </div>
     </div>
@@ -82,63 +75,32 @@
       <div class="m" style="left:45%;"><div class="dot"></div><div class="t">350</div></div>
       <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
     </div>
-    <p class="small muted">Both from Firefox telemetry, presented at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
+    <p class="small muted">Both proposed from Firefox telemetry at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
   </section>
 
-  <!-- 3b. Is 25 ms long enough? -->
+  <!-- 4. Is 25 ms long enough? -->
   <section>
     <h2>The 25 ms delay cuts off 0.23% of runs</h2>
     <div class="chart short" id="c-spread"></div>
-    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, runs per histogram bucket (lower bound in ms), Firefox Nightly 162, 5 to 13 November 2026, 395M runs. Counts fall about 3&times; after the bucket holding 25 ms: the delay ends the wait. Bars above it are timers that fired late on a busy machine. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, share of Happy Eyeballs runs. Firefox Beta 161, 5 to 13 November 2026, 167M runs. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
   </section>
 
-  <!-- 3c. Spread percentiles -->
+  <!-- 5. Spread percentiles -->
   <section>
     <h2>Most runs have nothing to wait for</h2>
     <table class="cmp">
-      <thead><tr><th>Spread before the first attempt</th><th>Nightly 162</th><th>Beta 161</th></tr></thead>
+      <thead><tr><th>Spread before the first attempt</th><th>Beta 161</th></tr></thead>
       <tbody>
-        <tr><td>Runs with zero spread</td><td>70.4%</td><td>72.7%</td></tr>
-        <tr><td>P50</td><td>0 ms</td><td>0 ms</td></tr>
-        <tr><td>P95</td><td>0.22 ms</td><td>0.12 ms</td></tr>
-        <tr><td>P99</td><td>10.0 ms</td><td>7.1 ms</td></tr>
-        <tr><td>P99.9</td><td>36.6 ms</td><td>43.5 ms</td></tr>
-        <tr class="hl"><td>Runs reaching the 25 ms delay</td><td>0.23%</td><td>0.23%</td></tr>
+        <tr><td>Runs with zero spread</td><td>72.7%</td></tr>
+        <tr><td>P50</td><td>0 ms</td></tr>
+        <tr><td>P95</td><td>0.12 ms</td></tr>
+        <tr><td>P99</td><td>7.1 ms</td></tr>
+        <tr><td>P99.9</td><td>43.5 ms</td></tr>
+        <tr class="hl"><td>Runs reaching the 25 ms delay</td><td>0.23%</td></tr>
       </tbody>
     </table>
-    <p class="small">In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right and 5% too low. Nightly and Beta agree.</p>
-    <p class="small muted">5 to 13 November 2026: Nightly 43,833 clients, 395M runs; Beta 69,641 clients, 167M runs. Not yet on Release. Percentiles are histogram bucket lower bounds (buckets about 9% wide), pooled over runs. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM</a>.</p>
-  </section>
-
-  <!-- 4. Library -->
-  <section>
-    <h2>A reusable library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a></h2>
-    <ul>
-      <li>Rust, deterministic, sans-I/O: no network, no clock. The caller drives the I/O and passes time in.</li>
-      <li>Every scenario is a plain unit test.</li>
-      <li>Version 2.0.0, 3 November 2026.</li>
-      <li>New: an HTTPS record with an IP hint for the preferred family counts as that family&rsquo;s answer, so the race starts without waiting for AAAA (<a href="https://github.com/mozilla/happy-eyeballs/pull/153">#153</a>, per draft &sect;4.2.1).</li>
-    </ul>
-  </section>
-
-  <!-- BETA divider -->
-  <section class="divider" data-background-color="#20123a">
-    <h2 style="color:#ffffff;">Beta experiment</h2>
-    <p class="small" style="color:#b3adc4;">Firefox Desktop Beta, 30 July to 18 August 2026, control vs HEv3, about 46M successful runs a day.</p>
-  </section>
-
-  <!-- 5. Beta HTTP/3 -->
-  <section>
-    <h2>More page loads over HTTP/3</h2>
-    <div class="chart" id="c-beta-h3"></div>
-    <figcaption>Share of page loads over HTTP/3, control vs HEv3, by DoH segment. With DoH: <strong>16.6% to 27.9%</strong>. Without DoH: 11.1% to 12.2%.</figcaption>
-  </section>
-
-  <!-- 6. Beta TTRS -->
-  <section>
-    <h2>Faster time to request start, with DoH</h2>
-    <div class="chart" id="c-beta-ttrs"></div>
-    <figcaption>navigationStart to requestStart (DNS plus connection setup), HEv3 change vs control, by DoH segment. Below zero is faster. With DoH, P99 goes from 2770 ms to 2168 ms. Without DoH it is flat.</figcaption>
+    <p class="small">In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right and 5% too low.</p>
+    <p class="small muted">5 to 13 November 2026, 69,641 clients, 167M runs. Not yet on Release. Percentiles are histogram bucket lower bounds (buckets about 9% wide), pooled over runs. Values above 25 ms are timers that fired late on a busy machine. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM</a>.</p>
   </section>
 
   <!-- RELEASE divider -->
@@ -147,53 +109,44 @@
     <p class="small" style="color:#b3adc4;">Firefox 160, first results.</p>
   </section>
 
-  <!-- 7. Release setup -->
+  <!-- 6. Release setup -->
   <section>
     <h2>Setup</h2>
     <ul>
-      <li>Firefox Desktop Release, version 160, next to the 50% rollout. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
+      <li>Firefox Desktop Release, version 160. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
       <li>Control: Happy Eyeballs v3 off. Treatment: Happy Eyeballs v3 on.</li>
-      <li>The treatment also doubles the DNS cache (1600 to 3200 entries), so results show both changes together.</li>
-      <li>Page loads from 5 to 13 November 2026 whose main document opened a <strong>new connection</strong>: about 23% of all page loads, 5.2M (control) and 5.4M (HEv3).</li>
+      <li>5 to 13 November 2026.</li>
+      <li>Only page loads whose main document opened a <strong>new connection</strong>: about 23% of all page loads. That is where Happy Eyeballs acts.</li>
     </ul>
   </section>
 
-  <!-- 7b. Release HTTP/3 share -->
+  <!-- 7. Release HTTP version -->
   <section>
-    <h2>More HTTP/3: 19.6% to 24.6% on new connections</h2>
-    <div class="sbars">
-      <div class="sbrow"><div class="sblab">control</div><div class="sb">
-        <div class="seg h1" style="width:26.7%">HTTP/1.1 26.7%</div><div class="seg h2" style="width:53.8%">HTTP/2 53.8%</div><div class="seg h3" style="width:19.6%">HTTP/3 19.6%</div>
-      </div></div>
-      <div class="sbrow"><div class="sblab">HEv3</div><div class="sb">
-        <div class="seg h1" style="width:25.8%">HTTP/1.1 25.8%</div><div class="seg h2" style="width:49.7%">HTTP/2 49.7%</div><div class="seg h3" style="width:24.6%">HTTP/3 24.6%</div>
-      </div></div>
-    </div>
-    <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 160 Release, 5 to 13 November 2026: 7.7M (control) and 8.0M (HEv3) page loads, 1.6% with unknown version excluded. The gain comes from HTTP/2. All established connections: HTTP/3 20.5% to 26.2%. All page loads, including reused connections: 17.2% to 19.1%.</figcaption>
+    <h2>More page loads over HTTP/3</h2>
+    <div class="chart short" id="c-rel-version"></div>
+    <figcaption>HTTP version of the main document, page loads on a new connection: 7.7M (control) and 8.0M (HEv3), 1.6% with unknown version excluded. HTTP/3 goes from <strong>19.6% to 24.6%</strong>, mostly taken from HTTP/2. All established connections: 20.5% to 26.2%. All page loads, including reused connections: 17.2% to 19.1%.</figcaption>
   </section>
 
   <!-- 8. Release FCP -->
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
     <div class="chart" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
+    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
   </section>
 
-  <!-- 9. Stale and negative DNS answers -->
+  <!-- 9. Changes since IETF 126 -->
   <section>
-    <h2>Stale and negative DNS answers</h2>
+    <h2>Changes since IETF 126</h2>
     <ul>
-      <li>Firefox serves DNS answers from a cache entry&rsquo;s grace period (stale-while-revalidate). Happy Eyeballs now races a stale answer right away, revalidates with a lookup that bypasses the cache, and races the fresh answer too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
-      <li>Negative answers from the stale cache were treated as fresh, so they were never revalidated (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>).</li>
-      <li>Negative answers now get the same grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>) and a 300 s cache lifetime on all channels (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>).</li>
+      <li>An HTTPS record with an IP hint for the preferred family counts as that family&rsquo;s answer, so the race starts without waiting for AAAA (<a href="https://github.com/mozilla/happy-eyeballs/pull/153">happy-eyeballs#153</a>, draft &sect;4.2.1).</li>
+      <li>Firefox implements <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">Optimistic DNS</a>: race a stale answer right away, revalidate with a lookup that bypasses the cache, and race the fresh answer too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
+      <li>Stale negative answers are revalidated too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>). They get the same grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>) and a 300 s cache lifetime (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>).</li>
     </ul>
-    <p class="small muted">Similar to <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">draft-gakiwate-dnsop-optimistic-dns</a>.</p>
   </section>
 
   <!-- 10. Groundwork -->
   <section>
     <h2>Happy Eyeballs is the groundwork</h2>
-    <p style="font-size:0.8em;">A wrong guess now costs a short delay, not a failed connection. So Firefox can guess more:</p>
     <div class="ground">
       <span class="gn">Optimistic DNS</span><span class="gd">Race a stale answer, revalidate in parallel</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><span class="gs done">done</span>
       <span class="gn">Network change</span><span class="gd">Mark DNS cache entries stale instead of deleting them</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><span class="gs proposed">proposed</span>
@@ -235,24 +188,23 @@
 <script>
   const D = window.DECK_DATA;
   const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+  const pct = (v) => v + '%';
 
-  Charts.register('c-beta-h3', (el) => Charts.bar(el, {
-    x: D.beta.h3.x, yName: '% of page loads', yMax: 30,
+  Charts.register('c-spread', (el) => Charts.barH(el, {
+    y: D.spread.x, data: D.spread.pct, xMax: 100, valueFormatter: pct,
+    colors: ['#2a78d6', '#2a78d6', '#2a78d6', '#2a78d6', '#eb6834'],
+  }));
+  Charts.register('c-rel-version', (el) => Charts.bar(el, {
+    x: ['control', 'HEv3'], yName: '% of page loads on a new connection', yMax: 60,
     barLabels: true, barLabelFormatter: (p) => p.value + '%',
     series: [
-      { name: 'control', data: D.beta.h3.control, color: '#8f8f9d' },
-      { name: 'HEv3', data: D.beta.h3.hev3, color: '#1baf7a' },
-    ],
-  }));
-  Charts.register('c-beta-ttrs', (el) => Charts.bar(el, {
-    x: D.beta.ttrs.p, yName: '% change vs control', yMin: -24, yMax: 12, refLine: 0, refLineLabel: 'control',
-    series: [
-      { name: 'DoH enabled', data: D.beta.ttrs.doh, color: '#2a78d6' },
-      { name: 'DoH disabled', data: D.beta.ttrs.nodoh, color: '#8f8f9d' },
+      { name: 'HTTP/1.1', data: [D.release.version.control[0], D.release.version.hev3[0]], color: '#c9c9d1' },
+      { name: 'HTTP/2', data: [D.release.version.control[1], D.release.version.hev3[1]], color: '#8f8f9d' },
+      { name: 'HTTP/3', data: [D.release.version.control[2], D.release.version.hev3[2]], color: '#1baf7a' },
     ],
   }));
   Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
-    x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: (v) => v + '%',
+    x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
     barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
     series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
   }));
@@ -262,12 +214,6 @@
       { name: 'control', data: D.release.control, color: '#8f8f9d' },
       { name: 'HEv3', data: D.release.hev3, color: '#1baf7a' },
     ],
-  }));
-
-  Charts.register('c-spread', (el) => Charts.bar(el, {
-    x: D.spread.bucket, yName: 'runs (Nightly)', yFormatter: (v) => (v / 1000) + 'k',
-    series: [{ name: 'runs', data: D.spread.nightly.map((v, i) => ({
-      value: v, itemStyle: { color: i < 7 ? '#2a78d6' : '#8f8f9d' } })) }],
   }));
 
   Reveal.initialize({
