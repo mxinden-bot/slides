@@ -60,13 +60,12 @@
         <h3>Resolution Delay</h3>
         <ul>
           <li><strong>25 ms</strong> in Firefox and in <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-05</a> (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/148">#148</a>).</li>
-          <li>More data on the next slide.</li>
         </ul>
       </div>
       <div>
         <h3>Connection Attempt Delay Multiplier</h3>
         <ul>
-          <li>Proposed by Firefox at IETF 126: a <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier.</li>
+          <li>A <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier.</li>
           <li>Now in the draft (<a href="https://github.com/ietf-wg-happy/draft-happy-eyeballs-v3/pull/143">#143</a>).</li>
         </ul>
       </div>
@@ -91,11 +90,11 @@
 
   <!-- 5. Release experiment -->
   <section>
-    <h2>Release experiment: focus on Firefox 160</h2>
+    <h2>Release experiment</h2>
     <ul>
-      <li>Firefox Desktop Release 160, 5 to 13 November 2026.</li>
-      <li>Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch: Happy Eyeballs v3 on, and off as control.</li>
-      <li>Only page loads whose main document opened a <strong>new connection</strong>. That is where Happy Eyeballs acts.</li>
+      <li>Focus on Firefox 160, Desktop Release, 5 to 13 November 2026.</li>
+      <li>Two branches, <strong>5% of users each</strong>, about 1.17M Firefox 160 clients per branch: Happy Eyeballs v3 on, and off as control.</li>
+      <li>Only page loads whose main document opened a <strong>new connection</strong>, the ones relevant to Happy Eyeballs.</li>
     </ul>
     <div class="share">
       <div class="seg new" style="width:23%">new connection: about 23%</div><div class="seg reuse" style="width:77%">reused connection: about 77% of page loads</div>
@@ -122,7 +121,7 @@
     <ul>
       <li>An HTTPS record with an IP hint for the preferred family counts as that family&rsquo;s answer, so the race starts without waiting for AAAA (<a href="https://github.com/mozilla/happy-eyeballs/pull/153">happy-eyeballs#153</a>, draft &sect;4.2.1).</li>
       <li>Firefox implements <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">Optimistic DNS</a>: race a stale answer right away, revalidate with a lookup that bypasses the cache, and race the fresh answer too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
-      <li>Stale negative answers are revalidated too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>). They get the same grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>) and a 300 s cache lifetime (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>).</li>
+      <li>Stale negative answers are revalidated too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>). They get a 300 s cache lifetime (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>) and the same 600 s grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>).</li>
     </ul>
   </section>
 
@@ -135,7 +134,7 @@
         <ul>
           <li><strong>Optimistic DNS</strong> <span class="st done">done</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><br><span class="gd">Race a stale answer, revalidate in parallel.</span></li>
           <li><strong>Network change</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><br><span class="gd">Mark DNS cache entries stale instead of deleting them.</span></li>
-          <li><strong>Persistent DNS cache</strong> <span class="st in-progress">in progress</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><br><span class="gd">Keep answers and HTTPS records across restarts.</span></li>
+          <li><strong>Persistent DNS cache</strong> <span class="st proposed">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><br><span class="gd">Keep answers and HTTPS records across restarts.</span></li>
         </ul>
       </div>
       <div>
