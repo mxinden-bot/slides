@@ -83,7 +83,7 @@
     <h2>Happy Eyeballs DNS Resolution Delay</h2>
     <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">25 ms cuts off 0.23% of runs.</p>
     <div class="chart" id="c-spread" style="height:450px;"></div>
-    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, cumulative share of Happy Eyeballs runs (dots are measured points). 72.7% of runs get all answers at once, 99% within 7.1 ms. Above 25 ms: timers that fired late on a busy machine. In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right. Firefox Beta 161, 5 to 13 November 2026, 69,641 clients, 167M runs, histogram buckets about 9% wide. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, cumulative share of Happy Eyeballs runs. 72.7% of runs get all answers at once, 97.5% within 1 ms, 99% within 7.1 ms. Above 25 ms: timers that fired late on a busy machine. In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right. Firefox Beta 161, 5 to 13 November 2026, 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
   </section>
 
   <!-- RELEASE divider -->
@@ -184,15 +184,15 @@
     c.setOption({
       animation: false,
       grid: { left: 8, right: 30, top: 30, bottom: 8, containLabel: true },
-      xAxis: { type: 'value', min: 0, max: 45,
+      xAxis: { type: 'value', min: 0, max: 50,
         axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false }, splitLine: { show: false },
         axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x + ' ms' } },
-      yAxis: { type: 'value', min: 98, max: 100, interval: 0.5,
+      yAxis: { type: 'value', min: 97, max: 100, interval: 0.5,
         axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { color: HAIR, type: 'dotted' } },
         axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x.toFixed(1) + '%' } },
       series: [{
-        type: 'line', data: D.spreadCdf, showSymbol: true, symbol: 'circle', symbolSize: 7, itemStyle: { color: '#2a78d6' }, clip: true,
+        type: 'line', data: D.spreadCdf, showSymbol: false, clip: true,
         lineStyle: { color: '#2a78d6', width: 3 },
         markArea: { silent: true, data: [
           [{ xAxis: 0, itemStyle: { color: 'rgba(42,120,214,0.08)' },
@@ -200,7 +200,7 @@
            { xAxis: 25 }],
           [{ xAxis: 25, itemStyle: { color: 'rgba(235,104,52,0.10)' },
              label: Object.assign(lab('0.23%:\ncut off', '#b4471a'), { position: 'insideBottom', distance: 40 }) },
-           { xAxis: 45 }],
+           { xAxis: 50 }],
         ] },
         markLine: { silent: true, symbol: 'none', data: [{ xAxis: 25 }],
           lineStyle: { color: '#eb6834', width: 2, type: 'dashed' },
