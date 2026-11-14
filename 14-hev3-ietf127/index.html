@@ -30,7 +30,7 @@
     <ul>
       <li><strong>Nightly</strong>: on by default.</li>
       <li><strong>Beta</strong>: A/B experiment, 30 July to 18 August 2026.</li>
-      <li><strong>Release</strong>: A/B experiment on Firefox 160, 5% of users per branch.</li>
+      <li><strong>Release</strong>: rolled out to <strong>50%</strong> of users, plus a 10% A/B experiment on Firefox 160 (5% per branch).</li>
       <li>The draft adopted Firefox&rsquo;s tuned delays (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/05/">draft-05</a>).</li>
       <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a> 2.0.0.</li>
     </ul>
@@ -105,7 +105,7 @@
   <section>
     <h2>Setup</h2>
     <ul>
-      <li>Firefox Desktop Release, version 160. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
+      <li>Firefox Desktop Release, version 160, next to the 50% rollout. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
       <li>Control: Happy Eyeballs v3 off. Treatment: Happy Eyeballs v3 on.</li>
       <li>The treatment also doubles the DNS cache (1600 to 3200 entries), so results show both changes together.</li>
       <li>Page loads from 5 to 13 November 2026 whose main document opened a <strong>new connection</strong>: about 23% of all page loads, 5.2M (control) and 5.4M (HEv3).</li>
@@ -135,7 +135,6 @@
   <section>
     <h2>Next</h2>
     <ul>
-      <li>Grow the Release rollout beyond 5%.</li>
       <li>Separate the effect of Happy Eyeballs v3 from the larger DNS cache.</li>
       <li><strong>Optimistic Alt-Svc</strong>: reuse an expired <code>Alt-Svc: h3</code> mapping and race HTTP/3 on the next visit (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a>).</li>
     </ul>
