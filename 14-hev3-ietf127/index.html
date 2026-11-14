@@ -18,6 +18,12 @@
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; }
     .reveal .cmp td + td, .reveal .cmp th + th { text-align: right; }
     .reveal .cmp tr.hl td { font-weight: 800; color: var(--ink); }
+    .reveal .ground { display: grid; grid-template-columns: auto auto auto auto; gap: 22px 30px; align-items: baseline; font-size: 0.72em; margin-top: 0.8em; }
+    .reveal .ground .gn { font-weight: 800; color: var(--ink); white-space: nowrap; }
+    .reveal .ground .gd { color: var(--ink-muted); }
+    .reveal .ground .gb { white-space: nowrap; }
+    .reveal .ground .gs { font-size: 0.8em; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
+    .reveal .ground .gs.done { color: var(--good); }
   </style>
 </head>
 <body>
@@ -162,13 +168,19 @@
     <p class="small muted">Similar to <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">draft-gakiwate-dnsop-optimistic-dns</a>.</p>
   </section>
 
-  <!-- 10. Next -->
+  <!-- 10. Groundwork -->
   <section>
-    <h2>Next</h2>
-    <ul>
-      <li>Separate the effect of Happy Eyeballs v3 from the larger DNS cache.</li>
-      <li><strong>Optimistic Alt-Svc</strong>: reuse an expired <code>Alt-Svc: h3</code> mapping and race HTTP/3 on the next visit (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a>).</li>
-    </ul>
+    <h2>Happy Eyeballs is the groundwork</h2>
+    <p style="font-size:0.8em;">A wrong guess now costs a short delay, not a failed connection. So Firefox can guess more:</p>
+    <div class="ground">
+      <span class="gn">Optimistic DNS</span><span class="gd">Race a stale answer, revalidate in parallel</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><span class="gs done">done</span>
+      <span class="gn">Network change</span><span class="gd">Mark DNS cache entries stale instead of deleting them</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><span class="gs proposed">proposed</span>
+      <span class="gn">Persistent DNS cache</span><span class="gd">Keep answers and HTTPS records across restarts</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><span class="gs in-progress">in progress</span>
+      <span class="gn">Optimistic Alt-Svc</span><span class="gd">Reuse an expired HTTP/3 Alt-Svc mapping</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a><span class="gs proposed">proposed</span>
+      <span class="gn">Optimistic HTTP/3</span><span class="gd">Race QUIC with no prior HTTP/3 signal</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1914201">bug 1914201</a><span class="gs proposed">proposed</span>
+      <span class="gn">DoH and OS resolver</span><span class="gd">Race the OS resolver after a DoH head start</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2065049">bug 2065049</a><span class="gs proposed">proposed</span>
+      <span class="gn">Proxies</span><span class="gd">Race HTTP/3 against HTTP/2 through the proxy tunnel</span><a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071358">bug 2071358</a><span class="gs proposed">proposed</span>
+    </div>
   </section>
 
   <!-- Closing -->
