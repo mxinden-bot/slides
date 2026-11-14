@@ -78,12 +78,12 @@
     <p class="small muted">Both proposed from Firefox telemetry at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
   </section>
 
-  <!-- 4. Is 25 ms long enough? -->
+  <!-- 4. DNS answer spread -->
   <section>
     <h2>Happy Eyeballs DNS Resolution Delay</h2>
-    <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">25 ms cuts off 0.23% of runs.</p>
+    <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">About 92% of runs get all DNS answers within 25 ms of the first.</p>
     <div class="chart" id="c-spread" style="height:450px;"></div>
-    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, cumulative share of Happy Eyeballs runs. 72.7% of runs get all answers at once, 97.5% within 1 ms, 99% within 7.1 ms. Above 25 ms: timers that fired late on a busy machine. In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right. Firefox Beta 161, 5 to 13 November 2026, 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) in a Happy Eyeballs run, including answers that arrive after connecting started, cumulative share of runs. 53.7% of runs get all answers at once, about 98.6% within 100 ms. Firefox Beta 161 (Release on 24 November 2026), 5 to 13 November 2026, 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a> (<code>until_end</code>).</figcaption>
   </section>
 
   <!-- RELEASE divider -->
@@ -178,30 +178,24 @@
     const c = echarts.init(el, null, { renderer: 'svg' });
     const css = getComputedStyle(document.documentElement);
     const v = (n, f) => css.getPropertyValue(n).trim() || f;
-    const INK = v('--ink', '#1c1b22'), MUTED = v('--ink-muted', '#5b5b66'), FAINT = v('--ink-faint', '#8f8f9d'),
+    const MUTED = v('--ink-muted', '#5b5b66'), FAINT = v('--ink-faint', '#8f8f9d'),
       HAIR = v('--hairline', '#d7d7db'), FONT = v('--font-sans', 'Inter, sans-serif');
-    const lab = (t, col) => ({ show: true, formatter: t, color: col, fontFamily: FONT, fontSize: 18, fontWeight: 700 });
+    const note = (x, y, t, pos) => ({ coord: [x, y], symbol: 'circle', symbolSize: 10, itemStyle: { color: '#2a78d6' },
+      label: { show: true, formatter: t, position: pos, distance: 12, color: '#1d5fae', fontFamily: FONT, fontSize: 18, fontWeight: 700 } });
     c.setOption({
       animation: false,
       grid: { left: 8, right: 30, top: 30, bottom: 8, containLabel: true },
-      xAxis: { type: 'value', min: 0, max: 50,
+      xAxis: { type: 'value', min: 0, max: 200, interval: 25,
         axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false }, splitLine: { show: false },
         axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x + ' ms' } },
-      yAxis: { type: 'value', min: 97, max: 100, interval: 0.5,
+      yAxis: { type: 'value', min: 50, max: 100, interval: 10,
         axisLine: { show: false }, axisTick: { show: false },
         splitLine: { lineStyle: { color: HAIR, type: 'dotted' } },
-        axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x.toFixed(1) + '%' } },
+        axisLabel: { color: FAINT, fontFamily: FONT, fontSize: 15, formatter: (x) => x + '%' } },
       series: [{
         type: 'line', data: D.spreadCdf, showSymbol: false, clip: true,
         lineStyle: { color: '#2a78d6', width: 3 },
-        markArea: { silent: true, data: [
-          [{ xAxis: 0, itemStyle: { color: 'rgba(42,120,214,0.08)' },
-             label: Object.assign(lab('99.77% of runs:\nall answers before the delay ends', '#1d5fae'), { position: 'insideBottom', distance: 40 }) },
-           { xAxis: 25 }],
-          [{ xAxis: 25, itemStyle: { color: 'rgba(235,104,52,0.10)' },
-             label: Object.assign(lab('0.23%:\ncut off', '#b4471a'), { position: 'insideBottom', distance: 40 }) },
-           { xAxis: 50 }],
-        ] },
+        markPoint: { silent: true, data: [note(25, 92.2, '92% within 25 ms', 'right'), note(100, 98.6, '98.6% within 100 ms', 'bottom')] },
         markLine: { silent: true, symbol: 'none', data: [{ xAxis: 25 }],
           lineStyle: { color: '#eb6834', width: 2, type: 'dashed' },
           label: { formatter: '25 ms Resolution Delay', color: '#b4471a', fontFamily: FONT, fontSize: 15, position: 'end' } },
