@@ -81,7 +81,8 @@
   <section>
     <h2>Happy Eyeballs DNS Resolution Delay</h2>
     <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">About 92% of runs get all DNS answers within 25 ms of the first.</p>
-    <div class="chart" id="c-spread" style="height:450px;"></div>
+    <div class="chart" id="c-spread" style="height:400px;"></div>
+    <p style="font-size:0.7em; margin:0.3em 0 0;"><strong>Next step:</strong> a dynamic Resolution Delay, derived from recent DNS answers (for example the last 100 from the same resolver), instead of tuning one constant.</p>
     <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) in a Happy Eyeballs run, including answers that arrive after connecting started, cumulative share of runs. 53.7% of runs get all answers at once, about 98.6% within 100 ms. Firefox Beta 161 (Release on 24 November 2026), 5 to 13 November 2026, 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a> (<code>until_end</code>).</figcaption>
   </section>
 
