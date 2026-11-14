@@ -219,11 +219,11 @@
         emphasis: { scaleSize: 6 },
       }],
       graphic: (o.centerValue ? [{
-        type: 'text', left: center[0], top: '45%', style: {
+        type: 'text', left: center[0] === '50%' ? 'center' : center[0], top: '45%', style: {
           text: o.centerValue, fill: INK, fontFamily: FONT, fontSize: 34, fontWeight: 800,
           textAlign: 'center', textVerticalAlign: 'middle' },
       }, {
-        type: 'text', left: center[0], top: '56%', style: {
+        type: 'text', left: center[0] === '50%' ? 'center' : center[0], top: '56%', style: {
           text: o.centerLabel || '', fill: INK_MUTED, fontFamily: FONT, fontSize: 14,
           textAlign: 'center', textVerticalAlign: 'middle' },
       }] : undefined),

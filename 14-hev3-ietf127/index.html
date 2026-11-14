@@ -18,10 +18,6 @@
     .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; }
     .reveal .cmp td + td, .reveal .cmp th + th { text-align: right; }
     .reveal .cmp tr.hl td { font-weight: 800; color: var(--ink); }
-    .reveal .share { display: flex; height: 64px; border-radius: 8px; overflow: hidden; margin-top: 1.2em; font-size: 0.56em; font-weight: 700; }
-    .reveal .share .seg { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
-    .reveal .share .new { background: #2a78d6; color: #fff; }
-    .reveal .share .reuse { background: #e6e6ea; color: var(--ink-muted); }
     .reveal .ground2 ul { list-style: none; margin-left: 0; font-size: 0.72em; }
     .reveal .ground2 li { margin-bottom: 0.9em; }
     .reveal .ground2 .gd { color: var(--ink-muted); }
@@ -92,13 +88,18 @@
   <!-- 5. Release experiment -->
   <section>
     <h2>Release experiment</h2>
-    <ul>
-      <li>Focus on Firefox 160, Desktop Release, 5 to 13 November 2026.</li>
-      <li>Two branches, <strong>5% of users each</strong>, about 1.17M Firefox 160 clients per branch: Happy Eyeballs v3 on, and off as control.</li>
-      <li>Only page loads whose main document opened a <strong>new connection</strong>, the ones relevant to Happy Eyeballs.</li>
-    </ul>
-    <div class="share">
-      <div class="seg new" style="width:23%">new connection: about 23%</div><div class="seg reuse" style="width:77%">reused connection: about 77% of page loads</div>
+    <div class="cols">
+      <div class="col-60">
+        <ul>
+          <li>Focus on Firefox 160, Desktop Release, 5 to 13 November 2026.</li>
+          <li>Two branches, <strong>5% of users each</strong>, about 1.17M Firefox 160 clients per branch: Happy Eyeballs v3 on, and off as control.</li>
+          <li>Only page loads whose main document opened a <strong>new connection</strong>, the ones relevant to Happy Eyeballs.</li>
+        </ul>
+      </div>
+      <div class="col-40">
+        <div class="chart short" id="c-newconn" style="height:380px;"></div>
+        <figcaption>Share of page loads whose main document opened a new connection.</figcaption>
+      </div>
     </div>
   </section>
 
@@ -113,7 +114,7 @@
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
     <div class="chart" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
+    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
   </section>
 
   <!-- 8. Changes since IETF 126 -->
@@ -202,6 +203,13 @@
     });
     return c;
   });
+  Charts.register('c-newconn', (el) => Charts.donut(el, {
+    data: [
+      { name: 'new connection', value: 23, color: '#2a78d6' },
+      { name: 'reused connection', value: 77, color: '#c9c9d1' },
+    ],
+    centerValue: '23%', centerLabel: 'of page loads',
+  }));
   Charts.register('c-rel-version', (el) => Charts.bar(el, {
     x: D.release.version.x, yName: '% of page loads on a new connection', yMax: 60,
     barLabels: true, barLabelFormatter: (p) => p.value + '%',
