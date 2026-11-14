@@ -136,7 +136,7 @@
         itemStyle: { color, borderRadius: o.stack ? 0 : [4, 4, 0, 0],
           borderColor: SURFACE, borderWidth: o.stack ? 1.5 : 0 },
         emphasis: { focus: 'series' },
-        label: o.barLabels ? { show: true, position: o.stack ? 'inside' : 'top',
+        label: o.barLabels ? { show: true, position: o.stack ? 'inside' : (o.barLabelPosition || 'top'),
           color: o.stack ? '#fff' : INK_MUTED, fontFamily: FONT, fontSize: LABEL_FS,
           formatter: o.barLabelFormatter || undefined } : undefined,
       };

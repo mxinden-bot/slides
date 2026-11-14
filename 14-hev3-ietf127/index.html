@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Eyeballs v3 in Firefox: partial rollout report (IETF 127)</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- 1. Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Happy Eyeballs v3 in Firefox</h1>
+    <p class="subtitle">Partial rollout report</p>
+    <span class="venue"><a href="https://datatracker.ietf.org/meeting/127/session/happy">IETF 127 &middot; HAPPY</a> &middot; 16 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
+  </section>
+
+  <!-- 2. Since IETF 126 -->
+  <section>
+    <h2>Since IETF 126</h2>
+    <ul>
+      <li><strong>Nightly</strong>: on by default.</li>
+      <li><strong>Beta</strong>: A/B experiment, 30 July to 18 August 2026.</li>
+      <li><strong>Release</strong>: A/B experiment on Firefox 160, 5% of users per branch.</li>
+      <li>The draft adopted Firefox&rsquo;s tuned delays (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/05/">draft-05</a>).</li>
+      <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a> 2.0.0.</li>
+    </ul>
+  </section>
+
+  <!-- 3. Delays now in the draft -->
+  <section>
+    <h2>Firefox&rsquo;s delays are now in the draft</h2>
+    <div class="cols">
+      <div>
+        <h3>Resolution Delay</h3>
+        <ul>
+          <li>Recommended: <strong>25 ms</strong> (was 50 ms).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Connection Attempt Delay Multiplier</h3>
+        <ul>
+          <li>Optional. A <strong>50 ms</strong> base with a <strong>&times;2</strong> multiplier starts attempts at 0, 50, 150, 350 and 750 ms.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="base"></div>
+      <div class="m" style="left:3%;"><div class="dot"></div><div class="t">0 ms</div></div>
+      <div class="m" style="left:9%;"><div class="dot"></div><div class="t">50</div></div>
+      <div class="m" style="left:21%;"><div class="dot"></div><div class="t">150</div></div>
+      <div class="m" style="left:45%;"><div class="dot"></div><div class="t">350</div></div>
+      <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
+    </div>
+    <p class="small muted">Both from Firefox telemetry, presented at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
+  </section>
+
+  <!-- 4. Library -->
+  <section>
+    <h2>A reusable library: <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a></h2>
+    <ul>
+      <li>Rust, deterministic, sans-I/O: no network, no clock. The caller drives the I/O and passes time in.</li>
+      <li>Every scenario is a plain unit test.</li>
+      <li>Version 2.0.0, 3 November 2026.</li>
+      <li>New: an HTTPS record with an IP hint for the preferred family counts as that family&rsquo;s answer, so the race starts without waiting for AAAA (<a href="https://github.com/mozilla/happy-eyeballs/pull/153">#153</a>, per draft &sect;4.2.1).</li>
+    </ul>
+  </section>
+
+  <!-- BETA divider -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Beta experiment</h2>
+    <p class="small" style="color:#b3adc4;">Firefox Desktop Beta, 30 July to 18 August 2026, control vs HEv3, about 46M successful runs a day.</p>
+  </section>
+
+  <!-- 5. Beta HTTP/3 -->
+  <section>
+    <h2>More page loads over HTTP/3</h2>
+    <div class="chart" id="c-beta-h3"></div>
+    <figcaption>Share of page loads over HTTP/3, control vs HEv3, by DoH segment. With DoH: <strong>16.6% to 27.9%</strong>. Without DoH: 11.1% to 12.2%.</figcaption>
+  </section>
+
+  <!-- 6. Beta TTRS -->
+  <section>
+    <h2>Faster time to request start, with DoH</h2>
+    <div class="chart" id="c-beta-ttrs"></div>
+    <figcaption>navigationStart to requestStart (DNS plus connection setup), HEv3 change vs control, by DoH segment. Below zero is faster. With DoH, P99 goes from 2770 ms to 2168 ms. Without DoH it is flat.</figcaption>
+  </section>
+
+  <!-- RELEASE divider -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Release experiment</h2>
+    <p class="small" style="color:#b3adc4;">Firefox 160, first results.</p>
+  </section>
+
+  <!-- 7. Release setup -->
+  <section>
+    <h2>Setup</h2>
+    <ul>
+      <li>Firefox Desktop Release, version 160. Two branches, <strong>5% of users each</strong>, about 1.17M clients per branch.</li>
+      <li>Control: Happy Eyeballs v3 off. Treatment: Happy Eyeballs v3 on.</li>
+      <li>The treatment also doubles the DNS cache (1600 to 3200 entries), so results show both changes together.</li>
+      <li>Page loads from 5 to 13 November 2026 whose main document opened a <strong>new connection</strong>: about 23% of all page loads, 5.2M (control) and 5.4M (HEv3).</li>
+    </ul>
+  </section>
+
+  <!-- 8. Release FCP -->
+  <section>
+    <h2>First contentful paint is faster at every percentile</h2>
+    <div class="chart" id="c-rel-fcp"></div>
+    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
+  </section>
+
+  <!-- 9. Real-world edge cases -->
+  <section>
+    <h2>Real-world edge cases</h2>
+    <ul class="small">
+      <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
+      <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
+      <li><strong>Multi-CDN</strong>: a non-standard HTTPS-RR/CNAME consistency check rejected legitimate multi-CDN records; now each <code>TargetName</code> resolves independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>, <a href="https://github.com/mozilla/happy-eyeballs/pull/104">#104</a>).</li>
+      <li><strong>Web standards</strong>: <code>dnsLookupEnd</code> stopped matching Resource Timing (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
+    </ul>
+    <p class="small muted">Tracked in the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a>.</p>
+  </section>
+
+  <!-- 10. Next -->
+  <section>
+    <h2>Next</h2>
+    <ul>
+      <li>Grow the Release rollout beyond 5%.</li>
+      <li>Separate the effect of Happy Eyeballs v3 from the larger DNS cache.</li>
+      <li><strong>Optimistic Alt-Svc</strong>: reuse an expired <code>Alt-Svc: h3</code> mapping and race HTTP/3 on the next visit (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a>).</li>
+    </ul>
+  </section>
+
+  <!-- Closing -->
+  <section class="divider" data-background-color="#20123a">
+    <h2 style="color:#ffffff;">Questions?</h2>
+    <p class="small" style="color:#b3adc4;"><a href="https://github.com/mozilla/happy-eyeballs/issues" style="color:#ff9d5c;">github.com/mozilla/happy-eyeballs/issues</a> &middot; <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459" style="color:#ff9d5c;">bug 1953459</a> &middot; <a href="https://max-inden.de/" style="color:#ff9d5c;">max-inden.de</a></p>
+  </section>
+
+  <!-- ================= BACKUP ================= -->
+  <section class="divider" data-background-color="#3a1230">
+    <h2 style="color:#ffffff;">Backup</h2>
+  </section>
+
+  <section>
+    <h2>Release: first contentful paint in milliseconds</h2>
+    <div class="chart" id="c-rel-fcp-abs"></div>
+    <figcaption>First contentful paint, control vs HEv3, Firefox 160 Release, page loads on a new connection. Log scale.</figcaption>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => (v >= 1000 ? (v / 1000) + ' s' : v + ' ms');
+
+  Charts.register('c-beta-h3', (el) => Charts.bar(el, {
+    x: D.beta.h3.x, yName: '% of page loads', yMax: 30,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [
+      { name: 'control', data: D.beta.h3.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.beta.h3.hev3, color: '#1baf7a' },
+    ],
+  }));
+  Charts.register('c-beta-ttrs', (el) => Charts.bar(el, {
+    x: D.beta.ttrs.p, yName: '% change vs control', yMin: -24, yMax: 12, refLine: 0, refLineLabel: 'control',
+    series: [
+      { name: 'DoH enabled', data: D.beta.ttrs.doh, color: '#2a78d6' },
+      { name: 'DoH disabled', data: D.beta.ttrs.nodoh, color: '#8f8f9d' },
+    ],
+  }));
+  Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
+    x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: (v) => v + '%',
+    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
+    series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
+  }));
+  Charts.register('c-rel-fcp-abs', (el) => Charts.bar(el, {
+    x: D.release.p, yName: 'FCP (log)', yType: 'log', yMin: 100, yMax: 20000, yFormatter: ms,
+    series: [
+      { name: 'control', data: D.release.control, color: '#8f8f9d' },
+      { name: 'HEv3', data: D.release.hev3, color: '#1baf7a' },
+    ],
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
