@@ -151,16 +151,15 @@
     <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>. No confidence intervals computed yet.</figcaption>
   </section>
 
-  <!-- 9. Real-world edge cases -->
+  <!-- 9. Stale and negative DNS answers -->
   <section>
-    <h2>Real-world edge cases</h2>
-    <ul class="small">
-      <li><strong>DNS negative answers</strong>: honour the SOA-derived negative TTL (<a href="https://www.rfc-editor.org/rfc/rfc2308">RFC 2308</a>, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049173">bug 2049173</a>), and do not re-resolve them mid-race (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2049178">bug 2049178</a>).</li>
-      <li><strong>DNS coalescing</strong>: a v4-only or v6-only lookup could not reuse a pending <code>AF_UNSPEC</code> lookup (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2044254">bug 2044254</a>).</li>
-      <li><strong>Multi-CDN</strong>: a non-standard HTTPS-RR/CNAME consistency check rejected legitimate multi-CDN records; now each <code>TargetName</code> resolves independently (<a href="https://www.rfc-editor.org/rfc/rfc9460#section-10.4.4">RFC 9460 &sect;10.4.4</a>, <a href="https://github.com/mozilla/happy-eyeballs/pull/104">#104</a>).</li>
-      <li><strong>Web standards</strong>: <code>dnsLookupEnd</code> stopped matching Resource Timing (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2047648">bug 2047648</a>).</li>
+    <h2>Stale and negative DNS answers</h2>
+    <ul>
+      <li>Firefox serves DNS answers from a cache entry&rsquo;s grace period (stale-while-revalidate). Happy Eyeballs now races a stale answer right away, revalidates with a lookup that bypasses the cache, and races the fresh answer too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
+      <li>Negative answers from the stale cache were treated as fresh, so they were never revalidated (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>).</li>
+      <li>Negative answers now get the same grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>) and a 300 s cache lifetime on all channels (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>).</li>
     </ul>
-    <p class="small muted">Tracked in the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">Happy Eyeballs v3 meta bug</a>.</p>
+    <p class="small muted">Similar to <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">draft-gakiwate-dnsop-optimistic-dns</a>.</p>
   </section>
 
   <!-- 10. Next -->
