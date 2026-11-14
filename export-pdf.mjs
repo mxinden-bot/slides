@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 function findChromium() {
   const base = process.env.PLAYWRIGHT_BROWSERS_PATH;
   if (!base) return undefined;
-  const hits = globSync(join(base, 'chromium-*/chrome-linux/chrome'));
+  const hits = globSync(join(base, 'chromium-*/chrome-linux{,64}/chrome'));
   return hits.sort().pop();
 }
 
