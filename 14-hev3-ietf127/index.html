@@ -80,8 +80,9 @@
 
   <!-- 4. Is 25 ms long enough? -->
   <section>
-    <h2>The 25 ms Resolution Delay cuts off 0.23% of runs</h2>
-    <div class="chart" id="c-spread" style="height:500px;"></div>
+    <h2>Happy Eyeballs DNS Resolution Delay</h2>
+    <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">25 ms cuts off 0.23% of runs.</p>
+    <div class="chart" id="c-spread" style="height:450px;"></div>
     <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, cumulative share of Happy Eyeballs runs (dots are measured points). 72.7% of runs get all answers at once, 99% within 7.1 ms. Above 25 ms: timers that fired late on a busy machine. In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right. Firefox Beta 161, 5 to 13 November 2026, 69,641 clients, 167M runs, histogram buckets about 9% wide. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
   </section>
 
