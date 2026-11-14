@@ -28,4 +28,13 @@ window.DECK_DATA = {
     hev3:    [169, 213, 349, 643, 1173, 1655, 2127, 3259, 10815],
     diff:    [-0.59, -1.84, -3.32, -2.72, -2.33, -2.24, -2.07, -1.87, -3.63],
   },
+
+  // netwerk.happy_eyeballs_dns_answer_spread_v2, until_first_attempt: time between the
+  // first and last positive DNS answer before the first connection attempt. Runs per
+  // histogram bucket (lower bound, ms), Firefox Nightly 162, 2026-11-05 -> 11-13, 395M runs.
+  // The 23.73 ms bucket holds the 25 ms Resolution Delay; above it, late timers.
+  spread: {
+    bucket:  ['14.1', '15.4', '16.8', '18.3', '20.0', '21.8', '23.7', '25.9', '28.2', '30.8', '33.6', '36.6', '39.9', '43.5'],
+    nightly: [343989, 349743, 337774, 333551, 323444, 304083, 265997, 83893, 57110, 50832, 45739, 40808, 36240, 32241],
+  },
 };

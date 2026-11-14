@@ -12,6 +12,13 @@
     const l = document.createElement('link'); l.rel = 'stylesheet';
     if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
   </script>
+  <style>
+    .reveal .cmp { border-collapse: collapse; width: 100%; font-size: 0.72em; margin-top: 0.2em; }
+    .reveal .cmp th, .reveal .cmp td { border-bottom: 1px solid var(--hairline); padding: 0.4em 0.7em; text-align: left; }
+    .reveal .cmp thead th { color: var(--ink-faint); font-weight: 800; }
+    .reveal .cmp td + td, .reveal .cmp th + th { text-align: right; }
+    .reveal .cmp tr.hl td { font-weight: 800; color: var(--ink); }
+  </style>
 </head>
 <body>
 <div class="reveal">
@@ -62,6 +69,31 @@
       <div class="m" style="left:93%;"><div class="dot"></div><div class="t">750 ms</div></div>
     </div>
     <p class="small muted">Both from Firefox telemetry, presented at IETF 126. Source: <a href="https://www.ietf.org/archive/id/draft-ietf-happy-happyeyeballs-v3-05.html">draft-ietf-happy-happyeyeballs-v3-05</a>, 2 November 2026.</p>
+  </section>
+
+  <!-- 3b. Is 25 ms long enough? -->
+  <section>
+    <h2>The 25 ms delay cuts off 0.23% of runs</h2>
+    <div class="chart short" id="c-spread"></div>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) before the first connection attempt, runs per histogram bucket (lower bound in ms), Firefox Nightly 162, 5 to 13 November 2026, 395M runs. Counts fall about 3&times; after the bucket holding 25 ms: the delay ends the wait. Bars above it are timers that fired late on a busy machine. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a>.</figcaption>
+  </section>
+
+  <!-- 3c. Spread percentiles -->
+  <section>
+    <h2>Most runs have nothing to wait for</h2>
+    <table class="cmp">
+      <thead><tr><th>Spread before the first attempt</th><th>Nightly 162</th><th>Beta 161</th></tr></thead>
+      <tbody>
+        <tr><td>Runs with zero spread</td><td>70.4%</td><td>72.7%</td></tr>
+        <tr><td>P50</td><td>0 ms</td><td>0 ms</td></tr>
+        <tr><td>P95</td><td>0.22 ms</td><td>0.12 ms</td></tr>
+        <tr><td>P99</td><td>10.0 ms</td><td>7.1 ms</td></tr>
+        <tr><td>P99.9</td><td>36.6 ms</td><td>43.5 ms</td></tr>
+        <tr class="hl"><td>Runs reaching the 25 ms delay</td><td>0.23%</td><td>0.23%</td></tr>
+      </tbody>
+    </table>
+    <p class="small">In the <a href="https://mailarchive.ietf.org/arch/msg/happy/aVcx3QumiWmADaibqRQCnQWArbM/">August thread</a> we called a cutoff share of about 1% about right and 5% too low. Nightly and Beta agree.</p>
+    <p class="small muted">5 to 13 November 2026: Nightly 43,833 clients, 395M runs; Beta 69,641 clients, 167M runs. Not yet on Release. Percentiles are histogram bucket lower bounds (buckets about 9% wide), pooled over runs. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM</a>.</p>
   </section>
 
   <!-- 4. Library -->
@@ -198,6 +230,12 @@
       { name: 'control', data: D.release.control, color: '#8f8f9d' },
       { name: 'HEv3', data: D.release.hev3, color: '#1baf7a' },
     ],
+  }));
+
+  Charts.register('c-spread', (el) => Charts.bar(el, {
+    x: D.spread.bucket, yName: 'runs (Nightly)', yFormatter: (v) => (v / 1000) + 'k',
+    series: [{ name: 'runs', data: D.spread.nightly.map((v, i) => ({
+      value: v, itemStyle: { color: i < 7 ? '#2a78d6' : '#8f8f9d' } })) }],
   }));
 
   Reveal.initialize({
