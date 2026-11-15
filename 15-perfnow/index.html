@@ -164,7 +164,7 @@
   <section>
     <p class="part">1 &middot; Protocols get better</p>
     <h2>QUIC connects in about half the time</h2>
-    <div class="chart short" id="c-setup"></div>
+    <div class="chart" style="height:490px" id="c-setup"></div>
     <figcaption>Connection setup time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
   </section>
 
@@ -172,14 +172,14 @@
   <section>
     <p class="part">2 &middot; The problem is the transition</p>
     <h2>IPv6: standardised in 1998, a quarter of requests today</h2>
-    <div class="chart short" id="c-ipv6"></div>
+    <div class="chart" style="height:490px" id="c-ipv6"></div>
     <figcaption>IP family of HTTP requests, Firefox Release, by version (about one month each). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
   </section>
 
   <section>
     <p class="part">2 &middot; The problem is the transition</p>
     <h2>HTTP/3: about 30% of requests</h2>
-    <div class="chart short" id="c-h3"></div>
+    <div class="chart" style="height:490px" id="c-h3"></div>
     <figcaption>HTTP version of responses, Firefox Release, by version. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
   </section>
 
@@ -220,14 +220,14 @@
   <section>
     <p class="part">3 &middot; Let the browser race</p>
     <h2>More page loads over HTTP/3</h2>
-    <div class="chart short" id="c-rel-version"></div>
+    <div class="chart" style="height:490px" id="c-rel-version"></div>
     <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 160 Release experiment, 5 to 13 November 2026: 7.7M (control) and 8.0M (Happy Eyeballs v3). HTTP/3 goes from <strong>19.6% to 24.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
   </section>
 
   <section>
     <p class="part">3 &middot; Let the browser race</p>
     <h2>First contentful paint is faster at every percentile</h2>
-    <div class="chart short" id="c-rel-fcp"></div>
+    <div class="chart" style="height:490px" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
   </section>
 
@@ -334,41 +334,104 @@
     { from: 'C', to: 'S', text: 'QUIC + HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
   ] }));
 
-  Charts.register('c-setup', (el) => Charts.bar(el, {
-    x: D.setup.p, yName: 'connection setup, ms', yMax: 600, yFormatter: ms,
-    barLabels: true, barLabelFormatter: (p) => p.value + ' ms',
+  // Deck chart style: one accent (blue = new protocol / Happy Eyeballs v3), gray = old /
+  // control. Thin rounded marks, hairline grid, direct labels, no legend boxes.
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n, f) => css.getPropertyValue(n).trim() || f;
+  const NEW = '#2a78d6', OLD = '#a9a9b4';
+  const INK = tok('--ink', '#1c1b22'), MUTED = tok('--ink-muted', '#5b5b66'),
+        FAINT = tok('--ink-faint', '#8f8f9d'), HAIR = tok('--hairline', '#e3e3e8'),
+        FONT = tok('--font-sans', 'Inter, sans-serif');
+  const txt = (o) => Object.assign({ fontFamily: FONT, fontSize: 18, color: MUTED }, o);
+  const chart = (el, opt) => {
+    const prev = echarts.getInstanceByDom(el); if (prev) prev.dispose();
+    const c = echarts.init(el, null, { renderer: 'svg' });
+    c.setOption(Object.assign({ animation: false, textStyle: { fontFamily: FONT } }, opt));
+    return c;
+  };
+  const valueAxis = (o) => Object.assign({
+    type: 'value', axisLine: { show: false }, axisTick: { show: false },
+    splitLine: { lineStyle: { color: HAIR, width: 1 } }, axisLabel: txt({ color: FAINT, fontSize: 16 }),
+  }, o);
+  const catAxis = (data, o) => Object.assign({
+    type: 'category', data, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+    axisLabel: txt({ color: MUTED }),
+  }, o);
+  // Legend drawn as text with a colored key mark beside it (text never wears the series color).
+  const keys = (items, top = 0, left = 0) => ({
+    type: 'group', top, left, children: items.flatMap((it, i) => [
+      { type: 'rect', left: i * 300, top: 6, shape: { width: 14, height: 14, r: 3 }, style: { fill: it.color } },
+      { type: 'text', left: i * 300 + 22, top: 2, style: { text: it.name, fill: MUTED, font: `600 18px ${FONT}` } },
+    ]),
+  });
+
+  // Connection setup: horizontal paired bars, values at the tips.
+  Charts.register('c-setup', (el) => chart(el, {
+    grid: { left: 70, right: 90, top: 50, bottom: 30 },
+    graphic: [keys([{ name: 'TCP + TLS (HTTP/2)', color: OLD }, { name: 'QUIC (HTTP/3)', color: NEW }], 0, 70)],
+    xAxis: valueAxis({ max: 500, interval: 100, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: ms }) }),
+    yAxis: catAxis(D.setup.p, { inverse: true, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
     series: [
-      { name: 'TCP + TLS (HTTP/2)', data: D.setup.tcp, color: '#8f8f9d' },
-      { name: 'QUIC (HTTP/3)', data: D.setup.quic, color: '#2a78d6' },
+      { name: 'TCP + TLS', type: 'bar', data: D.setup.tcp, barWidth: 24, barGap: '25%',
+        itemStyle: { color: OLD, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right', formatter: (p) => p.value + ' ms', ...txt({ fontSize: 17 }) } },
+      { name: 'QUIC', type: 'bar', data: D.setup.quic, barWidth: 24,
+        itemStyle: { color: NEW, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right', formatter: (p) => p.value + ' ms', ...txt({ fontSize: 17, color: INK, fontWeight: 700 }) } },
     ],
   }));
-  Charts.register('c-ipv6', (el) => Charts.line(el, {
-    x: D.versions, yName: '% of requests', yMin: 0, yMax: 100, yFormatter: pct, endLabels: true,
-    series: [
-      { name: 'IPv4', data: D.ipv4, color: '#8f8f9d' },
-      { name: 'IPv6', data: D.ipv6, color: '#2a78d6' },
-    ],
-  }));
-  Charts.register('c-h3', (el) => Charts.line(el, {
-    x: D.versions, yName: '% of responses', yMin: 0, yMax: 100, yFormatter: pct, endLabels: true,
-    series: [
-      { name: 'HTTP/1.1', data: D.h1, color: '#c9c9d1' },
-      { name: 'HTTP/2', data: D.h2, color: '#8f8f9d' },
-      { name: 'HTTP/3', data: D.h3, color: '#2a78d6' },
-    ],
-  }));
-  Charts.register('c-rel-version', (el) => Charts.bar(el, {
-    x: D.release.version.x, yName: '% of page loads on a new connection', yMax: 60,
-    barLabels: true, barLabelFormatter: (p) => p.value + '%',
-    series: [
-      { name: 'control', data: D.release.version.control, color: '#8f8f9d' },
-      { name: 'Happy Eyeballs v3', data: D.release.version.hev3, color: '#1baf7a' },
-    ],
-  }));
-  Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
-    x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
-    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
-    series: [{ name: 'Happy Eyeballs v3 vs control', data: D.release.diff, color: '#1baf7a' }],
+
+  // Share over time: one series, the line is the message; end label carries the value.
+  const share = (data, name) => (el) => chart(el, {
+    grid: { left: 60, right: 150, top: 30, bottom: 40 },
+    xAxis: catAxis(D.versions, { boundaryGap: false }),
+    yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{
+      type: 'line', data, symbol: 'circle', symbolSize: 10, showSymbol: false, smooth: false,
+      lineStyle: { color: NEW, width: 3, cap: 'round', join: 'round' }, itemStyle: { color: NEW },
+      areaStyle: { color: 'rgba(42,120,214,0.10)' },
+      endLabel: { show: true, formatter: (p) => `${name} ${p.value}%`, ...txt({ color: INK, fontWeight: 700, fontSize: 20 }), distance: 12 },
+      markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
+        label: { show: false }, data: [{ coord: [data.length - 1, data[data.length - 1]] }] },
+    }],
+  });
+  Charts.register('c-ipv6', share(D.ipv6, 'IPv6'));
+  Charts.register('c-h3', share(D.h3, 'HTTP/3'));
+
+  // Experiment, HTTP version: dumbbell control -> Happy Eyeballs v3 per version.
+  Charts.register('c-rel-version', (el) => {
+    const v = D.release.version;
+    return chart(el, {
+      grid: { left: 110, right: 60, top: 60, bottom: 40 },
+      graphic: [keys([{ name: 'control', color: OLD }, { name: 'Happy Eyeballs v3', color: NEW }], 0, 110)],
+      xAxis: valueAxis({ min: 0, max: 60, interval: 10, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      yAxis: catAxis(v.x, { inverse: true, axisLine: { show: false }, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
+      series: [
+        { type: 'custom', renderItem: (params, api) => {
+            const a = api.coord([api.value(0), api.value(2)]), b = api.coord([api.value(1), api.value(2)]);
+            return { type: 'line', shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: HAIR, lineWidth: 6, lineCap: 'round' } };
+          }, data: v.x.map((x, i) => [v.control[i], v.hev3[i], i]), encode: { x: [0, 1], y: 2 }, z: 1 },
+        { type: 'scatter', data: v.control.map((c, i) => [c, i]), symbolSize: 20, z: 2,
+          itemStyle: { color: OLD, borderColor: '#fff', borderWidth: 2 },
+          label: { show: true, position: 'bottom', distance: 10, formatter: (p) => p.value[0] + '%', ...txt({ fontSize: 17 }) } },
+        { type: 'scatter', data: v.hev3.map((c, i) => [c, i]), symbolSize: 20, z: 3,
+          itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
+          label: { show: true, position: 'top', distance: 10, formatter: (p) => p.value[0] + '%', ...txt({ fontSize: 17, color: INK, fontWeight: 700 }) } },
+      ],
+    });
+  });
+
+  // FCP change by percentile: thin columns down from zero, label only P50 and P99.
+  Charts.register('c-rel-fcp', (el) => chart(el, {
+    grid: { left: 70, right: 30, top: 40, bottom: 40 },
+    xAxis: catAxis(D.release.p, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
+    yAxis: valueAxis({ min: -4, max: 0, interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{
+      type: 'bar', barWidth: 24, data: D.release.diff.map((d, i) => ({
+        value: d, label: { show: ['P50', 'P99'].includes(D.release.p[i]) } })),
+      itemStyle: { color: NEW, borderRadius: [0, 0, 4, 4] },
+      label: { position: 'bottom', distance: 8, formatter: (p) => p.value.toFixed(1) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) },
+    }],
   }));
 
   Reveal.initialize({
