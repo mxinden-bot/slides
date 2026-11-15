@@ -28,7 +28,8 @@
     const mk = `seqah${++uid}`, mkA = `${mk}A`;
     const actors = spec.actors, msgs = spec.messages;
     const W = el.clientWidth || 560;
-    const padX = 16, topH = 40, rowH = 34, noteH = 28, botPad = 14;
+    const k = spec.scale || 1;
+    const padX = 16, topH = 40 * k, rowH = 34 * k, noteH = 28 * k, botPad = 14;
     const n = actors.length, laneW = (W - 2 * padX) / n;
     const cx = (i) => padX + laneW * (i + 0.5);
     const idx = {}; actors.forEach((a, i) => { idx[a.id] = i; });
@@ -44,8 +45,8 @@
     actors.forEach((a, i) => {
       const x = cx(i);
       s += `<line x1="${x}" y1="${topH}" x2="${x}" y2="${H - botPad}" stroke="${HAIR}" stroke-width="1.5"/>`;
-      s += `<rect x="${x - laneW * 0.44}" y="6" width="${laneW * 0.88}" height="26" rx="6" fill="${SURF}" stroke="${HAIR}"/>`;
-      s += `<text x="${x}" y="23" text-anchor="middle" font-size="14" font-weight="700" fill="${INK}">${esc(a.label)}</text>`;
+      s += `<rect x="${x - laneW * 0.44}" y="6" width="${laneW * 0.88}" height="${26 * k}" rx="6" fill="${SURF}" stroke="${HAIR}"/>`;
+      s += `<text x="${x}" y="${6 + 17 * k}" text-anchor="middle" font-size="${14 * k}" font-weight="700" fill="${INK}">${esc(a.label)}</text>`;
     });
 
     let y = topH + 6;
@@ -54,13 +55,13 @@
         const ids = (m.over || actors.map((a) => a.id)).map((id) => idx[id]);
         const x1 = cx(Math.min(...ids)) - laneW * 0.34, x2 = cx(Math.max(...ids)) + laneW * 0.34;
         s += `<rect x="${x1}" y="${y}" width="${x2 - x1}" height="${noteH}" rx="5" fill="rgba(230,96,0,0.08)" stroke="rgba(230,96,0,0.30)"/>`;
-        s += `<text x="${(x1 + x2) / 2}" y="${y + noteH / 2 + 4}" text-anchor="middle" font-size="12" fill="${ACC}">${esc(typeof m.note === 'string' ? m.note : m.text)}</text>`;
+        s += `<text x="${(x1 + x2) / 2}" y="${y + noteH / 2 + 4 * k}" text-anchor="middle" font-size="${12 * k}" fill="${ACC}">${esc(typeof m.note === 'string' ? m.note : m.text)}</text>`;
         y += noteH + 6; return;
       }
       const xa = cx(idx[m.from]), xb = cx(idx[m.to]);
-      const yy = y + rowH - 12, dir = xb >= xa ? 1 : -1;
+      const yy = y + rowH - 12 * k, dir = xb >= xa ? 1 : -1;
       const col = m.hl ? ACC : MUTED, mark = m.hl ? mkA : mk;
-      s += `<text x="${(xa + xb) / 2}" y="${yy - 6}" text-anchor="middle" font-size="12.5" `
+      s += `<text x="${(xa + xb) / 2}" y="${yy - 6 * k}" text-anchor="middle" font-size="${12.5 * k}" `
         + `fill="${m.hl ? ACC : INK}" font-weight="${m.hl ? 700 : 400}">${esc(m.text)}</text>`;
       s += `<line x1="${xa + dir * 2}" y1="${yy}" x2="${xb - dir * 6}" y2="${yy}" stroke="${col}" `
         + `stroke-width="1.6" ${m.dashed ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#${mark})"/>`;

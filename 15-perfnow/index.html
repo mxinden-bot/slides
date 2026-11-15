@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Save a round trip (performance.now() 2026)</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+  <style>
+    .reveal .part { font-size: 0.5em; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.2em; }
+    .reveal .rp { display: flex; gap: 40px; align-items: flex-start; }
+    .reveal .rp .seq { flex: 0 0 760px; }
+    .reveal .rp .side { flex: 1; display: flex; flex-direction: column; align-items: flex-start; }
+    .reveal .rp .count { font-size: 3.4em; font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -0.03em; }
+    .reveal .rp .unit { font-size: 0.7em; color: var(--ink-muted); margin-bottom: 1.1em; }
+    .reveal .ladder { list-style: none; margin: 0; padding: 0; font-size: 0.6em; width: 100%; }
+    .reveal .ladder li { display: flex; justify-content: space-between; padding: 0.25em 0; border-bottom: 1px solid var(--hairline); color: var(--ink-muted); }
+    .reveal .ladder li.next { color: transparent; border-bottom-color: transparent; }
+    .reveal .ladder li.now { color: var(--ink); font-weight: 800; }
+    .reveal .stats { display: flex; justify-content: space-around; margin-top: 1.2em; }
+    .reveal .bugs { border-collapse: collapse; width: 100%; font-size: 0.6em; }
+    .reveal .bugs td { border-bottom: 1px solid var(--hairline); padding: 0.4em 0.6em; vertical-align: top; }
+    .reveal .bugs td:first-child { font-weight: 800; white-space: nowrap; }
+    .reveal .bugs td:last-child { white-space: nowrap; text-align: right; }
+    .reveal .opts { font-size: 0.95em; line-height: 1.9; }
+    .reveal .opts em { color: var(--ink-faint); font-style: normal; padding: 0 0.3em; }
+    .reveal .bigurl { font-size: 2.2em; font-weight: 800; color: var(--accent); text-align: center; margin: 1.2em 0 0.4em; }
+    .reveal .monday { font-size: 1.05em; line-height: 1.6; }
+    .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Save a round trip</h1>
+    <p class="subtitle">Use modern protocols safely: HTTP/3, Happy Eyeballs and HTTPS records</p>
+    <span class="venue"><a href="https://perfnow.nl/">performance.now() 2026</a> &middot; Amsterdam &middot; 20 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
+  </section>
+
+  <!-- About me -->
+  <section>
+    <h2>Max Inden</h2>
+    <ul>
+      <li>Firefox networking at Mozilla.</li>
+      <li>HTTP/3 and QUIC (<a href="https://github.com/mozilla/neqo">neqo</a>), Happy Eyeballs (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
+      <li>Before: <a href="https://libp2p.io/">libp2p</a>, <a href="https://prometheus.io/">Prometheus</a>.</li>
+    </ul>
+  </section>
+
+  <!-- 1. Protocols get better -->
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>TCP, then HTTP</h2>
+    <div class="rp">
+      <div class="seq" id="rp-tcp"></div>
+      <div class="side">
+        <div class="count">2</div><div class="unit">round trips</div>
+        <ul class="ladder">
+          <li class="now"><span>TCP + HTTP</span><span>2</span></li>
+          <li class="next"><span>+ TLS 1.2</span><span>4</span></li>
+          <li class="next"><span>TLS 1.3</span><span>3</span></li>
+          <li class="next"><span>QUIC</span><span>2</span></li>
+          <li class="next"><span>QUIC 0-RTT</span><span>1</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>Add security: TLS 1.2</h2>
+    <div class="rp">
+      <div class="seq" id="rp-tls12"></div>
+      <div class="side">
+        <div class="count">4</div><div class="unit">round trips</div>
+        <ul class="ladder">
+          <li><span>TCP + HTTP</span><span>2</span></li>
+          <li class="now"><span>+ TLS 1.2</span><span>4</span></li>
+          <li class="next"><span>TLS 1.3</span><span>3</span></li>
+          <li class="next"><span>QUIC</span><span>2</span></li>
+          <li class="next"><span>QUIC 0-RTT</span><span>1</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>Better security: TLS 1.3</h2>
+    <div class="rp">
+      <div class="seq" id="rp-tls13"></div>
+      <div class="side">
+        <div class="count">3</div><div class="unit">round trips</div>
+        <ul class="ladder">
+          <li><span>TCP + HTTP</span><span>2</span></li>
+          <li><span>+ TLS 1.2</span><span>4</span></li>
+          <li class="now"><span>TLS 1.3</span><span>3</span></li>
+          <li class="next"><span>QUIC</span><span>2</span></li>
+          <li class="next"><span>QUIC 0-RTT</span><span>1</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>QUIC: transport and TLS in one handshake</h2>
+    <div class="rp">
+      <div class="seq" id="rp-quic"></div>
+      <div class="side">
+        <div class="count">2</div><div class="unit">round trips</div>
+        <ul class="ladder">
+          <li><span>TCP + HTTP</span><span>2</span></li>
+          <li><span>+ TLS 1.2</span><span>4</span></li>
+          <li><span>TLS 1.3</span><span>3</span></li>
+          <li class="now"><span>QUIC</span><span>2</span></li>
+          <li class="next"><span>QUIC 0-RTT</span><span>1</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>QUIC 0-RTT: the request goes in the first packet</h2>
+    <div class="rp">
+      <div class="seq" id="rp-0rtt"></div>
+      <div class="side">
+        <div class="count">1</div><div class="unit">round trip, on a repeat visit</div>
+        <ul class="ladder">
+          <li><span>TCP + HTTP</span><span>2</span></li>
+          <li><span>+ TLS 1.2</span><span>4</span></li>
+          <li><span>TLS 1.3</span><span>3</span></li>
+          <li><span>QUIC</span><span>2</span></li>
+          <li class="now"><span>QUIC 0-RTT</span><span>1</span></li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>Round trips until the first response byte, DNS not counted. TLS 1.3 over TCP can use 0-RTT too.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>What one round trip costs</h2>
+    <div class="stats">
+      <div class="stat"><span class="num">29 ms</span><span class="lbl">median</span></div>
+      <div class="stat"><span class="num">54 ms</span><span class="lbl">P75</span></div>
+      <div class="stat"><span class="num">219 ms</span><span class="lbl">P95</span></div>
+      <div class="stat"><span class="num">516 ms</span><span class="lbl">P99</span></div>
+    </div>
+    <p class="center" style="margin-top:1.4em;">For the slowest users, every round trip saved is a visible difference.</p>
+    <figcaption>Round-trip time of Firefox HTTP/3 connections, Firefox 159 Release, all platforms. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols get better</p>
+    <h2>QUIC connects in about half the time</h2>
+    <div class="chart short" id="c-setup"></div>
+    <figcaption>Connection setup time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
+  </section>
+
+  <!-- 2. The problem is the transition -->
+  <section>
+    <p class="part">2 &middot; The problem is the transition</p>
+    <h2>IPv6: standardised in 1998, a quarter of requests today</h2>
+    <div class="chart short" id="c-ipv6"></div>
+    <figcaption>IP family of HTTP requests, Firefox Release, by version (about one month each). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; The problem is the transition</p>
+    <h2>HTTP/3: about 30% of requests</h2>
+    <div class="chart short" id="c-h3"></div>
+    <figcaption>HTTP version of responses, Firefox Release, by version. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; The problem is the transition</p>
+    <h2>New protocols break on some networks</h2>
+    <table class="bugs">
+      <tr><td>Antivirus</td><td>Bitdefender stalls the HTTP/3 handshake, Facebook does not load</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a></td></tr>
+      <tr><td>Antivirus</td><td>Avast's proxy acknowledges packets Firefox never sent</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
+      <tr><td>VPN</td><td>Smaller packets on a VPN tunnel stall HTTP/3</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a></td></tr>
+      <tr><td>Operating system</td><td>Windows silently lowers the packet size, HTTP/3 fails</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1772057">bug 1772057</a></td></tr>
+      <tr><td>VPN</td><td>Virtual network interfaces reject batched UDP sends</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+      <tr><td>Proxy</td><td>SOCKS proxies carry no UDP, so no HTTP/3</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1808692">bug 1808692</a></td></tr>
+      <tr><td>VPN</td><td>A VPN drops all IPv6, the site does not load</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1964292">bug 1964292</a></td></tr>
+    </table>
+    <figcaption>Google, 2017: 4.4% of clients cannot use QUIC, mostly on corporate networks (<a href="https://dl.acm.org/doi/10.1145/3098822.3098842">SIGCOMM 2017</a>, section 7.2).</figcaption>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; The problem is the transition</p>
+    <h2>Too many options</h2>
+    <p class="opts">IPv4 <em>or</em> IPv6<br>TCP + TLS <em>or</em> QUIC<br>HTTP/1.1 <em>or</em> HTTP/2 <em>or</em> HTTP/3<br>DNS A <em>or</em> AAAA <em>or</em> HTTPS record</p>
+    <p>Which one works depends on the user's network. The site cannot know.</p>
+  </section>
+
+  <!-- 3. Let the browser race -->
+  <section>
+    <p class="part">3 &middot; Let the browser race</p>
+    <h2>Happy Eyeballs: try several, keep the first that connects</h2>
+    <ul>
+      <li>2012: IPv6, with IPv4 as a fallback (<a href="https://www.rfc-editor.org/rfc/rfc6555">RFC 6555</a>, then <a href="https://www.rfc-editor.org/rfc/rfc8305">RFC 8305</a>).</li>
+      <li>Now: HTTP/3 too, with HTTP/2 as a fallback (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">Happy Eyeballs v3</a>, IETF draft).</li>
+      <li>Firefox: on in Nightly, on for 50% of Release.</li>
+    </ul>
+    <p><strong>For you: offer HTTP/3 without risk. Where it breaks, the browser falls back.</strong></p>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Let the browser race</p>
+    <h2>More page loads over HTTP/3</h2>
+    <div class="chart short" id="c-rel-version"></div>
+    <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 160 Release experiment, 5 to 13 November 2026: 7.7M (control) and 8.0M (Happy Eyeballs v3). HTTP/3 goes from <strong>19.6% to 24.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Let the browser race</p>
+    <h2>First contentful paint is faster at every percentile</h2>
+    <div class="chart short" id="c-rel-fcp"></div>
+    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
+  </section>
+
+  <!-- 4. Make your site ready -->
+  <section>
+    <p class="part">4 &middot; Make your site ready</p>
+    <h2>Tell the browser about HTTP/3 before it connects</h2>
+    <div class="cols" style="gap:26px; align-items:flex-start;">
+      <div>
+        <h3 class="center">Alt-Svc header</h3>
+        <div id="up-altsvc"></div>
+        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the next connection.</strong></p>
+      </div>
+      <div>
+        <h3 class="center">HTTPS DNS record</h3>
+        <div id="up-https"></div>
+        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">4 &middot; Make your site ready</p>
+    <h2>Make your site ready for racing</h2>
+    <ul>
+      <li>Serve HTTP/3, and keep sending <code>Alt-Svc</code>.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code>:</li>
+    </ul>
+    <pre class="rr"><code class="plaintext">example.com. 3600 IN HTTPS 1 . alpn="h3,h2"</code></pre>
+    <ul>
+      <li>Give it a long lifetime, so browsers have it cached.</li>
+      <li>Serve IPv6 too (an AAAA record).</li>
+    </ul>
+  </section>
+
+  <!-- 5. Check your site -->
+  <section>
+    <p class="part">5 &middot; Check your site</p>
+    <h2>Check your site</h2>
+    <p class="bigurl"><a href="https://savearoundtrip.com/">savearoundtrip.com</a></p>
+    <p class="center">Does your site publish an HTTPS record? Does it advertise HTTP/3? How many round trips does a first visit cost?</p>
+  </section>
+
+  <section>
+    <h2>On Monday</h2>
+    <ol class="monday">
+      <li>Turn on HTTP/3.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code> and a long lifetime.</li>
+      <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
+    </ol>
+    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => v + ' ms';
+  const pct = (v) => v + '%';
+
+  const CS = [{ id: 'C', label: 'Client' }, { id: 'S', label: 'Server' }];
+  const RP = (msgs) => (el) => Seq.render(el, { actors: CS, messages: msgs, scale: 1.85 });
+  Seq.register('rp-tcp', RP([
+    { from: 'C', to: 'S', text: 'TCP SYN' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
+    { from: 'C', to: 'S', text: 'GET /', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]));
+  Seq.register('rp-tls12', RP([
+    { from: 'C', to: 'S', text: 'TCP SYN' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
+    { from: 'C', to: 'S', text: 'TLS ClientHello' }, { from: 'S', to: 'C', text: 'ServerHello, certificate', dashed: true },
+    { from: 'C', to: 'S', text: 'key exchange, Finished' }, { from: 'S', to: 'C', text: 'Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'GET /', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]));
+  Seq.register('rp-tls13', RP([
+    { from: 'C', to: 'S', text: 'TCP SYN' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
+    { from: 'C', to: 'S', text: 'TLS ClientHello + key share' }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'Finished + GET /', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]));
+  Seq.register('rp-quic', RP([
+    { from: 'C', to: 'S', text: 'QUIC Initial: ClientHello' }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'Finished + GET /', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]));
+  Seq.register('rp-0rtt', RP([
+    { from: 'C', to: 'S', text: 'ClientHello + GET / (0-RTT)', hl: true }, { from: 'S', to: 'C', text: 'ServerHello ... + response', dashed: true },
+  ]));
+
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'the browser learns about HTTP/3 only now', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'next connection: QUIC + HTTP/3', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + IP hints', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC + HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+
+  Charts.register('c-setup', (el) => Charts.bar(el, {
+    x: D.setup.p, yName: 'connection setup, ms', yMax: 600, yFormatter: ms,
+    barLabels: true, barLabelFormatter: (p) => p.value + ' ms',
+    series: [
+      { name: 'TCP + TLS (HTTP/2)', data: D.setup.tcp, color: '#8f8f9d' },
+      { name: 'QUIC (HTTP/3)', data: D.setup.quic, color: '#2a78d6' },
+    ],
+  }));
+  Charts.register('c-ipv6', (el) => Charts.line(el, {
+    x: D.versions, yName: '% of requests', yMin: 0, yMax: 100, yFormatter: pct, endLabels: true,
+    series: [
+      { name: 'IPv4', data: D.ipv4, color: '#8f8f9d' },
+      { name: 'IPv6', data: D.ipv6, color: '#2a78d6' },
+    ],
+  }));
+  Charts.register('c-h3', (el) => Charts.line(el, {
+    x: D.versions, yName: '% of responses', yMin: 0, yMax: 100, yFormatter: pct, endLabels: true,
+    series: [
+      { name: 'HTTP/1.1', data: D.h1, color: '#c9c9d1' },
+      { name: 'HTTP/2', data: D.h2, color: '#8f8f9d' },
+      { name: 'HTTP/3', data: D.h3, color: '#2a78d6' },
+    ],
+  }));
+  Charts.register('c-rel-version', (el) => Charts.bar(el, {
+    x: D.release.version.x, yName: '% of page loads on a new connection', yMax: 60,
+    barLabels: true, barLabelFormatter: (p) => p.value + '%',
+    series: [
+      { name: 'control', data: D.release.version.control, color: '#8f8f9d' },
+      { name: 'Happy Eyeballs v3', data: D.release.version.hev3, color: '#1baf7a' },
+    ],
+  }));
+  Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
+    x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
+    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
+    series: [{ name: 'Happy Eyeballs v3 vs control', data: D.release.diff, color: '#1baf7a' }],
+  }));
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
