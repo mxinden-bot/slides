@@ -247,9 +247,11 @@
     <ol class="steps">
       <li>Turn on HTTP/3 and send an <code>Alt-Svc</code> header.</li>
       <li>Publish an HTTPS record with <code>alpn="h3"</code> and a long lifetime.</li>
+      <li>Turn on QUIC 0-RTT, for repeat visits.</li>
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
     <p class="mantra">Offer on the server, race on the client.</p>
+    <aside class="notes">0-RTT data can be replayed by an attacker, so servers accept it only for safe requests such as GET; HTTP has a 425 Too Early status for the rest (RFC 8470).</aside>
     <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
