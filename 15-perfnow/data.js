@@ -5,6 +5,12 @@ window.DECK_DATA = {
   // GLAM fog, Firefox Release, all OS, Firefox 159, pulled 2026-11-10.
   // networking.http_3_rtt: smoothed RTT of QUIC connections, sampled at close (ms).
   rtt: { p50: 29, p75: 54, p95: 219, p99: 516 },
+  // Same metric, pooled histogram over all connections (not per-client), bucketed.
+  // Median connection falls in the 23 to 25 ms bucket. 27.0B samples.
+  rttHist: {
+    x: ['< 10 ms', '10 to 25', '25 to 50', '50 to 100', '100 to 200', '200 to 500', '500+'],
+    v: [11.3, 39.5, 31.2, 12.1, 3.8, 1.6, 0.5],
+  },
 
   // GLAM fog, Firefox Release, Firefox 159, desktop page loads not served from cache,
   // to servers that speak HTTP/3 (netwerk/base/nsLoadGroup.cpp).
@@ -23,6 +29,9 @@ window.DECK_DATA = {
   // networking.connection_address_type: IP family per HTTP transaction.
   ipv6: [25.0, 24.9, 25.4, 24.8, 24.9, 25.3, 24.7, 23.9],
   ipv4: [75.0, 75.1, 74.6, 75.2, 75.1, 74.7, 75.3, 76.1],
+  // GLAM fog tls_handshake_version, Firefox Release 159, share of TLS handshakes:
+  // TLS 1.3 88.17%, TLS 1.2 11.80%, TLS 1.0 0.02%.
+  tls13: 88.2,
   // networking.http_response_version.
   h1: [21.2, 20.7, 20.2, 20.8, 20.6, 20.7, 20.8, 18.1],
   h2: [51.3, 51.5, 49.7, 50.4, 49.5, 49.0, 48.6, 49.3],

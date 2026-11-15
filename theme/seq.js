@@ -30,8 +30,9 @@
     const W = el.clientWidth || 560;
     const k = spec.scale || 1;
     const padX = 16, topH = 40 * k, rowH = 34 * k, noteH = 28 * k, botPad = 14;
-    const n = actors.length, laneW = (W - 2 * padX) / n;
-    const cx = (i) => padX + laneW * (i + 0.5);
+    const padL = padX + (spec.gutter || 0);
+    const n = actors.length, laneW = (W - padL - padX) / n;
+    const cx = (i) => padL + laneW * (i + 0.5);
     const idx = {}; actors.forEach((a, i) => { idx[a.id] = i; });
     const H = topH + msgs.reduce((h, m) => h + (m.note ? noteH + 6 : rowH), 0) + botPad;
 
@@ -50,6 +51,7 @@
     });
 
     let y = topH + 6;
+    let rt = null;
     msgs.forEach((m) => {
       if (m.note) {
         const ids = (m.over || actors.map((a) => a.id)).map((id) => idx[id]);
@@ -65,6 +67,13 @@
         + `fill="${m.hl ? ACC : INK}" font-weight="${m.hl ? 700 : 400}">${esc(m.text)}</text>`;
       s += `<line x1="${xa + dir * 2}" y1="${yy}" x2="${xb - dir * 6}" y2="${yy}" stroke="${col}" `
         + `stroke-width="1.6" ${m.dashed ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#${mark})"/>`;
+      // Optional round-trip bracket in the left gutter: `rt` on the first message of a pair.
+      if (rt) {
+        const bx = padL - 14, y1 = rt.y - 10 * k, y2 = yy + 4;
+        s += `<path d="M${bx + 6},${y1} H${bx} V${y2} H${bx + 6}" fill="none" stroke="${MUTED}" stroke-width="1.5"/>`;
+        s += `<text x="${bx - 10}" y="${(y1 + y2) / 2 + 5 * k}" text-anchor="end" font-size="${13 * k}" font-weight="700" fill="${INK}">${esc(rt.label)}</text>`;
+        rt = null;
+      } else if (m.rt) rt = { y: yy, label: m.rt };
       y += rowH;
     });
     s += '</svg>';
