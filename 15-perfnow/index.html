@@ -180,6 +180,7 @@
     <h2>IPv6: standardised in 1998, a quarter of requests today</h2>
     <div class="chart" style="height:490px" id="c-ipv6"></div>
     <figcaption>IP family of HTTP requests, Firefox Release, by version (about one month each). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
+    <aside class="notes">IPv6 was standardised in 1998. Today about a quarter of Firefox requests use it. Google will tell you half of its users reach it over IPv6, but that only counts clients reaching a server that supports it. GitHub, for example, still has no IPv6 address. There was a transition path, but it was too complex, and the internet routed around it: much of the routing moved up to HTTP. A CDN can serve millions of sites from a single IP address.</aside>
   </section>
 
   <section>
@@ -187,6 +188,7 @@
     <h2>HTTP/3: about 30% of requests</h2>
     <div class="chart" style="height:490px" id="c-h3"></div>
     <figcaption>HTTP version of responses, Firefox Release, by version. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
+    <aside class="notes">HTTP/3 is about 30%, and growing. Unlike IPv6, it has a clear reason to exist: it is faster, as we just saw.</aside>
   </section>
 
   <section>
@@ -210,6 +212,17 @@
     <p>Which one works depends on the user's network. The site cannot know.</p>
   </section>
 
+  <section>
+    <p class="part">2 &middot; The problem is the transition</p>
+    <h2>Nobody can plan a transition of the whole internet</h2>
+    <ul>
+      <li>IPv6: a planned transition. 28 years later, about a quarter of Firefox requests.</li>
+      <li>Every network, device and middlebox decides for itself.</li>
+      <li>HTTP/3: no deadline. Servers offer it, browsers prefer it, nothing requires it.</li>
+    </ul>
+    <aside class="notes">The internet is too complex to plan a transition across every network and every vendor. What works is evolution: offer the new thing, let it prove itself. No one sets a date, no one is forced to switch.</aside>
+  </section>
+
   <!-- 3. Let the browser race -->
   <section>
     <p class="part">3 &middot; Let the browser race</p>
@@ -221,6 +234,7 @@
       <li>Firefox: on in Nightly, on for 50% of Release.</li>
     </ul>
     <p><strong>Offer HTTP/3 without risk: where it breaks, the browser falls back.</strong></p>
+    <aside class="notes">This is the whole strategy. HTTP/3 is faster. Alt-Svc and HTTPS records are an easy way to offer it. The browser races and falls back. Servers only need to offer it, and everyone gets the benefit.</aside>
   </section>
 
   <section>
