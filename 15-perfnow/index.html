@@ -28,6 +28,11 @@
     .reveal .bugs td { border-bottom: 1px solid var(--hairline); padding: 0.4em 0.6em; vertical-align: top; }
     .reveal .bugs td:first-child { font-weight: 800; white-space: nowrap; }
     .reveal .bugs td:last-child { white-space: nowrap; text-align: right; }
+    .reveal .why { display: flex; gap: 48px; align-items: center; margin: 1.4em 0 1em; }
+    .reveal .why .stat { flex: 0 0 300px; }
+    .reveal .why .bugs { font-size: 0.72em; }
+    .reveal .why .bugs td { padding: 1em 0.6em; }
+    .reveal .why .bugs td:nth-child(2) { white-space: normal; }
     .reveal .opts { font-size: 0.95em; line-height: 1.9; }
     .reveal .opts em { color: var(--ink-faint); font-style: normal; padding: 0 0.3em; }
     .reveal .bigurl { font-size: 2.2em; font-weight: 800; color: var(--accent); text-align: center; margin: 1.2em 0 0.4em; }
@@ -186,17 +191,16 @@
 
   <section>
     <p class="part">2 &middot; The problem is the transition</p>
-    <h2>New protocols break on some networks</h2>
-    <table class="bugs">
-      <tr><td>Antivirus</td><td>Bitdefender stalls the HTTP/3 handshake, Facebook does not load</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a></td></tr>
-      <tr><td>Antivirus</td><td>Avast's proxy acknowledges packets Firefox never sent</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
-      <tr><td>VPN</td><td>Smaller packets on a VPN tunnel stall HTTP/3</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a></td></tr>
-      <tr><td>Operating system</td><td>Windows silently lowers the packet size, HTTP/3 fails</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1772057">bug 1772057</a></td></tr>
-      <tr><td>VPN</td><td>Virtual network interfaces reject batched UDP sends</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
-      <tr><td>Proxy</td><td>SOCKS proxies carry no UDP, so no HTTP/3</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1808692">bug 1808692</a></td></tr>
-      <tr><td>VPN</td><td>A VPN drops all IPv6, the site does not load</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1964292">bug 1964292</a></td></tr>
-    </table>
-    <figcaption>Google, 2017: 4.4% of clients cannot use QUIC, mostly on corporate networks (<a href="https://dl.acm.org/doi/10.1145/3098822.3098842">SIGCOMM 2017</a>, section 7.2).</figcaption>
+    <h2>Why HTTP/3 does not always work</h2>
+    <div class="why">
+      <div class="stat"><span class="num">97%+</span><span class="lbl">of the time QUIC works,<br>across Meta's apps and sites</span></div>
+      <table class="bugs">
+        <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work. Facebook did not load behind Bitdefender.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
+        <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+        <tr><td>Network</td><td>Some networks block UDP. Rare today.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a></td></tr>
+      </table>
+    </div>
+    <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
   </section>
 
   <section>
