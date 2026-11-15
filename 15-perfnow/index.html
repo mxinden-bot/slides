@@ -32,6 +32,7 @@
     .reveal .opts em { color: var(--ink-faint); font-style: normal; padding: 0 0.3em; }
     .reveal .bigurl { font-size: 2.2em; font-weight: 800; color: var(--accent); text-align: center; margin: 1.2em 0 0.4em; }
     .reveal .monday { font-size: 1.05em; line-height: 1.6; }
+    .reveal .mantra { font-size: 1.15em; font-weight: 800; margin-top: 1em; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -42,7 +43,7 @@
   <!-- Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Save a round trip</h1>
-    <p class="subtitle">Use modern protocols safely: HTTP/3, Happy Eyeballs and HTTPS records</p>
+    <p class="subtitle">Offer on the server, race on the client</p>
     <span class="venue"><a href="https://perfnow.nl/">performance.now() 2026</a> &middot; Amsterdam &middot; 20 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
   </section>
 
@@ -208,13 +209,14 @@
   <!-- 3. Let the browser race -->
   <section>
     <p class="part">3 &middot; Let the browser race</p>
-    <h2>Happy Eyeballs: try several, keep the first that connects</h2>
+    <h2>Offer on the server, race on the client</h2>
+    <p>Happy Eyeballs: the browser tries several options and keeps the first that connects.</p>
     <ul>
       <li>2012: IPv6, with IPv4 as a fallback (<a href="https://www.rfc-editor.org/rfc/rfc6555">RFC 6555</a>, then <a href="https://www.rfc-editor.org/rfc/rfc8305">RFC 8305</a>).</li>
       <li>Now: HTTP/3 too, with HTTP/2 as a fallback (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">Happy Eyeballs v3</a>, IETF draft).</li>
       <li>Firefox: on in Nightly, on for 50% of Release.</li>
     </ul>
-    <p><strong>For you: offer HTTP/3 without risk. Where it breaks, the browser falls back.</strong></p>
+    <p><strong>Offer HTTP/3 without risk: where it breaks, the browser falls back.</strong></p>
   </section>
 
   <section>
@@ -278,6 +280,7 @@
       <li>Publish an HTTPS record with <code>alpn="h3"</code> and a long lifetime.</li>
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
+    <p class="mantra">Offer on the server, race on the client.</p>
     <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
