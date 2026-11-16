@@ -114,11 +114,8 @@
   <!-- 7. Release FCP -->
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
-    <div class="cols" style="gap:24px;">
-      <div><div class="chart short" id="c-rel-fcp"></div></div>
-      <div><div class="chart short" id="c-rel-fcp-ms"></div></div>
-    </div>
-    <figcaption>First contentful paint, HEv3 vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Left: change in %. Right: change in ms. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
+    <div class="chart" id="c-rel-fcp"></div>
+    <figcaption>First contentful paint, HEv3 vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Bars: change in %; labels: change in % and ms. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
   </section>
 
   <!-- 8. Changes since IETF 126 -->
@@ -296,13 +293,8 @@
   }));
   Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
     x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
-    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
+    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%\n' + D.release.diffMs[p.dataIndex] + ' ms',
     series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
-  }));
-  Charts.register('c-rel-fcp-ms', (el) => Charts.bar(el, {
-    x: D.release.p, yName: 'FCP change vs control, ms', yMin: -450, yMax: 0, yFormatter: (v) => v + ' ms',
-    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value + ' ms',
-    series: [{ name: 'HEv3 vs control', data: D.release.diffMs, color: '#1baf7a' }],
   }));
 
   const pctL = (p) => p.value + '%';
