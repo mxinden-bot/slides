@@ -24,4 +24,29 @@ window.DECK_DATA = {
     hev3:    [169, 213, 349, 643, 1173, 1655, 2127, 3259, 10815],
     diff:    [-0.59, -1.84, -3.32, -2.72, -2.33, -2.24, -2.07, -1.87, -3.63],
   },
+
+  // Backup: netwerk_happy_eyeballs_* on GLAM, Firefox 160 Release (Happy Eyeballs
+  // enabled clients), client-aggregated. Percentiles in ms; shares in % of
+  // (client-normalized) samples; labeled counters estimated from GLAM's per-client sums.
+  he: {
+    e2eOk:   { p: ['P5', 'P25', 'P50', 'P75', 'P95', 'P99', 'P99.9'], ms: [15, 40, 74, 149, 558, 2455, 10000] },
+    e2eFail: { p: ['P50', 'P75', 'P95', 'P99'], ms: [10, 10000, 10000, 10000] },
+    winIdx:  { x: ['1st', '2nd', '3rd', '4th', '5th+'], pct: [94.0, 4.7, 0.96, 0.2, 0.14] },
+    attempts: { x: ['1', '2', '3', '4', '5+'], pct: [62.8, 27.45, 6.66, 2.18, 0.91] },
+    cancelled: { x: ['0', '1', '2', '3+'], pct: [68.47, 25.41, 4.39, 1.73] },
+    firstAttempt: { p: ['P75', 'P95', 'P99', 'P99.9'], ms: [21, 109, 891, 6769] },
+    dns: { p: ['P75', 'P95', 'P99'], a: [18, 101, 963], aaaa: [19, 118, 1041], https: [7, 63, 299] },
+    spreadV1: { p: ['P95', 'P99', 'P99.9'], ms: [0, 12, 31] },
+    discovery: [
+      { name: 'no h3 advertised', value: 56.1, color: '#8f8f9d' },
+      { name: 'HTTPS record only', value: 1.7, color: '#1baf7a' },
+      { name: 'Alt-Svc only', value: 34.4, color: '#eb6834' },
+      { name: 'both', value: 7.8, color: '#2a78d6' },
+    ],
+    discoveryBy: { x: ['none', 'Alt-Svc only', 'both', 'HTTPS record only'],
+      doh: [50.0, 34.7, 12.6, 2.7], native: [57.6, 34.3, 6.6, 1.5] },
+    rr: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'], pct: [48.8, 21.6, 18.4, 3.4] },
+    rrBy: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'],
+      doh: [51.7, 25.0, 20.2, 3.3], native: [47.5, 20.1, 17.6, 3.4] },
+  },
 };
