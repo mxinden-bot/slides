@@ -225,12 +225,6 @@
   </section>
 
   <section>
-    <h2>What HTTPS records carry</h2>
-    <div class="chart" id="c-b-rr"></div>
-    <figcaption>Of connections that saw an HTTPS record, the share carrying each SvcParam. Estimated from GLAM&rsquo;s per-client sums. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: netwerk_happy_eyeballs_https_rr_features_by_resolver</a>.</figcaption>
-  </section>
-
-  <section>
     <h2>What HTTPS records carry, by resolver</h2>
     <div class="chart" id="c-b-rrby"></div>
     <figcaption>Same, split by DoH and the native resolver. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: netwerk_happy_eyeballs_https_rr_features_by_resolver</a>.</figcaption>
@@ -325,7 +319,6 @@
   Charts.register('c-b-discby', (el) => Charts.bar(el, { x: D.he.discoveryBy.x, yName: '% of connections', yMax: 70,
     barLabels: true, barLabelFormatter: pctL,
     series: [{ name: 'DoH', data: D.he.discoveryBy.doh, color: '#2a78d6' }, { name: 'native', data: D.he.discoveryBy.native, color: '#8f8f9d' }] }));
-  Charts.register('c-b-rr', (el) => Charts.barH(el, { y: D.he.rr.labels, data: D.he.rr.pct, xMax: 100, valueFormatter: (v) => v + '%' }));
   Charts.register('c-b-rrby', (el) => Charts.bar(el, { x: D.he.rrBy.labels, yName: '% of HTTPS records', yMax: 70,
     barLabels: true, barLabelFormatter: pctL,
     series: [{ name: 'DoH', data: D.he.rrBy.doh, color: '#2a78d6' }, { name: 'native', data: D.he.rrBy.native, color: '#8f8f9d' }] }));

@@ -45,7 +45,6 @@ window.DECK_DATA = {
     ],
     discoveryBy: { x: ['none', 'Alt-Svc only', 'both', 'HTTPS record only'],
       doh: [50.0, 34.7, 12.6, 2.7], native: [57.6, 34.3, 6.6, 1.5] },
-    rr: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'], pct: [48.8, 21.6, 18.4, 3.4] },
     rrBy: { labels: ['h3 ALPN', 'IPv4 hint', 'IPv6 hint', 'ECH'],
       doh: [51.7, 25.0, 20.2, 3.3], native: [47.5, 20.1, 17.6, 3.4] },
   },
