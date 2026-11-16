@@ -35,6 +35,7 @@
     .reveal .shot .big { font-size: 1.5em; font-weight: 800; color: var(--accent); }
     .reveal .steps { font-size: 1.0em; line-height: 1.6; }
     .reveal .mantra { font-size: 1.15em; font-weight: 800; margin-top: 1em; }
+    .reveal .placeholder { margin-top: 1em; height: 460px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--hairline); border-radius: 8px; color: var(--ink-faint); font-size: 0.8em; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -195,6 +196,13 @@
     <h2>First contentful paint is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Offer on the server, race on the client</p>
+    <h2>Largest contentful paint</h2>
+    <div class="placeholder">Placeholder: LCP change, Happy Eyeballs v3 vs control, same experiment.</div>
+    <aside class="notes">Placeholder. Pull LCP from the same Release experiment and chart it like the FCP slide.</aside>
   </section>
 
   <!-- 4. Offer on the server -->
