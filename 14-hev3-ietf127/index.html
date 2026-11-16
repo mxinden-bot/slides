@@ -115,7 +115,7 @@
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
     <div class="chart" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, HEv3 vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Bars: change in %; labels: change in % and ms. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
+    <figcaption>First contentful paint, HEv3 vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Bars: change in %; labels: change in % (and ms). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
   </section>
 
   <!-- 8. Changes since IETF 126 -->
@@ -293,7 +293,7 @@
   }));
   Charts.register('c-rel-fcp', (el) => Charts.bar(el, {
     x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
-    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%\n' + D.release.diffMs[p.dataIndex] + ' ms',
+    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%\n(' + D.release.diffMs[p.dataIndex] + ' ms)',
     series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
   }));
 
