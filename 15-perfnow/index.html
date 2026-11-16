@@ -35,7 +35,6 @@
     .reveal .shot .big { font-size: 1.5em; font-weight: 800; color: var(--accent); }
     .reveal .steps { font-size: 1.0em; line-height: 1.6; }
     .reveal .mantra { font-size: 1.15em; font-weight: 800; margin-top: 1em; }
-    .reveal .placeholder { margin-top: 1em; height: 460px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--hairline); border-radius: 8px; color: var(--ink-faint); font-size: 0.8em; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -200,9 +199,10 @@
 
   <section>
     <p class="part">3 &middot; Offer on the server, race on the client</p>
-    <h2>Largest contentful paint</h2>
-    <div class="placeholder">Placeholder: LCP change, Happy Eyeballs v3 vs control, same experiment.</div>
-    <aside class="notes">Placeholder. Pull LCP from the same Release experiment and chart it like the FCP slide.</aside>
+    <h2>Largest contentful paint is faster too</h2>
+    <div class="chart" style="height:490px" id="c-rel-lcp"></div>
+    <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>. Both branches differ in DNS cache size too (1600 vs 3200 entries).</figcaption>
+    <aside class="notes">Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP. Happy Eyeballs saves time in connection setup, and LCP adds more time after that. No confidence intervals computed, so don't call it significant. P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</aside>
   </section>
 
   <!-- 4. Offer on the server -->
@@ -429,6 +429,19 @@
     series: [{
       type: 'bar', barWidth: 24, data: D.release.diff.map((d, i) => ({
         value: d, label: { show: ['P50', 'P99'].includes(D.release.p[i]) } })),
+      itemStyle: { color: NEW, borderRadius: [0, 0, 4, 4] },
+      label: { position: 'bottom', distance: 8, formatter: (p) => p.value.toFixed(1) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) },
+    }],
+  }));
+
+  // LCP change by percentile, same style as FCP; label P50 and P95.
+  Charts.register('c-rel-lcp', (el) => chart(el, {
+    grid: { left: 70, right: 30, top: 40, bottom: 40 },
+    xAxis: catAxis(D.release.lcp.p, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
+    yAxis: valueAxis({ min: -4, max: 0, interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{
+      type: 'bar', barWidth: 24, data: D.release.lcp.diff.map((d, i) => ({
+        value: d, label: { show: ['P50', 'P95'].includes(D.release.lcp.p[i]) } })),
       itemStyle: { color: NEW, borderRadius: [0, 0, 4, 4] },
       label: { position: 'bottom', distance: 8, formatter: (p) => p.value.toFixed(1) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) },
     }],

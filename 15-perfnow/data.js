@@ -48,5 +48,14 @@ window.DECK_DATA = {
     },
     p:    ['P5', 'P10', 'P25', 'P50', 'P75', 'P85', 'P90', 'P95', 'P99'],
     diff: [-0.59, -1.84, -3.32, -2.72, -2.33, -2.24, -2.07, -1.87, -3.63],
+    // Largest contentful paint, same experiment and window, exact percentiles.
+    // 5,893,143 (control) and 6,119,675 (HEv3) page loads. p99 and above left out:
+    // there LCP measures how long a page stays open, not loading speed.
+    lcp: {
+      p:       ['P5', 'P10', 'P25', 'P50', 'P75', 'P85', 'P90', 'P95'],
+      control: [219, 302, 490, 941, 1883, 2931, 4270, 10711],
+      hev3:    [218, 302, 483, 928, 1860, 2886, 4196, 10390],
+      diff:    [-0.46, 0.00, -1.43, -1.38, -1.22, -1.54, -1.73, -3.00],
+    },
   },
 };
