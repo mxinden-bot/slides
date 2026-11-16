@@ -57,6 +57,12 @@ try {
       [...document.images].map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => {})))
     ));
     await page.waitForTimeout(1200);
+    // Charts first render at screen layout; redraw them at the print layout's size.
+    await page.evaluate(() => {
+      if (window.Charts) Charts.renderAll();
+      if (window.Seq) Seq.renderAll();
+    });
+    await page.waitForTimeout(800);
     const out = join(outDir, `${deck}.pdf`);
     await page.pdf({ path: out, printBackground: true, preferCSSPageSize: true,
       width: `${WIDTH}px`, height: `${HEIGHT}px`, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
