@@ -83,7 +83,7 @@
     <p class="muted" style="font-size:0.8em; margin:0 0 0.2em;">About 92% of runs get all DNS answers within 25 ms of the first.</p>
     <div class="chart" id="c-spread" style="height:400px;"></div>
     <p style="font-size:0.7em; margin:0.3em 0 0;"><strong>Next step:</strong> a dynamic Resolution Delay, derived from recent DNS answers (for example the last 100 from the same resolver), instead of tuning one constant.</p>
-    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) in a Happy Eyeballs run, including answers that arrive after connecting started, cumulative share of runs. 53.7% of runs get all answers at once, about 98.6% within 100 ms. Firefox Beta 161 (Release on 24 November 2026), 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a> (<code>until_end</code>).</figcaption>
+    <figcaption>Time between the first and the last positive DNS answer (A, AAAA, HTTPS) in a Happy Eyeballs run, including answers that arrive after connecting started, cumulative share of runs. 53.7% of runs get all answers at once, about 98.6% within 100 ms. Firefox Beta 161 (Release on 24 November 2026), 69,641 clients, 166.5M runs, every histogram bucket (about 9% wide). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread_v2/explore?app_id=beta">GLAM: netwerk_happy_eyeballs_dns_answer_spread_v2</a> (<code>until_end</code>).</figcaption>
   </section>
 
   <!-- 5. Release experiment -->
@@ -114,8 +114,11 @@
   <!-- 7. Release FCP -->
   <section>
     <h2>First contentful paint is faster at every percentile</h2>
-    <div class="chart" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, HEv3 change vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
+    <div class="cols" style="gap:24px;">
+      <div><div class="chart short" id="c-rel-fcp"></div></div>
+      <div><div class="chart short" id="c-rel-fcp-ms"></div></div>
+    </div>
+    <figcaption>First contentful paint, HEv3 vs control, page loads on a new connection: 5.2M (control) and 5.4M (HEv3). Left: change in %. Right: change in ms. Lower is faster. Median <strong>661 ms to 643 ms</strong>, P99 <strong>11222 ms to 10815 ms</strong>.</figcaption>
   </section>
 
   <!-- 8. Changes since IETF 126 -->
@@ -123,8 +126,8 @@
     <h2>Changes since IETF 126</h2>
     <ul>
       <li>An HTTPS record with an IP hint for the preferred family counts as that family&rsquo;s answer, so the race starts without waiting for AAAA (<a href="https://github.com/mozilla/happy-eyeballs/pull/153">happy-eyeballs#153</a>, draft &sect;4.2.1).</li>
-      <li>Firefox implements <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">Optimistic DNS</a>: race a stale answer right away, revalidate with a lookup that bypasses the cache, and race the fresh answer too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
-      <li>Stale negative answers are revalidated too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>). They get a 300 s cache lifetime (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084328">bug 2084328</a>) and the same 600 s grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>).</li>
+      <li>Firefox implements <a href="https://datatracker.ietf.org/doc/draft-gakiwate-dnsop-optimistic-dns/">Optimistic DNS</a>: connect to a stale answer right away while a fresh lookup runs. Fresh addresses join the same race, so a stale address that no longer works does not fail the connection (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a>).</li>
+      <li>Stale negative answers are revalidated too (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2072592">bug 2072592</a>). They get the same 600 s grace period as positive ones (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2084330">bug 2084330</a>).</li>
     </ul>
   </section>
 
@@ -167,67 +170,67 @@
   <section>
     <h2>End-to-end time, succeeded</h2>
     <div class="chart" id="c-b-e2eok"></div>
-    <figcaption>First DNS query to a connected socket, successful runs. Median 74 ms, P95 558 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore">GLAM: netwerk_happy_eyeballs_end_to_end_time_succeeded</a>.</figcaption>
+    <figcaption>First DNS query to a connected socket, successful runs. Median 74 ms, P95 558 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_succeeded/explore?app_id=release">GLAM: netwerk_happy_eyeballs_end_to_end_time_succeeded</a>.</figcaption>
   </section>
 
   <section>
     <h2>End-to-end time, failed</h2>
     <div class="chart" id="c-b-e2efail"></div>
-    <figcaption>Failed runs either fail fast (median 10 ms) or hit the 10 s cap. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore">GLAM: netwerk_happy_eyeballs_end_to_end_time_failed</a>.</figcaption>
+    <figcaption>Failed runs either fail fast (median 10 ms) or hit the 10 s cap. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_end_to_end_time_failed/explore?app_id=release">GLAM: netwerk_happy_eyeballs_end_to_end_time_failed</a>.</figcaption>
   </section>
 
   <section>
     <h2>Winning attempt index</h2>
     <div class="chart" id="c-b-winidx"></div>
-    <figcaption>Which attempt connected. 94% of runs win on the first attempt. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore">GLAM: netwerk_happy_eyeballs_winning_attempt_index</a>.</figcaption>
+    <figcaption>Which attempt connected. 94% of runs win on the first attempt. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_winning_attempt_index/explore?app_id=release">GLAM: netwerk_happy_eyeballs_winning_attempt_index</a>.</figcaption>
   </section>
 
   <section>
     <h2>Connection attempt count</h2>
     <div class="chart" id="c-b-attempts"></div>
-    <figcaption>Attempts started before one succeeded, successful runs. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_connection_attempt_count/explore">GLAM: netwerk_happy_eyeballs_connection_attempt_count</a>.</figcaption>
+    <figcaption>Attempts started before one succeeded, successful runs. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_connection_attempt_count/explore?app_id=release">GLAM: netwerk_happy_eyeballs_connection_attempt_count</a>.</figcaption>
   </section>
 
   <section>
     <h2>Cancelled attempt count</h2>
     <div class="chart" id="c-b-cancelled"></div>
-    <figcaption>Attempts cancelled once another won. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_cancelled_attempt_count/explore">GLAM: netwerk_happy_eyeballs_cancelled_attempt_count</a>.</figcaption>
+    <figcaption>Attempts cancelled once another won. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_cancelled_attempt_count/explore?app_id=release">GLAM: netwerk_happy_eyeballs_cancelled_attempt_count</a>.</figcaption>
   </section>
 
   <section>
     <h2>Time to first attempt</h2>
     <div class="chart" id="c-b-first"></div>
-    <figcaption>Time from the start of a run to the first connection attempt. Median 0 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_time_to_first_attempt/explore">GLAM: netwerk_happy_eyeballs_time_to_first_attempt</a>.</figcaption>
+    <figcaption>Time from the start of a run to the first connection attempt. Median 0 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_time_to_first_attempt/explore?app_id=release">GLAM: netwerk_happy_eyeballs_time_to_first_attempt</a>.</figcaption>
   </section>
 
   <section>
     <h2>DNS resolution time, by record type</h2>
     <div class="chart" id="c-b-dns"></div>
-    <figcaption>Per record type, log scale. HTTPS records resolve faster than A and AAAA. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore">GLAM: netwerk_happy_eyeballs_dns_resolution_time</a>.</figcaption>
+    <figcaption>Per record type, log scale. HTTPS records resolve faster than A and AAAA. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_resolution_time/explore?app_id=release">GLAM: netwerk_happy_eyeballs_dns_resolution_time</a>.</figcaption>
   </section>
 
   <section>
     <h2>DNS answer spread before the first attempt</h2>
     <div class="chart" id="c-b-spreadv1"></div>
-    <figcaption>First version of the spread metric: only answers before the first connection attempt. Median and P95 0 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread/explore">GLAM: netwerk_happy_eyeballs_dns_answer_spread</a>.</figcaption>
+    <figcaption>First version of the spread metric: only answers before the first connection attempt. Median and P95 0 ms. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_dns_answer_spread/explore?app_id=release">GLAM: netwerk_happy_eyeballs_dns_answer_spread</a>.</figcaption>
   </section>
 
   <section>
     <h2>How connections learn about HTTP/3</h2>
     <div class="chart" id="c-b-disc"></div>
-    <figcaption>Share of connections by how HTTP/3 support was advertised. Estimated from GLAM&rsquo;s per-client sums. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery_by_resolver/explore">GLAM: netwerk_happy_eyeballs_h3_discovery_by_resolver</a>.</figcaption>
+    <figcaption>Share of connections by how HTTP/3 support was advertised. Estimated from GLAM&rsquo;s per-client sums. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery_by_resolver/explore?app_id=release">GLAM: netwerk_happy_eyeballs_h3_discovery_by_resolver</a>.</figcaption>
   </section>
 
   <section>
     <h2>How connections learn about HTTP/3, by resolver</h2>
     <div class="chart" id="c-b-discby"></div>
-    <figcaption>Same, split by DoH and the native resolver. DoH is about 19% of connections. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery_by_resolver/explore">GLAM: netwerk_happy_eyeballs_h3_discovery_by_resolver</a>.</figcaption>
+    <figcaption>Same, split by DoH and the native resolver. DoH is about 19% of connections. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_h3_discovery_by_resolver/explore?app_id=release">GLAM: netwerk_happy_eyeballs_h3_discovery_by_resolver</a>.</figcaption>
   </section>
 
   <section>
     <h2>What HTTPS records carry, by resolver</h2>
     <div class="chart" id="c-b-rrby"></div>
-    <figcaption>Same, split by DoH and the native resolver. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore">GLAM: netwerk_happy_eyeballs_https_rr_features_by_resolver</a>.</figcaption>
+    <figcaption>Same, split by DoH and the native resolver. Firefox 160 Release. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/netwerk_happy_eyeballs_https_rr_features_by_resolver/explore?app_id=release">GLAM: netwerk_happy_eyeballs_https_rr_features_by_resolver</a>.</figcaption>
   </section>
 
 </div>
@@ -295,6 +298,11 @@
     x: D.release.p, yName: 'FCP change vs control, lower is faster', yMin: -4, yMax: 0, yFormatter: pct,
     barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value.toFixed(1) + '%',
     series: [{ name: 'HEv3 vs control', data: D.release.diff, color: '#1baf7a' }],
+  }));
+  Charts.register('c-rel-fcp-ms', (el) => Charts.bar(el, {
+    x: D.release.p, yName: 'FCP change vs control, ms', yMin: -450, yMax: 0, yFormatter: (v) => v + ' ms',
+    barLabels: true, barLabelPosition: 'bottom', barLabelFormatter: (p) => p.value + ' ms',
+    series: [{ name: 'HEv3 vs control', data: D.release.diffMs, color: '#1baf7a' }],
   }));
 
   const pctL = (p) => p.value + '%';

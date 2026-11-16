@@ -23,6 +23,8 @@ window.DECK_DATA = {
     control: [170, 217, 361, 661, 1201, 1693, 2172, 3321, 11222],
     hev3:    [169, 213, 349, 643, 1173, 1655, 2127, 3259, 10815],
     diff:    [-0.59, -1.84, -3.32, -2.72, -2.33, -2.24, -2.07, -1.87, -3.63],
+    // hev3 - control, ms
+    diffMs:  [-1, -4, -12, -18, -28, -38, -45, -62, -407],
   },
 
   // Backup: netwerk_happy_eyeballs_* on GLAM, Firefox 160 Release (Happy Eyeballs
