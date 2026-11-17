@@ -133,7 +133,7 @@
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
     <aside class="notes"><ul>
       <li>Distance sets the round trip: 5 to 20 ms within a city, 40 to 80 ms across a country, 150 ms or more across an ocean or on mobile (savearoundtrip.com).</li>
-      <li>25 ms median: a CDN close to the user. The tail is far longer: about 110 ms at P95.</li>
+      <li>25 ms median: a CDN close to the user. The tail is far longer: 43 ms at P75, 118 ms at P95.</li>
       <li>What people notice (Nielsen, 1993): 0.1 s feels instant, 1 s keeps the flow of thought, 10 s and attention is gone.</li>
       <li>A handshake costs several round trips: 3 at P95 is already over 0.1 s.</li>
       <li>It compounds: the round trip is paid before the HTML arrives, and every image, script and style waits for the HTML. So it delays the whole page, not one request.</li>
@@ -461,20 +461,25 @@
     ]),
   });
 
-  // Round-trip time as a cumulative distribution on a log axis, the median marked.
-  Charts.register('c-rtt', (el) => chart(el, {
-    grid: { left: 70, right: 40, top: 30, bottom: 50 },
-    xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
-      splitLine: { lineStyle: { color: HAIR } }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => v + ' ms' }) },
-    yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3 },
-      markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
-        data: [[{ coord: [1, 50] }, { coord: [25, 50] }], [{ coord: [25, 0] }, { coord: [25, 50] }]] },
-      markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
-        data: [{ coord: [25, 50.75] }],
-        label: { show: true, position: 'right', distance: 12, formatter: 'half of connections: 25 ms or less', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) } },
-    }],
-  }));
+  // Round-trip time as a cumulative distribution on a log axis; median, P75 and P95 marked
+  // at the first bucket bound where the share reaches the percentile.
+  Charts.register('c-rtt', (el) => {
+    const at = (q) => D.rttCdf.find((p) => p[1] >= q);
+    const marks = [[50, 'median'], [75, 'P75'], [95, 'P95']].map(([q, name]) => ({ q, name, p: at(q) }));
+    return chart(el, {
+      grid: { left: 70, right: 40, top: 30, bottom: 50 },
+      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR } }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => v + ' ms' }) },
+      yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3 },
+        markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
+          data: marks.flatMap((m) => [[{ coord: [1, m.q] }, { coord: [m.p[0], m.q] }], [{ coord: [m.p[0], 0] }, { coord: [m.p[0], m.q] }]]) },
+        markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
+          data: marks.map((m) => ({ coord: m.p, label: { formatter: `${m.name}: ${m.p[0]} ms` } })),
+          label: { show: true, position: 'right', distance: 12, ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) } },
+      }],
+    });
+  });
 
   // Connection setup: horizontal paired bars, values at the tips.
   Charts.register('c-setup', (el) => chart(el, {
