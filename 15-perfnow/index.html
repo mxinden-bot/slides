@@ -126,10 +126,7 @@
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
     <h2>What one round trip costs</h2>
-    <div class="cost">
-      <div class="stat"><span class="num">25 ms</span><span class="lbl">median round trip</span></div>
-      <div class="chart" style="height:470px" id="c-rtt"></div>
-    </div>
+    <div class="chart" style="height:500px" id="c-rtt"></div>
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
     <aside class="notes"><ul>
       <li>Distance sets the round trip: 5 to 20 ms within a city, 40 to 80 ms across a country, 150 ms or more across an ocean or on mobile (savearoundtrip.com).</li>
@@ -467,16 +464,21 @@
     const at = (q) => D.rttCdf.find((p) => p[1] >= q);
     const marks = [[50, 'median'], [75, 'P75'], [95, 'P95']].map(([q, name]) => ({ q, name, p: at(q) }));
     return chart(el, {
-      grid: { left: 70, right: 40, top: 30, bottom: 50 },
-      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
-        splitLine: { lineStyle: { color: HAIR } }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => v + ' ms' }) },
-      yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-      series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3 },
+      grid: { left: 90, right: 60, top: 50, bottom: 60 },
+      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, name: 'round-trip time', nameLocation: 'middle', nameGap: 36,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17 }),
+        axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR } }, minorTick: { show: false }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => (v >= 1000 ? v / 1000 + ' s' : v + ' ms') }) },
+      yAxis: valueAxis({ min: 0, max: 100, interval: 25, name: 'share of connections', nameLocation: 'end', nameGap: 18,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }),
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3.5 },
         markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
           data: marks.flatMap((m) => [[{ coord: [1, m.q] }, { coord: [m.p[0], m.q] }], [{ coord: [m.p[0], 0] }, { coord: [m.p[0], m.q] }]]) },
         markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
           data: marks.map((m) => ({ coord: m.p, label: { formatter: `${m.name}: ${m.p[0]} ms` } })),
-          label: { show: true, position: 'right', distance: 12, ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) } },
+          label: { show: true, position: 'left', distance: 10, backgroundColor: '#fff', padding: [2, 6], ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } },
       }],
     });
   });
