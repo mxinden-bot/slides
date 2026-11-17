@@ -47,6 +47,8 @@
     .reveal svg.race .note.on { fill: var(--ink); font-weight: 700; }
     .reveal svg.race .cut { stroke: var(--accent); stroke-width: 2; }
     .reveal svg.race .cutlabel { font-size: 17px; fill: var(--ink); font-weight: 700; }
+    .reveal .benefit { font-size: 0.7em; font-weight: 700; margin: 0.2em 0 0; }
+    .reveal .flow { width: 1000px; margin: 0.6em auto 0; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -205,7 +207,7 @@
     <p class="part">3 &middot; Offer on the server, race on the client</p>
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user's network. The browser tries them in turn.</p>
-    <svg class="race" viewBox="0 0 1180 400" width="100%">
+    <svg class="race" viewBox="0 0 1180 400" style="max-height:400px" width="100%">
       <g class="axis">
         <line x1="260" y1="360" x2="1150" y2="360"/>
         <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
@@ -219,6 +221,7 @@
       <line class="cut" x1="812" y1="150" x2="812" y2="345"/>
       <text class="cutlabel" x="822" y="335">first to connect wins, the rest is cancelled</text>
     </svg>
+    <p class="benefit">Usually the new protocol wins. Where it is blocked, the browser falls back to the old one, so it stays safe.</p>
     <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
     <aside class="notes"><ul>
       <li>This is the whole strategy: offer on the server, race on the client.</li>
@@ -247,47 +250,44 @@
 
   <section>
     <p class="part">3 &middot; Offer on the server, race on the client</p>
-    <h2>First contentful paint is faster at every percentile</h2>
+    <h2>First contentful paint (FCP) is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
+    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li></ul></aside>
   </section>
 
   <section>
     <p class="part">3 &middot; Offer on the server, race on the client</p>
-    <h2>Largest contentful paint is faster too</h2>
+    <h2>Largest contentful paint (LCP) is faster too</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
     <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>. Both branches differ in DNS cache size too (1600 vs 3200 entries).</figcaption>
-    <aside class="notes"><ul><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
+    <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Firefox records the final value when the page is hidden.</li><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
   </section>
 
   <!-- 4. Offer on the server -->
   <section>
     <p class="part">4 &middot; Offer on the server</p>
-    <h2>Tell the browser about HTTP/3 before it connects</h2>
-    <div class="cols" style="gap:26px; align-items:flex-start;">
-      <div>
-        <h3 class="center">Alt-Svc header</h3>
-        <div id="up-altsvc"></div>
-        <p class="center small"><strong style="color:var(--warn);">HTTP/3 only on the next connection.</strong></p>
-      </div>
-      <div>
-        <h3 class="center">HTTPS DNS record</h3>
-        <div id="up-https"></div>
-        <p class="center small"><strong style="color:var(--good);">HTTP/3 on the first connection.</strong></p>
-      </div>
-    </div>
+    <h2>Alt-Svc header: HTTP/3 only on the next connection</h2>
+    <div class="flow" id="up-altsvc"></div>
   </section>
 
   <section>
     <p class="part">4 &middot; Offer on the server</p>
-    <h2>Give Happy Eyeballs both signals</h2>
+    <h2>HTTPS DNS record: HTTP/3 on the first connection</h2>
+    <div class="flow" id="up-https"></div>
+  </section>
+
+  <section>
+    <p class="part">4 &middot; Offer on the server</p>
+    <h2>What to offer</h2>
     <ul>
-      <li>Serve HTTP/3 and send an <code>Alt-Svc</code> header.</li>
+      <li>Serve HTTP/3, alongside HTTP/1.1 and HTTP/2.</li>
+      <li>Send an <code>Alt-Svc</code> header on all of them.</li>
       <li>Publish an HTTPS record with <code>alpn="h3"</code>:</li>
     </ul>
     <pre class="rr"><code class="plaintext">example.com. 3600 IN HTTPS 1 . alpn="h3,h2"</code></pre>
     <ul>
-      <li>Give it a long lifetime, so browsers have it cached.</li>
+      <li>Offer QUIC 0-RTT.</li>
     </ul>
   </section>
 
@@ -299,7 +299,7 @@
       <img src="savearoundtrip-perfnow.png" alt="savearoundtrip.com result for perfnow.nl: no HTTPS record, no Alt-Svc header, no HTTP/3">
       <div>
         <p class="big"><a href="https://savearoundtrip.com/">savearoundtrip.com</a></p>
-        <p>HTTPS record? Alt-Svc header? A live HTTP/3 handshake?</p>
+        <p>A live tester for your website.</p>
       </div>
     </div>
     <figcaption>savearoundtrip.com checking perfnow.nl, 15 November 2026.</figcaption>
@@ -308,13 +308,18 @@
   <section>
     <h2>Next steps</h2>
     <ol class="steps">
-      <li>Turn on HTTP/3 and send an <code>Alt-Svc</code> header.</li>
-      <li>Publish an HTTPS record with <code>alpn="h3"</code> and a long lifetime.</li>
-      <li>Turn on QUIC 0-RTT, for repeat visits.</li>
+      <li>Serve HTTP/3 and send an <code>Alt-Svc</code> header.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code>.</li>
+      <li>Offer QUIC 0-RTT.</li>
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
     <p class="mantra">Offer on the server, race on the client.</p>
-    <aside class="notes"><ul><li>0-RTT data can be replayed by an attacker.</li><li>Servers accept it only for safe requests such as GET.</li><li>HTTP has a 425 Too Early status for the rest (RFC 8470).</li></ul></aside>
+    <aside class="notes"><ul>
+      <li>Summary: we are moving to HTTP/3, one round trip less, and with 0-RTT no setup round trip at all.</li>
+      <li>The problem is the rollout. We don't want to get stuck like IPv6. TLS 1.3 is the better example.</li>
+      <li>For that, servers offer and clients race.</li>
+      <li>Here is what you can do:</li>
+      <li>Q&amp;A: 0-RTT data can be replayed by an attacker.</li><li>Servers accept it only for safe requests such as GET.</li><li>HTTP has a 425 Too Early status for the rest (RFC 8470).</li></ul></aside>
     <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
@@ -361,13 +366,13 @@
   ]));
 
   const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
-  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, messages: [
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, scale: 1.5, messages: [
     { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
     { from: 'C', to: 'S', text: 'TCP + TLS + HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
     { note: 'the browser learns about HTTP/3 only now', over: ['C', 'S'] },
     { from: 'C', to: 'S', text: 'next connection: QUIC + HTTP/3', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
   ] }));
-  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, messages: [
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, scale: 1.5, messages: [
     { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + IP hints', dashed: true },
     { from: 'C', to: 'S', text: 'QUIC + HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
   ] }));
@@ -457,46 +462,34 @@
     series: [line(D.tlsSeries, 'TLS 1.3', NEW, true), line(D.ipv6Series, 'IPv6', OLD, false)],
   }));
 
-  // Experiment, HTTP version: grouped columns, control gray vs Happy Eyeballs v3 blue.
+  // Experiment, HTTP version: one 100% bar per branch, HTTP/3 in the accent.
   Charts.register('c-rel-version', (el) => {
     const v = D.release.version;
-    const col = (name, data, color, strong) => ({ name, type: 'bar', data, barWidth: 44, barGap: '45%',
-      itemStyle: { color, borderRadius: [4, 4, 0, 0] },
-      label: { show: true, position: 'top', formatter: (p) => p.value + '%', ...txt(strong ? { color: INK, fontWeight: 700 } : {}) } });
+    const seg = (i, color, textColor) => ({ name: v.x[i], type: 'bar', stack: 'v', barWidth: 64,
+      data: [v.control[i], v.hev3[i]], itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, position: 'inside', formatter: (p) => `${v.x[i]}  ${p.value}%`, ...txt({ color: textColor, fontWeight: 700, fontSize: 18 }) } });
     return chart(el, {
-      grid: { left: 60, right: 20, top: 60, bottom: 40 },
-      graphic: [keys([{ name: 'control', color: OLD }, { name: 'Happy Eyeballs v3', color: NEW }], 0, 60)],
-      xAxis: catAxis(v.x, { axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
-      yAxis: valueAxis({ min: 0, max: 60, interval: 20, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-      series: [col('control', v.control, OLD, false), col('Happy Eyeballs v3', v.hev3, NEW, true)],
+      grid: { left: 210, right: 40, top: 20, bottom: 40 },
+      xAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      yAxis: catAxis(['control', 'Happy Eyeballs v3'], { inverse: true, axisLine: { show: false }, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
+      series: [seg(0, '#e3e3e8', INK), seg(1, '#c9c9d1', INK), seg(2, NEW, '#fff')],
     });
   });
 
-  // FCP change by percentile: thin columns down from zero, label only P50 and P99.
-  Charts.register('c-rel-fcp', (el) => chart(el, {
-    grid: { left: 70, right: 30, top: 40, bottom: 40 },
-    xAxis: catAxis(D.release.p, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
+  // Paint-time change by percentile: a third colour, since this reads differently (a change,
+  // not a comparison of branches). Every bar labelled with % and ms.
+  const CHG = '#1baf7a';
+  const change = (P, diff, diffMs) => (el) => chart(el, {
+    grid: { left: 70, right: 30, top: 40, bottom: 70 },
+    xAxis: catAxis(P, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
     yAxis: valueAxis({ min: -4, max: 0, interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{
-      type: 'bar', barWidth: 24, data: D.release.diff.map((d, i) => ({
-        value: d, label: { show: ['P50', 'P99'].includes(D.release.p[i]) } })),
-      itemStyle: { color: NEW, borderRadius: [0, 0, 4, 4] },
-      label: { position: 'bottom', distance: 8, formatter: (p) => p.value.toFixed(1) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) },
-    }],
-  }));
-
-  // LCP change by percentile, same style as FCP; label P50 and P95.
-  Charts.register('c-rel-lcp', (el) => chart(el, {
-    grid: { left: 70, right: 30, top: 40, bottom: 40 },
-    xAxis: catAxis(D.release.lcp.p, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
-    yAxis: valueAxis({ min: -4, max: 0, interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{
-      type: 'bar', barWidth: 24, data: D.release.lcp.diff.map((d, i) => ({
-        value: d, label: { show: ['P50', 'P95'].includes(D.release.lcp.p[i]) } })),
-      itemStyle: { color: NEW, borderRadius: [0, 0, 4, 4] },
-      label: { position: 'bottom', distance: 8, formatter: (p) => p.value.toFixed(1) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) },
-    }],
-  }));
+    series: [{ type: 'bar', barWidth: 30, data: diff,
+      itemStyle: { color: CHG, borderRadius: [0, 0, 4, 4] },
+      label: { show: true, position: 'bottom', distance: 8, lineHeight: 20,
+        formatter: (p) => `${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
+  });
+  Charts.register('c-rel-fcp', change(D.release.p, D.release.diff, D.release.diffMs));
+  Charts.register('c-rel-lcp', change(D.release.lcp.p, D.release.lcp.diff, D.release.lcp.diffMs));
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
