@@ -19,10 +19,6 @@
     .reveal .bugs td { border-bottom: 1px solid var(--hairline); vertical-align: top; }
     .reveal .bugs td:first-child { font-weight: 800; white-space: nowrap; }
     .reveal .bugs td:last-child { white-space: nowrap; text-align: right; }
-    .reveal .why { display: flex; gap: 48px; align-items: center; margin: 1.4em 0 1em; }
-    .reveal .why .stat { flex: 0 0 300px; }
-    .reveal .why .bugs { font-size: 0.72em; }
-    .reveal .why .bugs td { padding: 1em 0.6em; }
     .reveal .cost { display: flex; gap: 30px; align-items: center; }
     .reveal .cost .stat { flex: 0 0 260px; }
     .reveal .cost .chart { flex: 1; }
@@ -35,6 +31,22 @@
     .reveal .shot .big { font-size: 1.5em; font-weight: 800; color: var(--accent); }
     .reveal .steps { font-size: 1.0em; line-height: 1.6; }
     .reveal .mantra { font-size: 1.15em; font-weight: 800; margin-top: 1em; }
+    .reveal .newproto { font-size: 0.7em; font-weight: 700; color: var(--accent); margin: -0.2em 0 0; }
+    .reveal table.why { font-size: 0.72em; margin-top: 1.2em; }
+    .reveal table.why td { padding: 0.9em 0.6em; }
+    .reveal svg.race { margin-top: 0.4em; font-family: var(--font-sans); }
+    .reveal svg.race text { font-size: 20px; fill: var(--ink); }
+    .reveal svg.race .lane > text:first-child { font-weight: 700; }
+    .reveal svg.race .axis line { stroke: var(--hairline); stroke-width: 2; }
+    .reveal svg.race .axis text { font-size: 16px; fill: var(--ink-faint); }
+    .reveal svg.race .dns { fill: #c9c9d1; }
+    .reveal svg.race .lose { fill: none; stroke: #a9a9b4; stroke-width: 2; stroke-dasharray: 6 5; }
+    .reveal svg.race .win { fill: #2a78d6; }
+    .reveal svg.race .skip { fill: none; stroke: #d7d7db; stroke-width: 2; stroke-dasharray: 3 5; }
+    .reveal svg.race .note { font-size: 17px; fill: var(--ink-muted); }
+    .reveal svg.race .note.on { fill: var(--ink); font-weight: 700; }
+    .reveal svg.race .cut { stroke: var(--accent); stroke-width: 2; }
+    .reveal svg.race .cutlabel { font-size: 17px; fill: var(--ink); font-weight: 700; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -45,9 +57,9 @@
   <!-- Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Save a round trip</h1>
-    <p class="subtitle">HTTP/3, Happy Eyeballs and one round trip less</p>
+    <p class="subtitle">Optimizing for IETF's Happy Eyeballs v3</p>
     <span class="venue"><a href="https://perfnow.nl/">performance.now() 2026</a> &middot; Amsterdam &middot; 20 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
-    <aside class="notes">Subtitle is a placeholder.</aside>
+    <aside class="notes"><ul><li>Subtitle taken from the talk title on perfnow.nl. Still a placeholder.</li></ul></aside>
   </section>
 
   <!-- About me -->
@@ -56,7 +68,7 @@
     <ul>
       <li>I work on the Firefox networking stack at Mozilla.</li>
       <li>HTTP/3 and QUIC (<a href="https://github.com/mozilla/neqo">neqo</a>).</li>
-      <li>Led most of the Happy Eyeballs v3 work in Firefox (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
+      <li>Worked on Happy Eyeballs v3 in Firefox, with Kershaw Chang (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
       <li><a href="https://max-inden.de/post/fast-udp-io-in-firefox/">Fast UDP I/O for Firefox in Rust</a>.</li>
       <li>Before: <a href="https://libp2p.io/">libp2p</a>, <a href="https://prometheus.io/">Prometheus</a>, <a href="https://kubernetes.io/">Kubernetes</a>.</li>
     </ul>
@@ -65,7 +77,7 @@
   <!-- 1. Protocols evolve -->
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
-    <h2>1991: TCP, then HTTP</h2>
+    <h2>1991: plain HTTP over TCP</h2>
     <div class="rp" id="rp-tcp"></div>
     <figcaption>HTTP (1991) over TCP (<a href="https://www.rfc-editor.org/rfc/rfc793">RFC 793</a>, 1981). Round trips until the response arrives, DNS not counted.</figcaption>
   </section>
@@ -79,7 +91,7 @@
 
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
-    <h2>2018: better security with TLS 1.3</h2>
+    <h2>2018: TLS 1.3</h2>
     <div class="rp" id="rp-tls13"></div>
     <figcaption>TLS 1.3: <a href="https://www.rfc-editor.org/rfc/rfc8446">RFC 8446</a>, 2018.</figcaption>
   </section>
@@ -87,8 +99,10 @@
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
     <h2>2021: QUIC, transport and TLS in one handshake</h2>
+    <p class="newproto">A new transport protocol: QUIC runs over UDP, not TCP.</p>
     <div class="rp" id="rp-quic"></div>
     <figcaption>QUIC: <a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>, 2021. HTTP/3: <a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114</a>, 2022.</figcaption>
+    <aside class="notes"><ul><li>Stress: a completely new protocol, not another layer on top of TCP.</li><li>That makes the upgrade hard, which is why we need Happy Eyeballs v3 later.</li></ul></aside>
   </section>
 
   <section>
@@ -105,7 +119,7 @@
       <div class="stat"><span class="num">25 ms</span><span class="lbl">median round trip</span></div>
       <div class="chart" style="height:470px" id="c-rtt"></div>
     </div>
-    <figcaption>Round-trip time of HTTP/3 connections, share of connections, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
+    <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
   </section>
 
   <section>
@@ -113,89 +127,115 @@
     <h2>QUIC connects in about half the time</h2>
     <div class="chart" style="height:490px" id="c-setup"></div>
     <figcaption>Connection setup time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
-    <aside class="notes">Placeholder: redo with a query on sql.telemetry.mozilla.org. Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. Counting the request too it is 3 vs 2.</aside>
+    <aside class="notes"><ul>
+      <li>Placeholder: redo with a query on sql.telemetry.mozilla.org.</li>
+      <li>Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. With the request it is 3 vs 2.</li>
+      <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
+      <li>Confounder: QUIC 0-RTT connections may pull the QUIC numbers down.</li>
+      <li>Desktop only, page loads only, not served from cache.</li>
+    </ul></aside>
   </section>
 
   <!-- 2. Rolling out new protocols -->
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
     <h2>Why HTTP/3 does not always work</h2>
-    <div class="why">
-      <div class="stat"><span class="num">97%+</span><span class="lbl">of the time QUIC works,<br>across Meta's apps and sites</span></div>
-      <table class="bugs">
-        <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work. Facebook did not load behind Bitdefender.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
-        <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
-        <tr><td>Network</td><td>Some networks block UDP. Rare today.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a></td></tr>
-      </table>
-    </div>
+    <table class="bugs why">
+      <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
+      <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3. VPN DNS resolvers may not return HTTPS records.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+      <tr><td>Network</td><td>Some networks block UDP. Rare today: QUIC works 97%+ of the time across Meta's apps and sites.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a><br><a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">Meta</a></td></tr>
+    </table>
     <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
   </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>IPv6: standardised in 1998, a quarter of requests today</h2>
+    <h2>IPv6: standardised in 1998, a quarter of Firefox requests</h2>
     <div class="chart" style="height:490px" id="c-ipv6"></div>
-    <figcaption>Share of HTTP requests over IPv6, Firefox Release, by version (about one month each). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
-    <aside class="notes">IPv6 was standardised in 1998. Today about a quarter of Firefox requests use it. Google will tell you half of its users reach it over IPv6, but that only counts clients reaching a server that supports it. GitHub, for example, still has no IPv6 address. There was a transition path, but it was too complex, and the internet routed around it: much of the routing moved up to HTTP. A CDN can serve millions of sites from a single IP address.</aside>
+    <figcaption>Share of HTTP requests over IPv6, Firefox Release, April to October 2026. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
+    <aside class="notes"><ul>
+      <li>Placeholder: need a multi-year view from STMO.</li>
+      <li>IPv6 standardised in 1998. Today about a quarter of Firefox requests.</li>
+      <li>Other perspectives: Google says about half of its users reach it over IPv6. That only counts clients reaching a server that supports IPv6.</li>
+      <li>GitHub still has no IPv6 address.</li>
+      <li>There was a transition path, but it was too complex.</li>
+      <li>The internet routed around it: routing moved up to HTTP. A CDN can serve millions of sites from a single IP address.</li>
+    </ul></aside>
   </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>TLS 1.3 worked: 88% after 8 years</h2>
-    <div class="chart" style="height:340px" id="c-adopt"></div>
-    <figcaption>Firefox 159 Release: IPv6 share of HTTP requests (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">networking.connection_address_type</a>), TLS 1.3 share of TLS handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/tls_handshake_version/explore">tls_handshake_version</a>).</figcaption>
-    <aside class="notes">TLS 1.3 is the opposite of IPv6: a client offers it, a server that supports it gains right away, and everyone else falls back to TLS 1.2. Eight years later it is almost 90% of Firefox handshakes.</aside>
+    <h2>TLS 1.3: standardised 20 years after IPv6, used far more</h2>
+    <div class="chart" style="height:490px" id="c-adopt"></div>
+    <figcaption>Firefox Release. TLS 1.3 share of TLS handshakes, Firefox 91 to 147 (<a href="https://glam.telemetry.mozilla.org/firefox/probe/ssl_handshake_version/explore">GLAM: SSL_HANDSHAKE_VERSION</a>). IPv6 share of HTTP requests, Firefox 150 to 159 (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">networking.connection_address_type</a>).</figcaption>
+    <aside class="notes"><ul>
+      <li>Placeholder: both series need a longer, consistent history from STMO.</li>
+      <li>TLS 1.3: a client offers it, a server that supports it gains right away, everyone else falls back to TLS 1.2.</li>
+    </ul></aside>
   </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>The internet cannot switch all at once</h2>
-    <p class="bigquote">&ldquo;Transition is easiest when changing only one entity still benefits that entity.&rdquo;
+    <h2>What makes a transition work</h2>
+    <p class="bigquote">&ldquo;Transition is easiest when changing only one entity still benefits that entity.&rdquo;</p>
+    <p class="bigquote">&ldquo;Transition is easiest when the benefits come to those bearing the costs.&rdquo;
       <span class="src"><a href="https://www.rfc-editor.org/rfc/rfc8170#section-1">RFC 8170</a>, &ldquo;Planning for Protocol Adoption and Subsequent Transitions&rdquo;, Internet Architecture Board, 2017</span></p>
-    <aside class="notes">The internet is too complex to plan a transition across every network and every vendor. No one sets a date, no one is forced to switch. The IAB wrote this down in RFC 8170. And it says why IPv6 is slow: for content providers and ISPs there was no incremental benefit to deploying locally. TLS 1.3 had one. How can we do the same for HTTP/3?</aside>
+    <aside class="notes"><ul>
+      <li>IPv6: in most cases no benefit for the one deploying it, so little adoption.</li>
+      <li>RFC 8170 on IPv6: "there was no incremental benefit to deploying locally".</li>
+      <li>TLS 1.3: the TLS handshake goes from 2 round trips to 1. An immediate benefit, high impact.</li>
+      <li>Bridge to QUIC: also 1 round trip for the whole setup. Huge.</li>
+    </ul></aside>
   </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
     <h2>HTTP/3: about 30% of requests</h2>
     <div class="chart" style="height:490px" id="c-h3"></div>
-    <figcaption>Share of HTTP responses over HTTP/3, Firefox Release, by version. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
-    <aside class="notes">HTTP/3 is about 30%, and growing slowly. Unlike IPv6, it has a clear reason to exist: it is faster, as we just saw.</aside>
+    <figcaption>Share of HTTP responses over HTTP/3, Firefox Release, April to October 2026. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
+    <aside class="notes"><ul>
+      <li>Placeholder: need a multi-year view from STMO.</li>
+      <li>About 30%, growing slowly.</li>
+      <li>Unlike IPv6, HTTP/3 has a clear reason: it is faster.</li>
+    </ul></aside>
   </section>
 
-
-
   <!-- 3. Offer on the server, race on the client -->
+  <section>
+    <p class="part">3 &middot; Offer on the server, race on the client</p>
+    <h2>Happy Eyeballs: race the options</h2>
+    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user's network. The browser tries them in turn.</p>
+    <svg class="race" viewBox="0 0 1180 400" width="100%">
+      <g class="axis">
+        <line x1="260" y1="360" x2="1150" y2="360"/>
+        <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
+      </g>
+      <g class="lane"><text x="0" y="40">DNS: HTTPS record</text><rect class="dns" x="260" y="24" width="103" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="82">DNS: AAAA (IPv6)</text><rect class="dns" x="260" y="66" width="66" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="124">DNS: A (IPv4)</text><rect class="dns" x="260" y="108" width="52" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="lose" x="363" y="166" width="449" height="26" rx="4"/><text class="note" x="380" y="185">no answer</text></g>
+      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text><rect class="win" x="547" y="218" width="265" height="26" rx="4"/><text class="note on" x="822" y="237">connected</text></g>
+      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text><rect class="skip" x="915" y="270" width="200" height="26" rx="4"/><text class="note" x="925" y="289">never started</text></g>
+      <line class="cut" x1="812" y1="150" x2="812" y2="345"/>
+      <text class="cutlabel" x="822" y="335">first to connect wins, the rest is cancelled</text>
+    </svg>
+    <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
+    <aside class="notes"><ul>
+      <li>This is the whole strategy: offer on the server, race on the client.</li>
+      <li>HTTP/3 is faster. Alt-Svc and HTTPS records are an easy way to offer it.</li>
+      <li>The browser races and falls back. Servers only need to offer it.</li>
+    </ul></aside>
+  </section>
+
   <section>
     <p class="part">3 &middot; Offer on the server, race on the client</p>
     <h2>Why &ldquo;Happy Eyeballs&rdquo;?</h2>
     <ul>
       <li><strong>Eyeballs</strong> is network operator slang for users: the people looking at the screen.</li>
       <li>Happy eyeballs: users who never wait on a broken path.</li>
-      <li>The name comes from <a href="https://www.rfc-editor.org/rfc/rfc6555">RFC 6555</a> (2012), &ldquo;Happy Eyeballs: Success with Dual-Stack Hosts&rdquo;.</li>
+      <li>2012: IPv6, with IPv4 as a fallback (<a href="https://www.rfc-editor.org/rfc/rfc6555">RFC 6555</a>, then <a href="https://www.rfc-editor.org/rfc/rfc8305">RFC 8305</a>).</li>
+      <li>Now: HTTP/3 too, with HTTP/2 as a fallback (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">Happy Eyeballs v3</a>, IETF draft).</li>
     </ul>
-  </section>
-
-  <section>
-    <p class="part">3 &middot; Offer on the server, race on the client</p>
-    <h2>Happy Eyeballs: try several, keep the first that connects</h2>
-    <div class="cols" style="gap:48px; align-items:flex-start;">
-      <div>
-        <h3>Too many options</h3>
-        <p class="opts small">IPv4 <em>or</em> IPv6<br>TCP + TLS <em>or</em> QUIC<br>HTTP/1.1 <em>or</em> HTTP/2 <em>or</em> HTTP/3<br>DNS A <em>or</em> AAAA <em>or</em> HTTPS record</p>
-        <p class="small">Which one works depends on the user's network. The site cannot know.</p>
-      </div>
-      <div>
-        <h3>The browser races them</h3>
-        <ul class="small">
-          <li>2012: IPv6, with IPv4 as a fallback (<a href="https://www.rfc-editor.org/rfc/rfc6555">RFC 6555</a>, then <a href="https://www.rfc-editor.org/rfc/rfc8305">RFC 8305</a>).</li>
-          <li>Now: HTTP/3 too, with HTTP/2 as a fallback (<a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">Happy Eyeballs v3</a>, IETF draft).</li>
-          <li>Firefox: on in Nightly, on for 50% of Release.</li>
-        </ul>
-      </div>
-    </div>
-    <p style="margin-top:0.8em;"><strong>Offer HTTP/3 without risk: where it breaks, the browser falls back.</strong></p>
-    <aside class="notes">This is the whole strategy. HTTP/3 is faster. Alt-Svc and HTTPS records are an easy way to offer it. The browser races and falls back. Servers only need to offer it, and everyone gets the benefit.</aside>
   </section>
 
   <section>
@@ -217,7 +257,7 @@
     <h2>Largest contentful paint is faster too</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
     <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>. Both branches differ in DNS cache size too (1600 vs 3200 entries).</figcaption>
-    <aside class="notes">Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP. Happy Eyeballs saves time in connection setup, and LCP adds more time after that. No confidence intervals computed, so don't call it significant. P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</aside>
+    <aside class="notes"><ul><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
   </section>
 
   <!-- 4. Offer on the server -->
@@ -274,7 +314,7 @@
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
     <p class="mantra">Offer on the server, race on the client.</p>
-    <aside class="notes">0-RTT data can be replayed by an attacker, so servers accept it only for safe requests such as GET; HTTP has a 425 Too Early status for the rest (RFC 8470).</aside>
+    <aside class="notes"><ul><li>0-RTT data can be replayed by an attacker.</li><li>Servers accept it only for safe requests such as GET.</li><li>HTTP has a 425 Too Early status for the rest (RFC 8470).</li></ul></aside>
     <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
@@ -303,13 +343,13 @@
   ]));
   Seq.register('rp-tls12', RP([
     { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
-    { from: 'C', to: 'S', text: 'TLS ClientHello', rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'ServerHello, certificate', dashed: true },
-    { from: 'C', to: 'S', text: 'key exchange, Finished', rt: 'round trip 3' }, { from: 'S', to: 'C', text: 'Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'TLS ClientHello', rt: 'round trip 2', rtHl: true }, { from: 'S', to: 'C', text: 'ServerHello, certificate', dashed: true },
+    { from: 'C', to: 'S', text: 'key exchange, Finished', rt: 'round trip 3', rtHl: true }, { from: 'S', to: 'C', text: 'Finished', dashed: true },
     { from: 'C', to: 'S', text: 'GET /', hl: true, rt: 'round trip 4' }, { from: 'S', to: 'C', text: 'response', dashed: true },
   ]));
   Seq.register('rp-tls13', RP([
     { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
-    { from: 'C', to: 'S', text: 'TLS ClientHello + key share', rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'TLS ClientHello + key share', rt: 'round trip 2', rtHl: true }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
     { from: 'C', to: 'S', text: 'Finished + GET /', hl: true, rt: 'round trip 3' }, { from: 'S', to: 'C', text: 'response', dashed: true },
   ]));
   Seq.register('rp-quic', RP([
@@ -362,14 +402,19 @@
     ]),
   });
 
-  // Round-trip time distribution: columns, the median bucket in the accent.
+  // Round-trip time as a cumulative distribution on a log axis, the median marked.
   Charts.register('c-rtt', (el) => chart(el, {
-    grid: { left: 60, right: 20, top: 30, bottom: 40 },
-    xAxis: catAxis(D.rttHist.x, { axisLabel: txt({ color: MUTED, fontSize: 16 }) }),
-    yAxis: valueAxis({ min: 0, max: 40, interval: 10, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{ type: 'bar', barWidth: 44,
-      data: D.rttHist.v.map((v, i) => ({ value: v, itemStyle: { color: i === 1 ? NEW : OLD, borderRadius: [4, 4, 0, 0] } })),
-      label: { show: true, position: 'top', formatter: (p) => p.value + '%', ...txt({ fontSize: 16 }) } }],
+    grid: { left: 70, right: 40, top: 30, bottom: 50 },
+    xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+      splitLine: { lineStyle: { color: HAIR } }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => v + ' ms' }) },
+    yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3 },
+      markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
+        data: [[{ coord: [1, 50] }, { coord: [25, 50] }], [{ coord: [25, 0] }, { coord: [25, 50] }]] },
+      markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
+        data: [{ coord: [25, 50.75] }],
+        label: { show: true, position: 'right', distance: 12, formatter: 'half of connections: 25 ms or less', ...txt({ color: INK, fontWeight: 700, fontSize: 18 }) } },
+    }],
   }));
 
   // Connection setup: horizontal paired bars, values at the tips.
@@ -388,38 +433,29 @@
     ],
   }));
 
-  // Share over time: one series, the line is the message; end label carries the value.
+  // Share over time on a date axis; the end label carries the latest value.
+  const timeAxis = (o) => Object.assign({ type: 'time', axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+    splitLine: { show: false }, axisLabel: txt({ color: MUTED, fontSize: 16, hideOverlap: true,
+      formatter: { year: '{yyyy}', month: '{MMM} {yyyy}', day: '{MMM} {yyyy}' } }) }, o);
+  const line = (data, name, color, strong) => ({ type: 'line', name, data, showSymbol: false,
+    lineStyle: { color, width: 3, cap: 'round', join: 'round' }, itemStyle: { color },
+    endLabel: { show: true, formatter: (p) => `${name} ${p.value[1]}%`, ...txt(strong ? { color: INK, fontWeight: 700, fontSize: 20 } : { fontSize: 18 }), distance: 12 } });
   const share = (data, name) => (el) => chart(el, {
-    grid: { left: 60, right: 150, top: 30, bottom: 40 },
-    xAxis: catAxis(D.versions, { boundaryGap: false }),
+    grid: { left: 60, right: 170, top: 30, bottom: 40 },
+    xAxis: timeAxis({ min: '2026-04-01', max: '2026-11-01' }),
     yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{
-      type: 'line', data, symbol: 'circle', symbolSize: 10, showSymbol: false,
-      lineStyle: { color: NEW, width: 3, cap: 'round', join: 'round' }, itemStyle: { color: NEW },
-      areaStyle: { color: 'rgba(42,120,214,0.10)' },
-      endLabel: { show: true, formatter: (p) => `${name} ${p.value}%`, ...txt({ color: INK, fontWeight: 700, fontSize: 20 }), distance: 12 },
-      markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
-        label: { show: false }, data: [{ coord: [data.length - 1, data[data.length - 1]] }] },
-    }],
+    series: [Object.assign(line(data, name, NEW, true), { areaStyle: { color: 'rgba(42,120,214,0.10)' } })],
   });
-  Charts.register('c-ipv6', share(D.ipv6, 'IPv6'));
-  Charts.register('c-h3', share(D.h3, 'HTTP/3'));
+  Charts.register('c-ipv6', share(D.ipv6Series, 'IPv6'));
+  Charts.register('c-h3', share(D.h3Series, 'HTTP/3'));
 
-  // IPv6 vs TLS 1.3 adoption.
-  Charts.register('c-adopt', (el) => {
-    const rows = [
-      { name: 'IPv6, 1998', v: D.ipv6[D.ipv6.length - 1], c: OLD },
-      { name: 'TLS 1.3, 2018', v: D.tls13, c: NEW },
-    ];
-    return chart(el, {
-      grid: { left: 190, right: 80, top: 20, bottom: 30 },
-      xAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-      yAxis: catAxis(rows.map((r) => r.name), { inverse: true, axisLine: { show: false }, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
-      series: [{ type: 'bar', barWidth: 32,
-        data: rows.map((r) => ({ value: r.v, itemStyle: { color: r.c, borderRadius: [0, 4, 4, 0] } })),
-        label: { show: true, position: 'right', formatter: (p) => Math.round(p.value) + '%', ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } }],
-    });
-  });
+  // TLS 1.3 vs IPv6 adoption over time, one date axis.
+  Charts.register('c-adopt', (el) => chart(el, {
+    grid: { left: 60, right: 170, top: 30, bottom: 40 },
+    xAxis: timeAxis({ min: '2021-07-01', max: '2026-11-01' }),
+    yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [line(D.tlsSeries, 'TLS 1.3', NEW, true), line(D.ipv6Series, 'IPv6', OLD, false)],
+  }));
 
   // Experiment, HTTP version: grouped columns, control gray vs Happy Eyeballs v3 blue.
   Charts.register('c-rel-version', (el) => {
