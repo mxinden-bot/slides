@@ -119,6 +119,20 @@
   <!-- 2. Rolling out new protocols -->
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
+    <h2>Why HTTP/3 does not always work</h2>
+    <div class="why">
+      <div class="stat"><span class="num">97%+</span><span class="lbl">of the time QUIC works,<br>across Meta's apps and sites</span></div>
+      <table class="bugs">
+        <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work. Facebook did not load behind Bitdefender.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
+        <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+        <tr><td>Network</td><td>Some networks block UDP. Rare today.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a></td></tr>
+      </table>
+    </div>
+    <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; Rolling out new protocols</p>
     <h2>IPv6: standardised in 1998, a quarter of requests today</h2>
     <div class="chart" style="height:490px" id="c-ipv6"></div>
     <figcaption>Share of HTTP requests over IPv6, Firefox Release, by version (about one month each). Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
@@ -149,19 +163,6 @@
     <aside class="notes">HTTP/3 is about 30%, and growing slowly. Unlike IPv6, it has a clear reason to exist: it is faster, as we just saw.</aside>
   </section>
 
-  <section>
-    <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>Why HTTP/3 does not always work</h2>
-    <div class="why">
-      <div class="stat"><span class="num">97%+</span><span class="lbl">of the time QUIC works,<br>across Meta's apps and sites</span></div>
-      <table class="bugs">
-        <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work. Facebook did not load behind Bitdefender.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
-        <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
-        <tr><td>Network</td><td>Some networks block UDP. Rare today.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a></td></tr>
-      </table>
-    </div>
-    <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
-  </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
