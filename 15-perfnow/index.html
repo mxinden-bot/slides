@@ -39,7 +39,7 @@
     .reveal svg.race .lane > text:first-child { font-weight: 700; }
     .reveal svg.race .axis line { stroke: var(--hairline); stroke-width: 2; }
     .reveal svg.race .axis text { font-size: 16px; fill: var(--ink-faint); }
-    .reveal svg.race .dns { fill: #c9c9d1; }
+    .reveal svg.race .dns { fill: #2a78d6; opacity: 0.55; }
     .reveal svg.race .lose { fill: none; stroke: #a9a9b4; stroke-width: 2; stroke-dasharray: 6 5; }
     .reveal svg.race .win { fill: #2a78d6; }
     .reveal svg.race .skip { fill: none; stroke: #d7d7db; stroke-width: 2; stroke-dasharray: 3 5; }
@@ -70,7 +70,7 @@
     <ul>
       <li>I work on the Firefox networking stack at Mozilla.</li>
       <li>HTTP/3 and QUIC (<a href="https://github.com/mozilla/neqo">neqo</a>).</li>
-      <li>Worked on Happy Eyeballs v3 in Firefox, with Kershaw Chang (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
+      <li>Happy Eyeballs v3 in Firefox (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
       <li><a href="https://max-inden.de/post/fast-udp-io-in-firefox/">Fast UDP I/O for Firefox in Rust</a>.</li>
       <li>Before: <a href="https://libp2p.io/">libp2p</a>, <a href="https://prometheus.io/">Prometheus</a>, <a href="https://kubernetes.io/">Kubernetes</a>.</li>
     </ul>
@@ -214,8 +214,8 @@
   <section>
     <p class="part">3 &middot; Offer on the server, race on the client</p>
     <h2>Happy Eyeballs: race the options</h2>
-    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user's network. The browser tries them in turn.</p>
-    <svg class="race" viewBox="0 0 1180 400" style="max-height:400px" width="100%">
+    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user&#39;s network. Usually, QUIC connects first.</p>
+    <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
       <g class="axis">
         <line x1="260" y1="360" x2="1150" y2="360"/>
         <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
@@ -223,19 +223,37 @@
       <g class="lane"><text x="0" y="40">DNS: HTTPS record</text><rect class="dns" x="260" y="24" width="103" height="22" rx="4"/></g>
       <g class="lane"><text x="0" y="82">DNS: AAAA (IPv6)</text><rect class="dns" x="260" y="66" width="66" height="22" rx="4"/></g>
       <g class="lane"><text x="0" y="124">DNS: A (IPv4)</text><rect class="dns" x="260" y="108" width="52" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="lose" x="363" y="166" width="449" height="26" rx="4"/><text class="note" x="380" y="185">no answer</text></g>
-      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text><rect class="win" x="547" y="218" width="265" height="26" rx="4"/><text class="note on" x="822" y="237">connected</text></g>
-      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text><rect class="skip" x="915" y="270" width="200" height="26" rx="4"/><text class="note" x="925" y="289">never started</text></g>
-      <line class="cut" x1="812" y1="150" x2="812" y2="345"/>
-      <text class="cutlabel" x="822" y="335">first to connect wins, the rest is cancelled</text>
+      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="win" x="363" y="166" width="125" height="26" rx="4"/><text class="note on" x="498" y="185">connected</text></g>
+      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text></g>
+      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text></g>
+      <line class="cut" x1="488" y1="150" x2="488" y2="345"/>
+      <text class="cutlabel" x="498" y="335">first to connect wins</text>
+    </svg>
+    <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
+    <aside class="notes"><ul><li>The browser asks DNS for all records at once, then starts the best option: QUIC over IPv6.</li><li>Usually it connects right away, and the race is over.</li></ul></aside>
+  </section>
+
+  <section data-transition="none">
+    <p class="part">3 &middot; Offer on the server, race on the client</p>
+    <h2>Happy Eyeballs: race the options</h2>
+    <p class="small">When QUIC is blocked, the next attempt starts after a short delay, and TCP connects.</p>
+    <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
+      <g class="axis">
+        <line x1="260" y1="360" x2="1150" y2="360"/>
+        <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
+      </g>
+      <g class="lane"><text x="0" y="40">DNS: HTTPS record</text><rect class="dns" x="260" y="24" width="103" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="82">DNS: AAAA (IPv6)</text><rect class="dns" x="260" y="66" width="66" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="124">DNS: A (IPv4)</text><rect class="dns" x="260" y="108" width="52" height="22" rx="4"/></g>
+      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="lose" x="363" y="166" width="633" height="26" rx="4"/><text class="note" x="377" y="185">no answer</text></g>
+      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text><rect class="win" x="547" y="218" width="449" height="26" rx="4"/><text class="note on" x="1006" y="237">connected</text></g>
+      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text><rect class="lose" x="915" y="270" width="81" height="26" rx="4"/></g>
+      <line class="cut" x1="996" y1="150" x2="996" y2="345"/>
+      <text class="cutlabel" x="986" y="335" text-anchor="end">first to connect wins, the rest is cancelled</text>
     </svg>
     <p class="benefit">Usually the new protocol wins. Where it is blocked, the browser falls back to the old one, so it stays safe.</p>
     <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
-    <aside class="notes"><ul>
-      <li>This is the whole strategy: offer on the server, race on the client.</li>
-      <li>HTTP/3 is faster. Alt-Svc and HTTPS records are an easy way to offer it.</li>
-      <li>The browser races and falls back. Servers only need to offer it.</li>
-    </ul></aside>
+    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops it.</li><li>50 ms later the browser also tries TCP, 150 ms later QUIC over IPv4.</li><li>TCP connects first, the rest is cancelled.</li><li>This is the whole strategy: offer on the server, race on the client. Servers only need to offer HTTP/3.</li></ul></aside>
   </section>
 
   <section>
@@ -470,18 +488,36 @@
     series: [line(D.tlsSeries, 'TLS 1.3', NEW, true), line(D.ipv6Series, 'IPv6', OLD, false)],
   }));
 
-  // Experiment, HTTP version: one 100% bar per branch, HTTP/3 in the accent.
+  // Experiment, HTTP version: one 100% bar per branch, HTTP/3 in the accent, and bands
+  // linking each segment from the control bar to the Happy Eyeballs v3 bar.
   Charts.register('c-rel-version', (el) => {
-    const v = D.release.version;
-    const seg = (i, color, textColor) => ({ name: v.x[i], type: 'bar', stack: 'v', barWidth: 64,
-      data: [v.control[i], v.hev3[i]], itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, position: 'inside', formatter: (p) => `${v.x[i]}  ${p.value}%`, ...txt({ color: textColor, fontWeight: 700, fontSize: 18 }) } });
-    return chart(el, {
+    const v = D.release.version, BW = 64;
+    const cols = ['#e3e3e8', '#c9c9d1', NEW], ink = [INK, INK, '#fff'];
+    const seg = (i) => ({ name: v.x[i], type: 'bar', stack: 'v', barWidth: BW, z: 3,
+      data: [v.control[i], v.hev3[i]], itemStyle: { color: cols[i], borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, position: 'inside', formatter: (p) => `${v.x[i]}  ${p.value}%`, ...txt({ color: ink[i], fontWeight: 700, fontSize: 18 }) } });
+    const c = chart(el, {
       grid: { left: 210, right: 40, top: 20, bottom: 40 },
       xAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
       yAxis: catAxis(['control', 'Happy Eyeballs v3'], { inverse: true, axisLine: { show: false }, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
-      series: [seg(0, '#e3e3e8', INK), seg(1, '#c9c9d1', INK), seg(2, NEW, '#fff')],
+      series: [0, 1, 2].map(seg),
     });
+    const edges = (vals) => vals.reduce((a, x) => (a.push(a[a.length - 1] + x), a), [0]);
+    const e0 = edges(v.control), e1 = edges(v.hev3);
+    const px = (x, row) => c.convertToPixel({ xAxisIndex: 0, yAxisIndex: 0 }, [x, row]);
+    const bands = [1, 2].map((i) => {
+      const a0 = px(e0[i], 0), a1 = px(e0[i + 1], 0), b0 = px(e1[i], 1), b1 = px(e1[i + 1], 1);
+      const yTop = a0[1] + BW / 2, yBot = b0[1] - BW / 2;
+      return { type: 'polygon', z: 1, silent: true,
+        shape: { points: [[a0[0], yTop], [a1[0], yTop], [b1[0], yBot], [b0[0], yBot]] },
+        style: i === 2 ? { fill: 'rgba(42,120,214,0.16)', stroke: NEW, lineWidth: 1.5 } : { fill: 'none', stroke: 'none' } };
+    });
+    // The HTTP/1.1 to HTTP/2 boundary as a faint line, so all segments read as linked.
+    const l0 = px(e0[1], 0), l1 = px(e1[1], 1);
+    bands.push({ type: 'line', z: 1, silent: true, shape: { x1: l0[0], y1: l0[1] + BW / 2, x2: l1[0], y2: l1[1] - BW / 2 },
+      style: { stroke: '#a9a9b4', lineWidth: 1.5 } });
+    c.setOption({ graphic: bands });
+    return c;
   });
 
   // Paint-time change by percentile: a third colour, since this reads differently (a change,

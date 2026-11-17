@@ -51,7 +51,7 @@
     });
 
     let y = topH + 6;
-    let rt = null;
+    let rt = null, bg = '';
     msgs.forEach((m) => {
       if (m.note) {
         const ids = (m.over || actors.map((a) => a.id)).map((id) => idx[id]);
@@ -70,7 +70,7 @@
       // Optional round-trip bracket in the left gutter: `rt` on the first message of a pair.
       if (rt) {
         const bx = padL - 14, y1 = rt.y - 10 * k, y2 = yy + 4, rc = rt.hl ? ACC : MUTED;
-        if (rt.hl) s += `<rect x="${bx + 2}" y="${y1}" width="${W - padX - bx - 2}" height="${y2 - y1 + 4}" rx="6" fill="rgba(230,96,0,0.07)"/>`;
+        if (rt.hl) bg += `<rect x="${bx + 2}" y="${rt.y - 24 * k}" width="${W - padX - bx - 2}" height="${y2 - rt.y + 24 * k + 8}" rx="6" fill="rgba(230,96,0,0.07)"/>`;
         s += `<path d="M${bx + 6},${y1} H${bx} V${y2} H${bx + 6}" fill="none" stroke="${rc}" stroke-width="${rt.hl ? 2.5 : 1.5}"/>`;
         s += `<text x="${bx - 10}" y="${(y1 + y2) / 2 + 5 * k}" text-anchor="end" font-size="${13 * k}" font-weight="700" fill="${rt.hl ? ACC : INK}">${esc(rt.label)}</text>`;
         rt = null;
@@ -78,6 +78,8 @@
       y += rowH;
     });
     s += '</svg>';
+    // Round-trip highlights go behind everything else.
+    if (bg) s = s.replace('</defs>', '</defs>' + bg);
     el.innerHTML = s;
   }
 
