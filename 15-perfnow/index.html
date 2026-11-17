@@ -158,10 +158,11 @@
     <h2>Why HTTP/3 does not always work</h2>
     <table class="bugs why">
       <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
-      <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3. VPN DNS resolvers may not return HTTPS records.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+      <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3. VPN DNS resolvers often do not return HTTPS records.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
       <tr><td>Network</td><td>Some networks block UDP. Rare today: QUIC works 97%+ of the time across Meta's apps and sites.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a><br><a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">Meta</a></td></tr>
     </table>
     <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
+    <aside class="notes"><ul><li>VPN resolvers and HTTPS records: from field experience, no public bug to cite.</li></ul></aside>
   </section>
 
   <section>
@@ -292,7 +293,7 @@
     <p class="part">3 &middot; Offer on the server, race on the client</p>
     <h2>Largest contentful paint (LCP) is faster too</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
-    <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>. Both branches differ in DNS cache size too (1600 vs 3200 entries).</figcaption>
+    <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>.</figcaption>
     <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Firefox records the final value when the page is hidden.</li><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
   </section>
 
@@ -366,12 +367,12 @@
     </ol>
     <p class="mantra">Offer on the server, race on the client.</p>
     <aside class="notes"><ul>
-      <li>Summary: we are moving to HTTP/3, one round trip less, and with 0-RTT no setup round trip at all.</li>
+      <li>Summary: we are moving to HTTP/3, one round trip less. With 0-RTT the request goes out in the first flight.</li>
       <li>The problem is the rollout. We don't want to get stuck like IPv6. TLS 1.3 is the better example.</li>
       <li>For that, servers offer and clients race.</li>
       <li>Here is what you can do:</li>
       <li>Q&amp;A: 0-RTT data can be replayed by an attacker.</li><li>Servers accept it only for safe requests such as GET.</li><li>HTTP has a 425 Too Early status for the rest (RFC 8470).</li></ul></aside>
-    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
+    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="https://mastodon.social/@mxinden">@mxinden@mastodon.social</a> &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a> &middot; <a href="https://github.com/mozilla/happy-eyeballs">github.com/mozilla/happy-eyeballs</a></p>
   </section>
 
 </div>
