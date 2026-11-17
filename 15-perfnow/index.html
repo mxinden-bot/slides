@@ -122,6 +122,14 @@
       <div class="chart" style="height:470px" id="c-rtt"></div>
     </div>
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
+    <aside class="notes"><ul>
+      <li>Distance sets the round trip: 5 to 20 ms within a city, 40 to 80 ms across a country, 150 ms or more across an ocean or on mobile (savearoundtrip.com).</li>
+      <li>25 ms median: a CDN close to the user. The tail is far longer: about 110 ms at P95.</li>
+      <li>What people notice (Nielsen, 1993): 0.1 s feels instant, 1 s keeps the flow of thought, 10 s and attention is gone.</li>
+      <li>A handshake costs several round trips: 3 at P95 is already over 0.1 s.</li>
+      <li>It compounds: the round trip is paid before the HTML arrives, and every image, script and style waits for the HTML. So it delays the whole page, not one request.</li>
+      <li>And it is paid again for every new connection: fonts, images, analytics on other origins.</li>
+    </ul></aside>
   </section>
 
   <section>
