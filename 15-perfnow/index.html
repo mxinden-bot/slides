@@ -127,18 +127,18 @@
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>The internet cannot switch all at once</h2>
-    <p class="bigquote">&ldquo;Transition is easiest when changing only one entity still benefits that entity.&rdquo;
-      <span class="src"><a href="https://www.rfc-editor.org/rfc/rfc8170#section-1">RFC 8170</a>, &ldquo;Planning for Protocol Adoption and Subsequent Transitions&rdquo;, Internet Architecture Board, 2017</span></p>
-    <aside class="notes">The internet is too complex to plan a transition across every network and every vendor. No one sets a date, no one is forced to switch. The IAB wrote this down in RFC 8170. And it says why IPv6 is slow: for content providers and ISPs there was no incremental benefit to deploying locally.</aside>
+    <h2>TLS 1.3 worked: 88% after 8 years</h2>
+    <div class="chart" style="height:340px" id="c-adopt"></div>
+    <figcaption>Firefox 159 Release: IPv6 share of HTTP requests (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">networking.connection_address_type</a>), TLS 1.3 share of TLS handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/tls_handshake_version/explore">tls_handshake_version</a>).</figcaption>
+    <aside class="notes">TLS 1.3 is the opposite of IPv6: a client offers it, a server that supports it gains right away, and everyone else falls back to TLS 1.2. Eight years later it is almost 90% of Firefox handshakes.</aside>
   </section>
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>TLS 1.3 worked: 88% after 8 years</h2>
-    <div class="chart" style="height:340px" id="c-adopt"></div>
-    <figcaption>Firefox 159 Release: IPv6 share of HTTP requests (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">networking.connection_address_type</a>), TLS 1.3 share of TLS handshakes (<a href="https://glam.telemetry.mozilla.org/fog/probe/tls_handshake_version/explore">tls_handshake_version</a>).</figcaption>
-    <aside class="notes">TLS 1.3 is the opposite of IPv6: a client offers it, a server that supports it gains right away, and everyone else falls back to TLS 1.2. Eight years later it is almost 90% of Firefox handshakes. How can we do the same for HTTP/3?</aside>
+    <h2>The internet cannot switch all at once</h2>
+    <p class="bigquote">&ldquo;Transition is easiest when changing only one entity still benefits that entity.&rdquo;
+      <span class="src"><a href="https://www.rfc-editor.org/rfc/rfc8170#section-1">RFC 8170</a>, &ldquo;Planning for Protocol Adoption and Subsequent Transitions&rdquo;, Internet Architecture Board, 2017</span></p>
+    <aside class="notes">The internet is too complex to plan a transition across every network and every vendor. No one sets a date, no one is forced to switch. The IAB wrote this down in RFC 8170. And it says why IPv6 is slow: for content providers and ISPs there was no incremental benefit to deploying locally. TLS 1.3 had one. How can we do the same for HTTP/3?</aside>
   </section>
 
   <section>
