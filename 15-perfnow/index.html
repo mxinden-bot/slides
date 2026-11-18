@@ -292,22 +292,12 @@
   <section>
     <p class="part">4 &middot; Servers advertise</p>
     <h2>Enable, then advertise</h2>
-    <div class="cols" style="gap:60px; align-items:flex-start; margin-top:0.6em;">
-      <div>
-        <h3>Enable</h3>
-        <ul>
-          <li>HTTP/3, next to HTTP/2.</li>
-          <li>QUIC 0-RTT.</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Advertise</h3>
-        <ul>
-          <li><code>Alt-Svc</code> on every response.</li>
-          <li>HTTPS record with <code>alpn="h3"</code>.</li>
-        </ul>
-      </div>
-    </div>
+    <ul>
+      <li>Enable HTTP/3, next to HTTP/2.</li>
+      <li>Send <code>Alt-Svc</code> on every response.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code>.</li>
+      <li>Enable QUIC 0-RTT.</li>
+    </ul>
   </section>
 
   <section>
