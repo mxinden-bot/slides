@@ -318,7 +318,7 @@
 
   <section>
     <p class="part">4 &middot; Servers advertise</p>
-    <h2>No excuse: your server most likely supports it</h2>
+    <h2>Most servers and CDNs already support it</h2>
     <div class="cols sup" style="gap:40px; align-items:flex-start;">
       <table><thead><tr><th>Server, proxy</th><th>HTTP/3</th><th>0-RTT</th></tr></thead>
         <tr><td><a href="https://caddyserver.com/docs/caddyfile/options">Caddy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://docs.litespeedtech.com/lsws/cp/cpanel/quic-http3/">LiteSpeed</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http3">Envoy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://www.haproxy.com/blog/announcing-haproxy-2-8">HAProxy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://h2o.examp1e.net/configure/http3_directives.html">H2O</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://doc.traefik.io/traefik/reference/install-configuration/entrypoints/">Traefik</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://techcommunity.microsoft.com/blog/networkingblog/enabling-http3-support-on-windows-server-2022/2676880">IIS</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://www.apache.org/dist/httpd/CHANGES_2.4">Apache httpd</a></td><td><span class="n">no</span></td><td><span class="n">no</span></td></tr></table>
@@ -327,7 +327,7 @@
     </div>
     <figcaption>Surveyed 17 November 2026 from vendor documentation. yes = supported, on by default or as an option; ? = no vendor statement found. Only the server that browsers connect to matters, not the origin behind it.</figcaption>
     <aside class="notes"><ul>
-      <li>No excuse: most frontends can do all of this today.</li>
+      <li>Most frontends can do all of this today.</li>
       <li>It is your public-facing server or CDN that needs it, not the application server behind it.</li>
       <li>nginx HTTP/3 is still marked experimental; Apache httpd has none.</li>
       <li>Several are opt-in: Cloudflare, Akamai, CloudFront, Fastly need HTTP/3 turned on.</li>
