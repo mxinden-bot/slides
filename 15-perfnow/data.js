@@ -72,11 +72,13 @@ window.DECK_DATA = {
   // Change = HEv3 vs control; ms = HEv3 minus control. All 95% bootstrap CIs exclude zero.
   // LCP here is lcp_time at onLoad, not the final LCP.
   report: {
-    p: ['P50', 'P75', 'P95', 'P99'],
-    fcp: { n: ['73.9M', '77.1M'], control: [648, 1175, 3098, 8207], hev3: [632, 1146, 3023, 7923],
-      diff: [-2.48, -2.41, -2.40, -3.46], diffMs: [-16, -28, -74, -284] },
-    lcp: { n: ['81.8M', '84.9M'], control: [875, 1665, 4661, 13262], hev3: [865, 1653, 4587, 12944],
-      diff: [-1.05, -0.70, -1.57, -2.39], diffMs: [-9, -12, -73, -317] },
+    // P10 to P99 from the report's per-percentile uplift and diff charts (P50 to P99 match
+    // its summary table; bootstrap 95% CIs only given there, all exclude zero).
+    p: ['P10', 'P25', 'P50', 'P75', 'P90', 'P95', 'P99'],
+    fcp: { n: ['73.9M', '77.1M'],
+      diff: [-2.10, -2.81, -2.48, -2.41, -2.36, -2.40, -3.46], diffMs: [-4, -10, -16, -28, -49, -74, -284] },
+    lcp: { n: ['81.8M', '84.9M'],
+      diff: [1.10, -0.64, -1.05, -0.70, -1.12, -1.57, -2.39], diffMs: [3, -3, -9, -12, -34, -73, -317] },
   },
   release: {
     version: {

@@ -55,7 +55,8 @@
     .reveal .rt.old { background: #a9a9b4; color: #fff; }
     .reveal .rt.new { background: #2a78d6; color: #fff; }
     .reveal .rt.saved { border: 3px dashed var(--accent); color: var(--accent); background: transparent; }
-    .reveal .rtnote { flex: 1; font-size: 0.5em; color: var(--ink-muted); padding-left: 8px; }
+    .reveal .rtnote { flex: 1; font-size: 0.55em; color: var(--ink-muted); padding-left: 8px; }
+    .reveal .rtnote.strong { color: var(--ink); font-weight: 800; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -253,16 +254,16 @@
     <p class="part">3 &middot; Clients race</p>
     <h2>First contentful paint (FCP) is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, Firefox 158 and 159 Release experiment: 73.9M (control) and 77.1M (Happy Eyeballs v3). Median <strong>648 ms to 632 ms</strong>, P99 <strong>8.2 s to 7.9 s</strong>. Every 95% confidence interval excludes zero.</figcaption>
-    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li><li>Firefox 158 and 159, bootstrap 95% confidence intervals all exclude zero.</li></ul></aside>
+    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, Firefox 158 and 159 Release experiment: 73.9M (control) and 77.1M (Happy Eyeballs v3). Median <strong>648 ms to 632 ms</strong>, P99 <strong>8.2 s to 7.9 s</strong>. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li><li>Firefox 158 and 159. P10 to P99 read from the report&#39;s per-percentile charts; confidence intervals only for P50 to P99, all exclude zero.</li></ul></aside>
   </section>
 
   <section>
     <p class="part">3 &middot; Clients race</p>
-    <h2>Largest contentful paint (LCP) is faster too</h2>
+    <h2>Largest contentful paint (LCP) is faster for most page loads</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
-    <figcaption>Largest contentful paint at page load (onLoad), Happy Eyeballs v3 vs control, same experiment: 81.8M (control) and 84.9M (Happy Eyeballs v3). Median <strong>875 ms to 865 ms</strong>, P99 <strong>13.3 s to 12.9 s</strong>. Every 95% confidence interval excludes zero.</figcaption>
-    <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li><li>Smaller in percent than FCP, and less time saved at the median: 9 ms for LCP, 16 ms for FCP. Happy Eyeballs saves time in connection setup; LCP adds more after that.</li><li>Firefox 158 and 159, bootstrap 95% confidence intervals all exclude zero.</li></ul></aside>
+    <figcaption>Largest contentful paint at page load (onLoad), Happy Eyeballs v3 vs control, same experiment: 81.8M (control) and 84.9M (Happy Eyeballs v3). Median <strong>875 ms to 865 ms</strong>, P99 <strong>13.3 s to 12.9 s</strong>. Slightly slower below about P18. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li><li>Smaller in percent than FCP, and less time saved at the median: 9 ms for LCP, 16 ms for FCP. Happy Eyeballs saves time in connection setup; LCP adds more after that.</li><li>The fastest page loads (below about P18) get slightly slower: +1.1% (+3 ms) at P10. Possibly the cost of waiting for the HTTPS record; not explained yet.</li><li>Firefox 158 and 159. Confidence intervals only for P50 to P99, all exclude zero.</li></ul></aside>
   </section>
 
   <!-- 4. Servers advertise -->
@@ -273,17 +274,18 @@
       <div class="rtrow">
         <div class="rtlabel">Alt-Svc header only</div>
         <div class="rt dns">DNS</div><div class="rt old">TCP</div><div class="rt old">TLS</div><div class="rt old">HTTP/2 request</div>
-        <div class="rtnote">learns about HTTP/3 only now</div>
+        <div class="rtnote">HTTP/3 only from the next connection</div>
       </div>
       <div class="rtrow">
         <div class="rtlabel">HTTPS record</div>
-        <div class="rt dns">DNS</div><div class="rt new">QUIC</div><div class="rt new">HTTP/3 request</div><div class="rt saved">1 round trip saved</div>
+        <div class="rt dns">DNS</div><div class="rt new">QUIC</div><div class="rt new">HTTP/3 request</div>
+        <div class="rtnote strong">HTTP/3 on the first connection</div>
       </div>
     </div>
-    <figcaption>One box per round trip on the first visit, TLS 1.3. The HTTPS record is looked up at the same time as A and AAAA, so DNS costs the same in both.</figcaption>
+    <figcaption>First connection to a site, TLS 1.3. The HTTPS record is looked up at the same time as A and AAAA.</figcaption>
     <aside class="notes"><ul>
       <li>Alt-Svc: the browser connects over TCP + TLS, sends the request, and only the response tells it about HTTP/3. HTTP/3 only from the next connection.</li>
-      <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is QUIC. One round trip less.</li>
+      <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is already QUIC.</li>
     </ul></aside>
   </section>
 
@@ -548,11 +550,12 @@
   const change = (P, diff, diffMs) => (el) => chart(el, {
     grid: { left: 70, right: 30, top: 40, bottom: 70 },
     xAxis: catAxis(P, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
-    yAxis: valueAxis({ min: -4, max: 0, interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-    series: [{ type: 'bar', barWidth: 30, data: diff,
-      itemStyle: { color: CHG, borderRadius: [0, 0, 4, 4] },
-      label: { show: true, position: 'bottom', distance: 8, lineHeight: 20,
-        formatter: (p) => `${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
+    yAxis: valueAxis({ min: -4, max: Math.max(0, Math.ceil(Math.max(...diff))), interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{ type: 'bar', barWidth: 30,
+      data: diff.map((v) => ({ value: v, itemStyle: { color: v > 0 ? '#a9a9b4' : CHG, borderRadius: v > 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] },
+        label: { position: v > 0 ? 'top' : 'bottom' } })),
+      label: { show: true, distance: 8, lineHeight: 20,
+        formatter: (p) => `${p.value > 0 ? '+' : ''}${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex] > 0 ? '+' : ''}${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
   });
   Charts.register('c-rel-fcp', change(D.report.p, D.report.fcp.diff, D.report.fcp.diffMs));
   Charts.register('c-rel-lcp', change(D.report.p, D.report.lcp.diff, D.report.lcp.diffMs));
