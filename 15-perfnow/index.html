@@ -167,12 +167,12 @@
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>IPv6: standardised in 1998, a quarter of Firefox requests</h2>
+    <h2>IPv6: standardised in 1998, a fifth of Firefox connections</h2>
     <div class="chart" style="height:490px" id="c-ipv6"></div>
-    <figcaption>Share of HTTP requests over IPv6, Firefox Release, April to October 2026. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">GLAM: networking.connection_address_type</a>. IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
+    <figcaption>Share of HTTP connections over IPv6, Firefox Desktop Release, August 2025 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_connection_address_type">networking.connection_address_type</a>). IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
     <aside class="notes"><ul>
-      <li>Placeholder: need a multi-year view from STMO.</li>
-      <li>IPv6 standardised in 1998. Today about a quarter of Firefox requests.</li>
+      <li>IPv6 standardised in 1998. Today about a fifth of Firefox connections, up from 18% a year ago.</li>
+      <li>Firefox data only starts in August 2025.</li>
       <li>Other perspectives: Google says about half of its users reach it over IPv6. That only counts clients reaching a server that supports IPv6.</li>
       <li>GitHub still has no IPv6 address.</li>
       <li>There was a transition path, but it was too complex.</li>
@@ -184,9 +184,10 @@
     <p class="part">2 &middot; Rolling out new protocols</p>
     <h2>TLS 1.3: standardised 20 years after IPv6, used far more</h2>
     <div class="chart" style="height:490px" id="c-adopt"></div>
-    <figcaption>Firefox Release. TLS 1.3 share of TLS handshakes, Firefox 91 to 147 (<a href="https://glam.telemetry.mozilla.org/firefox/probe/ssl_handshake_version/explore">GLAM: SSL_HANDSHAKE_VERSION</a>). IPv6 share of HTTP requests, Firefox 150 to 159 (<a href="https://glam.telemetry.mozilla.org/fog/probe/networking_connection_address_type/explore">networking.connection_address_type</a>).</figcaption>
+    <figcaption>Firefox Desktop Release, October 2024 to November 2026. TLS 1.3 share of TLS handshakes over TCP (QUIC not counted), IPv6 share of HTTP connections. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO.</figcaption>
     <aside class="notes"><ul>
-      <li>Placeholder: both series need a longer, consistent history from STMO.</li>
+      <li>Firefox data only goes back to October 2024 (retention limit).</li>
+      <li>TLS 1.3 here is TCP only: QUIC always uses TLS 1.3, so the real share is higher.</li>
       <li>TLS 1.3: a client offers it, a server that supports it gains right away, everyone else falls back to TLS 1.2.</li>
     </ul></aside>
   </section>
@@ -207,12 +208,11 @@
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>HTTP/3: about 30% of requests</h2>
+    <h2>HTTP/3: 22% to 29% of responses in two years</h2>
     <div class="chart" style="height:490px" id="c-h3"></div>
-    <figcaption>Share of HTTP responses over HTTP/3, Firefox Release, April to October 2026. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_response_version/explore">GLAM: networking.http_response_version</a>.</figcaption>
+    <figcaption>Share of HTTP responses over HTTP/3 (main documents and subresources), Firefox Desktop Release, October 2024 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_http_response_version">networking.http_response_version</a>).</figcaption>
     <aside class="notes"><ul>
-      <li>Placeholder: need a multi-year view from STMO.</li>
-      <li>About 30%, growing slowly.</li>
+      <li>From 22% to 29% in two years: growing, but slowly.</li>
       <li>Unlike IPv6, HTTP/3 has a clear reason: it is faster.</li>
     </ul></aside>
   </section>
@@ -506,20 +506,20 @@
       formatter: { year: '{yyyy}', month: '{MMM} {yyyy}', day: '{MMM} {yyyy}' } }) }, o);
   const line = (data, name, color, strong) => ({ type: 'line', name, data, showSymbol: false,
     lineStyle: { color, width: 3, cap: 'round', join: 'round' }, itemStyle: { color },
-    endLabel: { show: true, formatter: (p) => `${name} ${p.value[1]}%`, ...txt(strong ? { color: INK, fontWeight: 700, fontSize: 20 } : { fontSize: 18 }), distance: 12 } });
-  const share = (data, name) => (el) => chart(el, {
+    endLabel: { show: true, formatter: (p) => `${name} ${Math.round(p.value[1])}%`, ...txt(strong ? { color: INK, fontWeight: 700, fontSize: 20 } : { fontSize: 18 }), distance: 12 } });
+  const share = (data, name, min) => (el) => chart(el, {
     grid: { left: 60, right: 170, top: 30, bottom: 40 },
-    xAxis: timeAxis({ min: '2026-04-01', max: '2026-11-01' }),
+    xAxis: timeAxis({ min, max: '2026-12-01' }),
     yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
     series: [Object.assign(line(data, name, NEW, true), { areaStyle: { color: 'rgba(42,120,214,0.10)' } })],
   });
-  Charts.register('c-ipv6', share(D.ipv6Series, 'IPv6'));
-  Charts.register('c-h3', share(D.h3Series, 'HTTP/3'));
+  Charts.register('c-ipv6', share(D.ipv6Series, 'IPv6', '2025-07-01'));
+  Charts.register('c-h3', share(D.h3Series, 'HTTP/3', '2024-09-01'));
 
   // TLS 1.3 vs IPv6 adoption over time, one date axis.
   Charts.register('c-adopt', (el) => chart(el, {
     grid: { left: 60, right: 170, top: 30, bottom: 40 },
-    xAxis: timeAxis({ min: '2021-07-01', max: '2026-11-01' }),
+    xAxis: timeAxis({ min: '2024-09-01', max: '2026-12-01' }),
     yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
     series: [line(D.tlsSeries, 'TLS 1.3', NEW, true), line(D.ipv6Series, 'IPv6', OLD, false)],
   }));
