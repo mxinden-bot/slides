@@ -34,19 +34,6 @@
     .reveal .newproto { font-size: 0.7em; font-weight: 700; color: var(--accent); margin: -0.2em 0 0; }
     .reveal table.why { font-size: 0.72em; margin-top: 1.2em; }
     .reveal table.why td { padding: 0.9em 0.6em; }
-    .reveal svg.race { margin-top: 0.4em; font-family: var(--font-sans); }
-    .reveal svg.race text { font-size: 20px; fill: var(--ink); }
-    .reveal svg.race .lane > text:first-child { font-weight: 700; }
-    .reveal svg.race .axis line { stroke: var(--hairline); stroke-width: 2; }
-    .reveal svg.race .axis text { font-size: 16px; fill: var(--ink-faint); }
-    .reveal svg.race .dns { fill: #2a78d6; opacity: 0.55; }
-    .reveal svg.race .lose { fill: none; stroke: #a9a9b4; stroke-width: 2; stroke-dasharray: 6 5; }
-    .reveal svg.race .win { fill: #2a78d6; }
-    .reveal svg.race .skip { fill: none; stroke: #d7d7db; stroke-width: 2; stroke-dasharray: 3 5; }
-    .reveal svg.race .note { font-size: 17px; fill: var(--ink-muted); }
-    .reveal svg.race .note.on { fill: var(--ink); font-weight: 700; }
-    .reveal svg.race .cut { stroke: var(--accent); stroke-width: 2; }
-    .reveal svg.race .cutlabel { font-size: 17px; fill: var(--ink); font-weight: 700; }
     .reveal .benefit { font-size: 0.7em; font-weight: 700; margin: 0.2em 0 0; }
     .reveal .flow { width: 1000px; margin: 0.6em auto 0; }
     .reveal .sup table { border-collapse: collapse; font-size: 0.6em; width: 100%; }
@@ -58,6 +45,8 @@
     .reveal .sup .n { color: var(--ink-faint); }
     .reveal .sup .u { color: var(--ink-faint); }
     .reveal .sup-dns { font-size: 0.58em; margin-top: 0.9em; }
+    .reveal .race-anim { width: 100%; height: 470px; cursor: pointer; margin-top: 0.2em; }
+    .reveal .race-anim svg { font-family: var(--font-sans); }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -222,42 +211,16 @@
     <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
-    <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
-      <g class="axis">
-        <line x1="260" y1="360" x2="1150" y2="360"/>
-        <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
-      </g>
-      <g class="lane"><text x="0" y="40">DNS: HTTPS record</text><rect class="dns" x="260" y="24" width="103" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="82">DNS: AAAA (IPv6)</text><rect class="dns" x="260" y="66" width="66" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="124">DNS: A (IPv4)</text><rect class="dns" x="260" y="108" width="52" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="win" x="363" y="166" width="125" height="26" rx="4"/><text class="note on" x="498" y="185">connected</text></g>
-      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text></g>
-      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text></g>
-      <line class="cut" x1="488" y1="150" x2="488" y2="345"/>
-      <text class="cutlabel" x="498" y="335">first to connect wins</text>
-    </svg>
-    <aside class="notes"><ul><li>The browser asks DNS for all records at once, then starts the best option: QUIC over IPv6.</li><li>Usually it connects right away, and the race is over.</li></ul></aside>
+    <div class="race-anim" data-sc="a" title="click to replay"></div>
+    <aside class="notes"><ul><li>The browser asks DNS for the HTTPS record, AAAA and A at once.</li><li>Once the answers are in, it sorts the options: QUIC before TCP, alternating IPv6 and IPv4.</li><li>It starts the best one, QUIC over IPv6. Usually that connects, and the race is over.</li><li>Click the diagram to replay.</li></ul></aside>
   </section>
 
   <section data-transition="none">
     <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small" style="visibility:hidden" aria-hidden="true">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
-    <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
-      <g class="axis">
-        <line x1="260" y1="360" x2="1150" y2="360"/>
-        <text x="260" y="388">0 ms</text><text x="444" y="388">50</text><text x="628" y="388">100</text><text x="812" y="388">150</text><text x="996" y="388">200</text>
-      </g>
-      <g class="lane"><text x="0" y="40">DNS: HTTPS record</text><rect class="dns" x="260" y="24" width="103" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="82">DNS: AAAA (IPv6)</text><rect class="dns" x="260" y="66" width="66" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="124">DNS: A (IPv4)</text><rect class="dns" x="260" y="108" width="52" height="22" rx="4"/></g>
-      <g class="lane"><text x="0" y="184">1: QUIC over IPv6</text><rect class="lose" x="363" y="166" width="633" height="26" rx="4"/><text class="note" x="377" y="185">no answer</text></g>
-      <g class="lane"><text x="0" y="236">2: TCP over IPv6</text><rect class="win" x="547" y="218" width="449" height="26" rx="4"/><text class="note on" x="1006" y="237">connected</text></g>
-      <g class="lane"><text x="0" y="288">3: QUIC over IPv4</text><rect class="lose" x="915" y="270" width="81" height="26" rx="4"/></g>
-      <line class="cut" x1="996" y1="150" x2="996" y2="345"/>
-      <text class="cutlabel" x="986" y="335" text-anchor="end">first to connect wins, the rest is cancelled</text>
-    </svg>
-    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops it.</li><li>50 ms later the browser also tries TCP, 150 ms later QUIC over IPv4.</li><li>TCP connects first, the rest is cancelled.</li><li>This is the whole strategy: servers advertise, clients race. Servers only need to advertise HTTP/3.</li></ul></aside>
+    <div class="race-anim" data-sc="b" title="click to replay"></div>
+    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops UDP.</li><li>50 ms later the browser also tries QUIC over IPv4, 150 ms after the first try TCP over IPv6.</li><li>TCP connects first, the rest is cancelled. TCP over IPv4 never starts.</li><li>Order and delays as in Firefox: 0, 50, 150, 350 ms after the first attempt.</li><li>This is the whole strategy: servers advertise, clients race. Servers only need to advertise HTTP/3.</li></ul></aside>
   </section>
 
   <section>
@@ -565,6 +528,80 @@
   });
   Charts.register('c-rel-fcp', change(D.release.p, D.release.diff, D.release.diffMs));
   Charts.register('c-rel-lcp', change(D.release.lcp.p, D.release.lcp.diff, D.release.lcp.diffMs));
+
+
+  // Happy Eyeballs race, animated. Simplified, but order and delays follow Firefox:
+  // DNS for HTTPS, AAAA and A at once; start once the HTTPS answer is in; endpoints
+  // interleaved QUIC/IPv6, QUIC/IPv4, TCP/IPv6, TCP/IPv4; attempts 0, 50, 150, 350 ms
+  // after the first; the first to connect wins, the rest is cancelled.
+  const RACE = {
+    a: { end: 58, ms: 2600, dns: [['HTTPS record', 28], ['AAAA (IPv6)', 18], ['A (IPv4)', 14]],
+      attempts: [['QUIC over IPv6', 28, 58, 'win'], ['QUIC over IPv4', 78], ['TCP over IPv6', 178], ['TCP over IPv4', 378]],
+      steps: [[0, 'Ask DNS for the HTTPS record, AAAA and A at once.'], [28, 'Answers are in: start the best option, QUIC over IPv6.'], [58, 'QUIC connects. Nothing else to try.']] },
+    b: { end: 223, ms: 6000, dns: [['HTTPS record', 28], ['AAAA (IPv6)', 18], ['A (IPv4)', 14]],
+      attempts: [['QUIC over IPv6', 28, null, 'lose'], ['QUIC over IPv4', 78, null, 'lose'], ['TCP over IPv6', 178, 223, 'win'], ['TCP over IPv4', 378]],
+      steps: [[0, 'Ask DNS for the HTTPS record, AAAA and A at once.'], [28, 'Start the best option: QUIC over IPv6.'],
+        [78, 'No answer after 50 ms: also try QUIC over IPv4.'], [178, 'Still nothing: also try TCP over IPv6.'],
+        [223, 'TCP connects first. The rest is cancelled, the user does not notice.']] },
+  };
+  const raceSvg = (sc, t) => {
+    const W = 1180, X0 = 250, X1 = 1150, TMAX = 300, x = (ms) => X0 + (X1 - X0) * Math.min(ms, TMAX) / TMAX;
+    const LANE = 46, y0 = 30, done = t >= sc.end;
+    let s = `<svg viewBox="0 0 ${W} 470" width="100%" height="100%">`;
+    const text = (tx, ty, str, o = {}) => `<text x="${tx}" y="${ty}" font-size="${o.size || 22}" fill="${o.fill || INK}" font-weight="${o.bold ? 700 : 400}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}>${str}</text>`;
+    const rows = [...sc.dns.map((d) => ({ kind: 'dns', label: 'DNS: ' + d[0], start: 0, stop: d[1] })),
+      ...sc.attempts.map((a, i) => ({ kind: a[3] || 'never', label: `${i + 1}: ${a[0]}`, start: a[1], stop: a[2] }))];
+    rows.forEach((r, i) => {
+      const yy = y0 + i * LANE + (r.kind === 'dns' ? 0 : 16), mid = yy + 13;
+      const started = t >= r.start, cancelled = done && r.kind === 'lose';
+      s += text(0, mid + 7, r.label, { bold: true, fill: started || r.kind === 'dns' ? INK : FAINT });
+      if (r.kind === 'dns' && t > 0) {
+        s += `<rect x="${x(0)}" y="${yy + 3}" width="${x(Math.min(t, r.stop)) - x(0)}" height="20" rx="4" fill="${NEW}" opacity="${t >= r.stop ? 0.55 : 0.3}"/>`;
+      } else if (r.kind === 'win' && started) {
+        const w = x(Math.min(t, r.stop)) - x(r.start);
+        s += `<rect x="${x(r.start)}" y="${yy}" width="${w}" height="26" rx="4" fill="${NEW}" opacity="${t >= r.stop ? 1 : 0.45}"/>`;
+        if (t >= r.stop) s += text(x(r.stop) + 10, mid + 7, 'connected', { bold: true });
+      } else if (r.kind === 'lose' && started) {
+        const w = x(Math.min(t, sc.end)) - x(r.start);
+        s += `<g opacity="${cancelled ? 0.45 : 1}"><rect x="${x(r.start)}" y="${yy}" width="${w}" height="26" rx="4" fill="none" stroke="#a9a9b4" stroke-width="2" stroke-dasharray="6 5"/>`;
+        if (w > 140) s += text(x(r.start) + 12, mid + 7, cancelled ? 'no answer, cancelled' : 'no answer', { size: 18, fill: MUTED });
+        s += '</g>';
+      } else if (r.kind === 'never' && done) {
+        s += text(r.start < TMAX ? x(r.start) : X1, mid + 7, 'never started', { size: 18, fill: FAINT, anchor: r.start < TMAX ? null : 'end' });
+      }
+    });
+    const ay = y0 + rows.length * LANE + 30;
+    s += `<line x1="${X0}" y1="${ay}" x2="${X1}" y2="${ay}" stroke="${HAIR}" stroke-width="2"/>`;
+    for (let ms = 0; ms <= TMAX; ms += 50) s += text(x(ms), ay + 26, ms === 0 ? '0 ms' : ms, { size: 16, fill: FAINT, anchor: 'middle' });
+    const cx = x(Math.min(t, sc.end));
+    s += `<line x1="${cx}" y1="${y0 - 6}" x2="${cx}" y2="${ay}" stroke="${tok('--accent', '#e66000')}" stroke-width="2.5"/>`;
+    if (!done) s += text(cx + 8, y0 + 4, Math.round(t) + ' ms', { size: 16, fill: tok('--accent', '#e66000'), bold: true });
+    const step = sc.steps.filter((p) => t >= p[0]).pop();
+    s += text(0, ay + 68, step[1], { size: 26, bold: true });
+    return s + '</svg>';
+  };
+  const printing = /print-pdf/i.test(window.location.search);
+  const raceRun = (el, final) => {
+    const sc = RACE[el.dataset.sc];
+    if (el._raf) cancelAnimationFrame(el._raf);
+    if (final) { el.innerHTML = raceSvg(sc, sc.end); return; }
+    const t0 = performance.now(), hold = 400;
+    const frame = (now) => {
+      const p = Math.max(0, (now - t0 - hold) / sc.ms);
+      el.innerHTML = raceSvg(sc, Math.min(1, p) * sc.end);
+      if (p < 1) el._raf = requestAnimationFrame(frame);
+    };
+    el._raf = requestAnimationFrame(frame);
+  };
+  const raceAll = () => document.querySelectorAll('.race-anim').forEach((el) => {
+    const live = !printing && el.closest('section') === Reveal.getCurrentSlide();
+    if (live && el._live) return;
+    el._live = live;
+    raceRun(el, !live);
+  });
+  document.querySelectorAll('.race-anim').forEach((el) => el.addEventListener('click', () => raceRun(el, false)));
+  Reveal.on('ready', raceAll);
+  Reveal.on('slidechanged', raceAll);
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
