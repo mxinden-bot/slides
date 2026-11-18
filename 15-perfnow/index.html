@@ -141,13 +141,13 @@
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
     <h2>QUIC connects in about half the time</h2>
-    <div class="chart" style="height:490px" id="c-setup"></div>
-    <figcaption>Connection setup time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
+    <div class="chart" style="height:500px" id="c-setup"></div>
+    <figcaption>Connection setup time, share of connections at or below each time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
     <aside class="notes"><ul>
       <li>Placeholder: redo with a query on sql.telemetry.mozilla.org.</li>
       <li>Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. With the request it is 3 vs 2.</li>
       <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
-      <li>Confounder: QUIC 0-RTT connections may pull the QUIC numbers down.</li>
+      <li>Confounder, visible in the curve: about 23% of QUIC connections set up in under 1 ms, likely 0-RTT or resumed. They pull the QUIC median down.</li>
       <li>Desktop only, page loads only, not served from cache.</li>
     </ul></aside>
   </section>
@@ -208,7 +208,7 @@
 
   <section>
     <p class="part">2 &middot; Rolling out new protocols</p>
-    <h2>HTTP/3: 22% to 29% of responses in two years</h2>
+    <h2>HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-h3"></div>
     <figcaption>Share of HTTP responses over HTTP/3 (main documents and subresources). Firefox Desktop Release, October 2024 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_http_response_version">networking.http_response_version</a>).</figcaption>
     <aside class="notes"><ul>
@@ -221,7 +221,7 @@
   <section>
     <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
-    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user&#39;s network. Usually, QUIC connects first.</p>
+    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user&#39;s network.</p>
     <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
       <g class="axis">
         <line x1="260" y1="360" x2="1150" y2="360"/>
@@ -477,21 +477,27 @@
     });
   });
 
-  // Connection setup: horizontal paired bars, values at the tips.
-  Charts.register('c-setup', (el) => chart(el, {
-    grid: { left: 70, right: 90, top: 50, bottom: 30 },
-    graphic: [keys([{ name: 'TCP + TLS (HTTP/2)', color: OLD }, { name: 'QUIC (HTTP/3)', color: NEW }], 0, 70)],
-    xAxis: valueAxis({ max: 500, interval: 100, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: ms }) }),
-    yAxis: catAxis(D.setup.p, { inverse: true, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
-    series: [
-      { name: 'TCP + TLS', type: 'bar', data: D.setup.tcp, barWidth: 24, barGap: '25%',
-        itemStyle: { color: OLD, borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'right', formatter: (p) => p.value + ' ms', ...txt({ fontSize: 17 }) } },
-      { name: 'QUIC', type: 'bar', data: D.setup.quic, barWidth: 24,
-        itemStyle: { color: NEW, borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'right', formatter: (p) => p.value + ' ms', ...txt({ fontSize: 17, color: INK, fontWeight: 700 }) } },
-    ],
-  }));
+  // Connection setup: two cumulative curves on a log axis, medians marked.
+  Charts.register('c-setup', (el) => {
+    const med = (c) => c.find((p) => p[1] >= 50);
+    const curve = (data, name, color, labelPos) => ({ type: 'line', name, data, showSymbol: false,
+      lineStyle: { color, width: 3.5 },
+      endLabel: { show: false },
+      markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
+        data: [{ coord: med(data) }],
+        label: { show: true, position: labelPos, distance: 10, backgroundColor: '#fff', padding: [2, 6],
+          formatter: `${name}: ${Math.round(med(data)[0])} ms`, ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } } });
+    return chart(el, {
+      grid: { left: 90, right: 60, top: 50, bottom: 60 },
+      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, name: 'connection setup time', nameLocation: 'middle', nameGap: 36,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17 }), axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR } }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => (v >= 1000 ? v / 1000 + ' s' : v + ' ms') }) },
+      yAxis: valueAxis({ min: 0, max: 100, interval: 25, name: 'share of connections', nameLocation: 'end', nameGap: 18,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }), axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      series: [curve(D.setupCdf.tcp, 'TCP + TLS', '#a9a9b4', 'right'), curve(D.setupCdf.quic, 'QUIC', NEW, 'left')],
+    });
+  });
 
   // Share over time on a date axis; the end label carries the latest value.
   const timeAxis = (o) => Object.assign({ type: 'time', axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
