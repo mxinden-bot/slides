@@ -236,7 +236,6 @@
       <line class="cut" x1="488" y1="150" x2="488" y2="345"/>
       <text class="cutlabel" x="498" y="335">first to connect wins</text>
     </svg>
-    <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
     <aside class="notes"><ul><li>The browser asks DNS for all records at once, then starts the best option: QUIC over IPv6.</li><li>Usually it connects right away, and the race is over.</li></ul></aside>
   </section>
 
@@ -258,8 +257,6 @@
       <line class="cut" x1="996" y1="150" x2="996" y2="345"/>
       <text class="cutlabel" x="986" y="335" text-anchor="end">first to connect wins, the rest is cancelled</text>
     </svg>
-    <p class="benefit">Usually the new protocol wins. Where it is blocked, the browser falls back to the old one, so it stays safe.</p>
-    <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
     <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops it.</li><li>50 ms later the browser also tries TCP, 150 ms later QUIC over IPv4.</li><li>TCP connects first, the rest is cancelled.</li><li>This is the whole strategy: servers advertise, clients race. Servers only need to advertise HTTP/3.</li></ul></aside>
   </section>
 
