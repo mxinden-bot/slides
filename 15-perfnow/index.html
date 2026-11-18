@@ -60,11 +60,12 @@
     .reveal table.adv { border-collapse: separate; border-spacing: 14px 18px; margin: 1.2em 0 0; font-size: 0.8em; }
     .reveal table.adv th { color: var(--ink-faint); font-weight: 800; text-align: center; font-size: 0.75em; border: 0; }
     .reveal table.adv td { border: 0; vertical-align: middle; padding: 0; }
-    .reveal table.adv td:first-child { width: 420px; }
+    .reveal table.adv td:first-child { width: 340px; }
     .reveal table.adv td:first-child span { display: block; font-size: 0.65em; color: var(--ink-muted); }
-    .reveal table.adv .c { width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: #fff; }
+    .reveal table.adv .c { width: 190px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: #fff; }
     .reveal table.adv .c.old { background: #a9a9b4; }
     .reveal table.adv .c.new { background: #2a78d6; }
+    .reveal table.adv .c.more { opacity: 0.45; }
     @keyframes rpIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .reveal .rp svg .anim { opacity: 0; animation: rpIn 0.35s ease-out forwards; transform-box: fill-box; }
     html.print-pdf .reveal .rp svg .anim, html.reveal-print .reveal .rp svg .anim { opacity: 1; animation: none; }
@@ -282,9 +283,9 @@
     <p class="part">4 &middot; Servers advertise</p>
     <h2>Two ways to advertise HTTP/3</h2>
     <table class="adv">
-      <thead><tr><th></th><th>First connection</th><th>Next connections</th></tr></thead>
-      <tr><td><b>1. <code>Alt-Svc</code> header</b><span>in the HTTP response</span></td><td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td></tr>
-      <tr><td><b>2. HTTPS DNS record</b><span>in DNS, before connecting</span></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td></tr>
+      <thead><tr><th></th><th>1st connection</th><th>2nd</th><th>3rd</th><th>&hellip;</th></tr></thead>
+      <tr><td><b>1. <code>Alt-Svc</code> header</b><span>in the HTTP response</span></td><td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
+      <tr><td><b>2. HTTPS DNS record</b><span>in DNS, before connecting</span></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
     </table>
     <aside class="notes"><ul>
       <li>Alt-Svc: the browser only learns about HTTP/3 from the response, so the first connection is HTTP/2. HTTP/3 from the next connection on.</li>
