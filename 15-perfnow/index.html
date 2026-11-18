@@ -65,6 +65,9 @@
     .reveal table.adv .c { width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: #fff; }
     .reveal table.adv .c.old { background: #a9a9b4; }
     .reveal table.adv .c.new { background: #2a78d6; }
+    @keyframes rpIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .reveal .rp svg .anim { opacity: 0; animation: rpIn 0.35s ease-out forwards; transform-box: fill-box; }
+    html.print-pdf .reveal .rp svg .anim, html.reveal-print .reveal .rp svg .anim { opacity: 1; animation: none; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -370,7 +373,27 @@
 
   // Role play: round trips bracketed and numbered in the left gutter.
   const CS = [{ id: 'C', label: 'Client' }, { id: 'S', label: 'Server' }];
-  const RP = (msgs) => (el) => Seq.render(el, { actors: CS, messages: msgs, scale: 1.7, gutter: 200 });
+  // Role-play diagrams build up message by message when the slide opens: each arrow with its
+  // label is one step, the round-trip bracket (and its highlight) appears with the second
+  // message of its pair. Lifelines and actor boxes stay. The PDF shows the final state.
+  const seqAnimate = (el) => {
+    const svg = el.querySelector('svg'); if (!svg) return;
+    let step = -1, pending = [];
+    const bgs = [...svg.querySelectorAll(':scope > rect')].filter((r) => r.getAttribute('fill') === 'rgba(230,96,0,0.07)');
+    let hlCount = 0;
+    const set = (node, k) => { node.classList.add('anim'); node.style.animationDelay = (0.5 + k * 0.7) + 's'; };
+    [...svg.children].forEach((node) => {
+      if (node.tagName === 'defs' || bgs.includes(node)) return;
+      if (node.tagName === 'text' && node.getAttribute('font-size') && pending.length === 0 && node.nextElementSibling
+          && node.nextElementSibling.tagName === 'line' && node.nextElementSibling.hasAttribute('marker-end')) { pending.push(node); return; }
+      if (node.tagName === 'line' && node.hasAttribute('marker-end')) { step += 1; pending.forEach((n) => set(n, step)); pending = []; set(node, step); return; }
+      if (node.tagName === 'path' || (node.tagName === 'text' && node.getAttribute('text-anchor') === 'end')) {
+        set(node, step);
+        if (node.tagName === 'path' && node.getAttribute('stroke-width') === '2.5' && bgs[hlCount]) set(bgs[hlCount++], step);
+      }
+    });
+  };
+  const RP = (msgs) => (el) => { Seq.render(el, { actors: CS, messages: msgs, scale: 1.7, gutter: 200 }); seqAnimate(el); };
   Seq.register('rp-tcp', RP([
     { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
     { from: 'C', to: 'S', text: 'GET /', hl: true, rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'response', dashed: true },
