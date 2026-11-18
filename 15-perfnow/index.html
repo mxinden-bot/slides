@@ -312,10 +312,7 @@
     <ul>
       <li>Serve HTTP/3, alongside HTTP/1.1 and HTTP/2.</li>
       <li>Send an <code>Alt-Svc</code> header on all of them.</li>
-      <li>Publish an HTTPS record with <code>alpn="h3"</code>:</li>
-    </ul>
-    <pre class="rr"><code class="plaintext">example.com. 3600 IN HTTPS 1 . alpn="h3,h2"</code></pre>
-    <ul>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code>.</li>
       <li>Offer QUIC 0-RTT.</li>
     </ul>
   </section>
