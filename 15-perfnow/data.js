@@ -70,8 +70,13 @@ window.DECK_DATA = {
   release: {
     version: {
       x: ['HTTP/1.1', 'HTTP/2', 'HTTP/3'],
-      control: [26.7, 53.8, 19.6],
-      hev3:    [25.8, 49.7, 24.6],
+      // Pooled over Firefox 158 to 160 (all versions of the experiment): 158 and 159 from
+      // the experiment report (2026-10-16 to 11-10, page loads with a TLS handshake, in the
+      // foreground; counts 24262184/48301889/18325288 control, 23803776/46210774/24186369
+      // HEv3), plus 160 reconstructed from its shares and page-load totals above.
+      // 98.6M (control) and 102.2M (HEv3) page loads. Firefox 160 alone: 19.6% to 24.6%.
+      control: [26.7, 53.2, 20.1],
+      hev3:    [25.3, 49.1, 25.6],
     },
     p:    ['P5', 'P10', 'P25', 'P50', 'P75', 'P85', 'P90', 'P95', 'P99'],
     diff: [-0.59, -1.84, -3.32, -2.72, -2.33, -2.24, -2.07, -1.87, -3.63],
