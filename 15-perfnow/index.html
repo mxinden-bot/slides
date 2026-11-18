@@ -217,9 +217,9 @@
     </ul></aside>
   </section>
 
-  <!-- 3. Race on the client -->
+  <!-- 3. Clients race -->
   <section>
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user&#39;s network. Usually, QUIC connects first.</p>
     <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
@@ -241,7 +241,7 @@
   </section>
 
   <section data-transition="none">
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small">When QUIC is blocked, the next attempt starts after a short delay, and TCP connects.</p>
     <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
@@ -260,11 +260,11 @@
     </svg>
     <p class="benefit">Usually the new protocol wins. Where it is blocked, the browser falls back to the old one, so it stays safe.</p>
     <figcaption>Illustrative. Each new attempt starts after a delay (50 ms, then 150 ms after the first), or right away when an earlier one fails.</figcaption>
-    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops it.</li><li>50 ms later the browser also tries TCP, 150 ms later QUIC over IPv4.</li><li>TCP connects first, the rest is cancelled.</li><li>This is the whole strategy: offer on the server, race on the client. Servers only need to offer HTTP/3.</li></ul></aside>
+    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops it.</li><li>50 ms later the browser also tries TCP, 150 ms later QUIC over IPv4.</li><li>TCP connects first, the rest is cancelled.</li><li>This is the whole strategy: servers advertise, clients race. Servers only need to advertise HTTP/3.</li></ul></aside>
   </section>
 
   <section>
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>Why &ldquo;Happy Eyeballs&rdquo;?</h2>
     <ul>
       <li><strong>Eyeballs</strong> is network operator slang for users: the people looking at the screen.</li>
@@ -275,14 +275,14 @@
   </section>
 
   <section>
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>More page loads over HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-rel-version"></div>
     <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 160 Release experiment, 5 to 13 November 2026: 7.7M (control) and 8.0M (Happy Eyeballs v3). HTTP/3 goes from <strong>19.6% to 24.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
   </section>
 
   <section>
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>First contentful paint (FCP) is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
@@ -290,28 +290,28 @@
   </section>
 
   <section>
-    <p class="part">3 &middot; Race on the client</p>
+    <p class="part">3 &middot; Clients race</p>
     <h2>Largest contentful paint (LCP) is faster too</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
     <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>.</figcaption>
     <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Firefox records the final value when the page is hidden.</li><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
   </section>
 
-  <!-- 4. Offer on the server -->
+  <!-- 4. Servers advertise -->
   <section>
-    <p class="part">4 &middot; Offer on the server</p>
+    <p class="part">4 &middot; Servers advertise</p>
     <h2>Alt-Svc header: HTTP/3 only on the next connection</h2>
     <div class="flow" id="up-altsvc"></div>
   </section>
 
   <section>
-    <p class="part">4 &middot; Offer on the server</p>
+    <p class="part">4 &middot; Servers advertise</p>
     <h2>HTTPS DNS record: HTTP/3 on the first connection</h2>
     <div class="flow" id="up-https"></div>
   </section>
 
   <section>
-    <p class="part">4 &middot; Offer on the server</p>
+    <p class="part">4 &middot; Servers advertise</p>
     <h2>What to offer</h2>
     <ul>
       <li>Serve HTTP/3, alongside HTTP/1.1 and HTTP/2.</li>
@@ -325,7 +325,7 @@
   </section>
 
   <section>
-    <p class="part">4 &middot; Offer on the server</p>
+    <p class="part">4 &middot; Servers advertise</p>
     <h2>Your frontend most likely supports it</h2>
     <div class="cols sup" style="gap:40px; align-items:flex-start;">
       <table><thead><tr><th>Server, proxy</th><th>HTTP/3</th><th>0-RTT</th></tr></thead>
@@ -365,7 +365,7 @@
       <li>Offer QUIC 0-RTT.</li>
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
-    <p class="mantra">Offer on the server, race on the client.</p>
+    <p class="mantra">Servers advertise, clients race.</p>
     <aside class="notes"><ul>
       <li>Summary: we are moving to HTTP/3, one round trip less. With 0-RTT the request goes out in the first flight.</li>
       <li>The problem is the rollout. We don't want to get stuck like IPv6. TLS 1.3 is the better example.</li>
