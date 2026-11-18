@@ -547,8 +547,30 @@
       label: { show: true, distance: 8, lineHeight: 20,
         formatter: (p) => `${p.value > 0 ? '+' : ''}${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex] > 0 ? '+' : ''}${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
   });
-  Charts.register('c-rel-fcp', change(D.report.p, D.report.fcp.diff, D.report.fcp.diffMs));
-  Charts.register('c-rel-lcp', change(D.report.p, D.report.lcp.diff, D.report.lcp.diffMs));
+  // Change by percentile as a line (P10 to P99), the usual percentiles marked with % and ms.
+  const MARKS = [10, 25, 50, 75, 90, 95, 99];
+  const changeLine = (curve) => (el) => chart(el, {
+    grid: { left: 80, right: 50, top: 60, bottom: 60 },
+    xAxis: { type: 'value', min: 10, max: 99, interval: 10, name: 'percentile', nameLocation: 'middle', nameGap: 36,
+      nameTextStyle: txt({ color: MUTED, fontSize: 17 }), axisLine: { show: false }, axisTick: { show: false },
+      splitLine: { show: false }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => 'P' + v }) },
+    yAxis: valueAxis({ min: -4, max: Math.max(0, Math.ceil(Math.max(...curve.map((c) => c[1])))), interval: 1,
+      name: 'change vs control, lower is faster', nameLocation: 'end', nameGap: 18,
+      nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }), axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{ type: 'line', data: curve.map((c) => [c[0], c[1]]), showSymbol: false, smooth: false,
+      lineStyle: { color: CHG, width: 3.5 },
+      areaStyle: { color: 'rgba(27,175,122,0.10)', origin: 0 },
+      markLine: { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: INK, width: 1.5, type: 'solid' }, data: [{ yAxis: 0 }] },
+      markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: CHG, borderColor: '#fff', borderWidth: 2 },
+        data: MARKS.map((q) => { const c = curve.find((x) => x[0] === q); const up = c[1] > 0;
+          const pos = q === 99 ? 'left' : q === 95 ? 'top' : up ? 'right' : 'bottom';
+          return { coord: [c[0], c[1]], label: { position: pos, distance: 10,
+            formatter: `P${q}\n${up ? '+' : ''}${c[1].toFixed(1)}%\n(${c[2] > 0 ? '+' : ''}${c[2]} ms)` } }; }),
+        label: { show: true, lineHeight: 19, backgroundColor: 'rgba(255,255,255,0.9)', padding: [2, 4], ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } },
+    }],
+  });
+  Charts.register('c-rel-fcp', changeLine(D.report.fcpCurve));
+  Charts.register('c-rel-lcp', changeLine(D.report.lcpCurve));
 
 
   // Happy Eyeballs race, animated. Simplified, but order and delays follow Firefox:
