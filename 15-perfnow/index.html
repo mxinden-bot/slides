@@ -475,22 +475,22 @@
   // Connection setup: two cumulative curves on a log axis, medians marked.
   Charts.register('c-setup', (el) => {
     const med = (c) => c.find((p) => p[1] >= 50);
-    const curve = (data, name, color, labelPos) => ({ type: 'line', name, data, showSymbol: false,
+    const curve = (data, name, color, labelPos, offset) => ({ type: 'line', name, data, showSymbol: false,
       lineStyle: { color, width: 3.5 },
       endLabel: { show: false },
       markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
         data: [{ coord: med(data) }],
-        label: { show: true, position: labelPos, distance: 10, backgroundColor: '#fff', padding: [2, 6],
+        label: { show: true, position: labelPos, distance: 10, offset: offset || [0, 0], backgroundColor: '#fff', padding: [2, 6],
           formatter: `${name}: ${Math.round(med(data)[0])} ms`, ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } } });
     return chart(el, {
       grid: { left: 90, right: 60, top: 50, bottom: 60 },
-      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, name: 'connection setup time', nameLocation: 'middle', nameGap: 36,
+      xAxis: { type: 'value', min: 0, max: 300, interval: 50, name: 'connection setup time', nameLocation: 'middle', nameGap: 36,
         nameTextStyle: txt({ color: MUTED, fontSize: 17 }), axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
         splitLine: { lineStyle: { color: HAIR } }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
         axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => (v >= 1000 ? v / 1000 + ' s' : v + ' ms') }) },
       yAxis: valueAxis({ min: 0, max: 100, interval: 25, name: 'share of connections', nameLocation: 'end', nameGap: 18,
         nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }), axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
-      series: [curve(D.setupCdf.tcp, 'TCP + TLS', '#a9a9b4', 'right'), curve(D.setupCdf.quic, 'QUIC', NEW, 'left')],
+      series: [curve(D.setupCdf.tcp, 'TCP + TLS', '#a9a9b4', 'right'), curve(D.setupCdf.quic, 'QUIC', NEW, 'left', [0, -30])],
     });
   });
 
