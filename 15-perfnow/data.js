@@ -67,6 +67,17 @@ window.DECK_DATA = {
   // Release experiment happy-eyeballs-v3-release-v2, Firefox 160, 5% of Release per
   // branch, queried 2026-11-05 to 11-13; Firefox 160 shipped 2026-11-10, so data from 11-10, page loads whose main document opened a new connection.
   // Same numbers as the IETF 127 deck.
+  // FCP and LCP from the experiment report, Firefox 158 and 159, 2026-10-16 to 11-10,
+  // page loads with a TLS handshake, in the foreground (perf.page_load event).
+  // Change = HEv3 vs control; ms = HEv3 minus control. All 95% bootstrap CIs exclude zero.
+  // LCP here is lcp_time at onLoad, not the final LCP.
+  report: {
+    p: ['P50', 'P75', 'P95', 'P99'],
+    fcp: { n: ['73.9M', '77.1M'], control: [648, 1175, 3098, 8207], hev3: [632, 1146, 3023, 7923],
+      diff: [-2.48, -2.41, -2.40, -3.46], diffMs: [-16, -28, -74, -284] },
+    lcp: { n: ['81.8M', '84.9M'], control: [875, 1665, 4661, 13262], hev3: [865, 1653, 4587, 12944],
+      diff: [-1.05, -0.70, -1.57, -2.39], diffMs: [-9, -12, -73, -317] },
+  },
   release: {
     version: {
       x: ['HTTP/1.1', 'HTTP/2', 'HTTP/3'],

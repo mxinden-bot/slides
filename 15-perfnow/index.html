@@ -244,16 +244,16 @@
     <p class="part">3 &middot; Clients race</p>
     <h2>First contentful paint (FCP) is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
-    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.2M (control) and 5.4M (Happy Eyeballs v3). Median <strong>661 ms to 643 ms</strong>, P99 <strong>11.2 s to 10.8 s</strong>.</figcaption>
-    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li></ul></aside>
+    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, Firefox 158 and 159 Release experiment: 73.9M (control) and 77.1M (Happy Eyeballs v3). Median <strong>648 ms to 632 ms</strong>, P99 <strong>8.2 s to 7.9 s</strong>. Every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li><li>Firefox 158 and 159, bootstrap 95% confidence intervals all exclude zero.</li></ul></aside>
   </section>
 
   <section>
     <p class="part">3 &middot; Clients race</p>
     <h2>Largest contentful paint (LCP) is faster too</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
-    <figcaption>Largest contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, same experiment: 5.9M (control) and 6.1M (Happy Eyeballs v3). Median <strong>941 ms to 928 ms</strong>.</figcaption>
-    <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Firefox records the final value when the page is hidden.</li><li>Smaller in percent than FCP, but about the same time saved: 13 ms at the median for LCP, 18 ms for FCP.</li><li>Happy Eyeballs saves time in connection setup; LCP adds more time after that.</li><li>No confidence intervals computed: don't call it significant.</li><li>P99 and above left out: there LCP measures how long a page stays open, not how fast it loads.</li></ul></aside>
+    <figcaption>Largest contentful paint at page load (onLoad), Happy Eyeballs v3 vs control, same experiment: 81.8M (control) and 84.9M (Happy Eyeballs v3). Median <strong>875 ms to 865 ms</strong>, P99 <strong>13.3 s to 12.9 s</strong>. Every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul><li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li><li>Smaller in percent than FCP, and less time saved at the median: 9 ms for LCP, 16 ms for FCP. Happy Eyeballs saves time in connection setup; LCP adds more after that.</li><li>Firefox 158 and 159, bootstrap 95% confidence intervals all exclude zero.</li></ul></aside>
   </section>
 
   <!-- 4. Servers advertise -->
@@ -527,8 +527,8 @@
       label: { show: true, position: 'bottom', distance: 8, lineHeight: 20,
         formatter: (p) => `${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
   });
-  Charts.register('c-rel-fcp', change(D.release.p, D.release.diff, D.release.diffMs));
-  Charts.register('c-rel-lcp', change(D.release.lcp.p, D.release.lcp.diff, D.release.lcp.diffMs));
+  Charts.register('c-rel-fcp', change(D.report.p, D.report.fcp.diff, D.report.fcp.diffMs));
+  Charts.register('c-rel-lcp', change(D.report.p, D.report.lcp.diff, D.report.lcp.diffMs));
 
 
   // Happy Eyeballs race, animated. Simplified, but order and delays follow Firefox:
