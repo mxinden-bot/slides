@@ -221,7 +221,7 @@
   <section>
     <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
-    <p class="small">IPv4 or IPv6, TCP or QUIC: which one works depends on the user&#39;s network.</p>
+    <p class="small">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
     <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
       <g class="axis">
         <line x1="260" y1="360" x2="1150" y2="360"/>
@@ -242,7 +242,7 @@
   <section data-transition="none">
     <p class="part">3 &middot; Clients race</p>
     <h2>Happy Eyeballs: race the options</h2>
-    <p class="small">When QUIC is blocked, the next attempt starts after a short delay, and TCP connects.</p>
+    <p class="small" style="visibility:hidden" aria-hidden="true">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
     <svg class="race" viewBox="0 0 1180 400" width="100%" style="max-height:400px">
       <g class="axis">
         <line x1="260" y1="360" x2="1150" y2="360"/>
@@ -266,13 +266,12 @@
     <ul>
       <li><strong>Eyeballs</strong> is network operator slang for users: the people looking at the screen.</li>
       <li>Eyeballs are latency sensitive, and often on lossy, bad networks.</li>
-      <li>Happy eyeballs: users who never wait on a broken path.</li>
     </ul>
   </section>
 
   <section>
     <p class="part">3 &middot; Clients race</p>
-    <h2>More page loads over HTTP/3</h2>
+    <h2>With Happy Eyeballs: more page loads over HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-rel-version"></div>
     <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 160 Release experiment, 5 to 13 November 2026: 7.7M (control) and 8.0M (Happy Eyeballs v3). HTTP/3 goes from <strong>19.6% to 24.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
   </section>
