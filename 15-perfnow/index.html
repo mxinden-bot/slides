@@ -237,7 +237,7 @@
     <h2>With Happy Eyeballs: more page loads over HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-rel-version"></div>
     <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 158 to 160 Release experiment: 98.6M (control) and 102.2M (Happy Eyeballs v3). HTTP/3 goes from <strong>20.1% to 25.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
-    <aside class="notes"><ul><li>All versions of the experiment, Firefox 158 to 160: about 100M page loads per branch.</li><li>Firefox 160 alone gives the same picture: 19.6% to 24.6%.</li><li>This is only the client side: Firefox changed, the servers did not. When servers also advertise HTTP/3 (Alt-Svc, HTTPS records), the jump is likely much larger.</li></ul></aside>
+    <aside class="notes"><ul><li>All versions of the experiment, Firefox 158 to 160: about 100M page loads per branch.</li><li>Firefox 160 alone gives the same picture: 19.6% to 24.6%.</li><li>This is the client side: one browser, Firefox, racing better.</li><li>The client still needs the server: it can only reach HTTP/3 where the server offers it.</li><li>A server that enables HTTP/3 and publishes an HTTPS record changes it for all its clients at once, so the jump there is likely much larger.</li></ul></aside>
   </section>
 
   <section>
