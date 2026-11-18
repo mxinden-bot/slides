@@ -57,6 +57,14 @@
     .reveal .rt.saved { border: 3px dashed var(--accent); color: var(--accent); background: transparent; }
     .reveal .rtnote { flex: 1; font-size: 0.55em; color: var(--ink-muted); padding-left: 8px; }
     .reveal .rtnote.strong { color: var(--ink); font-weight: 800; }
+    .reveal table.adv { border-collapse: separate; border-spacing: 14px 18px; margin: 1.2em 0 0; font-size: 0.8em; }
+    .reveal table.adv th { color: var(--ink-faint); font-weight: 800; text-align: center; font-size: 0.75em; border: 0; }
+    .reveal table.adv td { border: 0; vertical-align: middle; padding: 0; }
+    .reveal table.adv td:first-child { width: 420px; }
+    .reveal table.adv td:first-child span { display: block; font-size: 0.65em; color: var(--ink-muted); }
+    .reveal table.adv .c { width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: #fff; }
+    .reveal table.adv .c.old { background: #a9a9b4; }
+    .reveal table.adv .c.new { background: #2a78d6; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -269,23 +277,16 @@
   <!-- 4. Servers advertise -->
   <section>
     <p class="part">4 &middot; Servers advertise</p>
-    <h2>The first visit: Alt-Svc header vs HTTPS record</h2>
-    <div class="rtrows">
-      <div class="rtrow">
-        <div class="rtlabel">Alt-Svc header only</div>
-        <div class="rt dns">DNS</div><div class="rt old">TCP</div><div class="rt old">TLS</div><div class="rt old">HTTP/2 request</div>
-        <div class="rtnote">HTTP/3 only from the next connection</div>
-      </div>
-      <div class="rtrow">
-        <div class="rtlabel">HTTPS record</div>
-        <div class="rt dns">DNS</div><div class="rt new">QUIC</div><div class="rt new">HTTP/3 request</div>
-        <div class="rtnote strong">HTTP/3 on the first connection</div>
-      </div>
-    </div>
-    <figcaption>First connection to a site, TLS 1.3. The HTTPS record is looked up at the same time as A and AAAA.</figcaption>
+    <h2>Two ways to advertise HTTP/3</h2>
+    <table class="adv">
+      <thead><tr><th></th><th>First connection</th><th>Next connections</th></tr></thead>
+      <tr><td><b>1. <code>Alt-Svc</code> header</b><span>in the HTTP response</span></td><td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td></tr>
+      <tr><td><b>2. HTTPS DNS record</b><span>in DNS, before connecting</span></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td></tr>
+    </table>
     <aside class="notes"><ul>
-      <li>Alt-Svc: the browser connects over TCP + TLS, sends the request, and only the response tells it about HTTP/3. HTTP/3 only from the next connection.</li>
-      <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is already QUIC.</li>
+      <li>Alt-Svc: the browser only learns about HTTP/3 from the response, so the first connection is HTTP/2. HTTP/3 from the next connection on.</li>
+      <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is HTTP/3 too.</li>
+      <li>Do both: the HTTPS record for the first connection, Alt-Svc for browsers that do not look up HTTPS records.</li>
     </ul></aside>
   </section>
 
