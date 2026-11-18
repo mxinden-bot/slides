@@ -65,7 +65,7 @@ window.DECK_DATA = {
   h3: [27.5, 27.8, 30.0, 28.8, 29.9, 30.2, 30.6, 32.7],
 
   // Release experiment happy-eyeballs-v3-release-v2, Firefox 160, 5% of Release per
-  // branch, 2026-11-05 -> 11-13, page loads whose main document opened a new connection.
+  // branch, queried 2026-11-05 to 11-13; Firefox 160 shipped 2026-11-10, so data from 11-10, page loads whose main document opened a new connection.
   // Same numbers as the IETF 127 deck.
   release: {
     version: {
