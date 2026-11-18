@@ -376,8 +376,7 @@
   const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
   Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, scale: 1.4, messages: [
     { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
-    { from: 'C', to: 'S', text: 'TCP + TLS handshake' }, { from: 'S', to: 'C', text: 'handshake done', dashed: true },
-    { from: 'C', to: 'S', text: 'HTTP/2 request' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/2 request (TCP + TLS)' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
     { note: 'the browser learns about HTTP/3 only now', over: ['C', 'S'] },
     { from: 'C', to: 'S', text: 'next connection: QUIC handshake', hl: true }, { from: 'S', to: 'C', text: 'handshake done', dashed: true },
     { from: 'C', to: 'S', text: 'HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
