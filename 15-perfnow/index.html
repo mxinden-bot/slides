@@ -72,12 +72,8 @@
     .reveal .slides > section { height: 100%; }
     .reveal .slides > section > figcaption, .reveal .slides .pdf-page > section > figcaption { position: absolute; left: 0; right: 100px; bottom: 6px; margin: 0; }
     html.print-pdf .reveal .slides .pdf-page > section, html.reveal-print .reveal .slides .pdf-page > section { top: 0 !important; height: 720px !important; }
-    .reveal .dict { margin: 1.4em 0 0 0.2em; }
-    .reveal .dict p { margin: 0; }
-    .reveal .dict .word { font-size: 3.4em; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
-    .reveal .dict .pos { font-size: 0.75em; font-style: italic; color: var(--ink-muted); margin-top: 0.3em; }
-    .reveal .dict .def { font-size: 1.15em; margin-top: 0.9em; }
-    .reveal .dict .def2 { font-size: 1.15em; margin-top: 0.4em; }
+    .reveal .said { height: 520px; display: flex; flex-direction: column; justify-content: center; gap: 0.8em; }
+    .reveal .said p { font-size: 1.35em; line-height: 1.3; margin: 0; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -257,11 +253,9 @@
   <section>
     <p class="part">3 &middot; Clients race</p>
     <h2>Why &ldquo;Happy Eyeballs&rdquo;?</h2>
-    <div class="dict">
-      <p class="word">eyeballs</p>
-      <p class="pos">noun, network operator slang</p>
-      <p class="def">The users: the people looking at the screen.</p>
-      <p class="def2">Latency sensitive, and often on lossy, bad networks.</p>
+    <div class="said">
+      <p>Network operators call users <strong>eyeballs</strong>.</p>
+      <p>They are latency sensitive, often on lossy, bad networks.</p>
     </div>
   </section>
 
