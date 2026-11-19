@@ -57,15 +57,6 @@
     .reveal .rt.saved { border: 3px dashed var(--accent); color: var(--accent); background: transparent; }
     .reveal .rtnote { flex: 1; font-size: 0.55em; color: var(--ink-muted); padding-left: 8px; }
     .reveal .rtnote.strong { color: var(--ink); font-weight: 800; }
-    .reveal table.adv { border-collapse: separate; border-spacing: 14px 18px; margin: 1.2em 0 0; font-size: 0.8em; }
-    .reveal table.adv th { color: var(--ink-faint); font-weight: 800; text-align: center; font-size: 0.75em; border: 0; }
-    .reveal table.adv td { border: 0; vertical-align: middle; padding: 0; }
-    .reveal table.adv td:first-child { width: 340px; }
-    .reveal table.adv td:first-child span { display: block; font-size: 0.65em; color: var(--ink-muted); }
-    .reveal table.adv .c { width: 190px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: #fff; }
-    .reveal table.adv .c.old { background: #a9a9b4; }
-    .reveal table.adv .c.new { background: #2a78d6; }
-    .reveal table.adv .c.more { opacity: 0.45; }
     .reveal .slides > section { height: 100%; }
     .reveal .slides > section > figcaption, .reveal .slides .pdf-page > section > figcaption { position: absolute; left: 0; right: 100px; bottom: 6px; margin: 0; }
     html.print-pdf .reveal .slides .pdf-page > section, html.reveal-print .reveal .slides .pdf-page > section { top: 0 !important; height: 720px !important; }
@@ -92,7 +83,18 @@
     .reveal blockquote.quote1 { height: 500px; display: flex; flex-direction: column; justify-content: center; margin: 0; padding: 0; border: 0; box-shadow: none; background: none; width: auto; font-style: normal; }
     .reveal blockquote.quote1 p { font-size: 1.6em; font-weight: 700; line-height: 1.25; margin: 0; }
     .reveal blockquote.quote1 cite { display: block; margin-top: 1em; font-size: 0.6em; font-style: normal; color: var(--ink-muted); }
-    .reveal pre.rr.sample { font-size: 0.6em; width: auto; margin: 0.4em 0 0 14px; box-shadow: none; }
+    .reveal table.adv { border-collapse: separate; border-spacing: 12px 44px; margin: 1.2em 0 0 -12px; }
+    .reveal table.adv th { color: var(--ink-faint); font-weight: 800; text-align: center; font-size: 0.55em; border: 0; padding: 0; }
+    .reveal table.adv td { border: 0; vertical-align: middle; padding: 0; }
+    .reveal table.adv td:first-child { width: 520px; }
+    .reveal table.adv .nm { font-size: 0.8em; font-weight: 700; }
+    .reveal table.adv .nm code { font-size: 0.95em; }
+    .reveal table.adv .wh { font-size: 0.5em; color: var(--ink-muted); margin-top: 2px; }
+    .reveal table.adv .ex { display: inline-block; margin-top: 10px; padding: 6px 10px; border-radius: 6px; background: #f1f1f4; font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.5em; color: var(--ink); white-space: nowrap; }
+    .reveal table.adv .c { width: 155px; height: 120px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.7em; font-weight: 800; color: #fff; }
+    .reveal table.adv .c.old { background: #a9a9b4; }
+    .reveal table.adv .c.new { background: #2a78d6; }
+    .reveal table.adv .c.more { opacity: 0.45; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -325,10 +327,15 @@
     <h2>Two ways to advertise HTTP/3</h2>
     <table class="adv">
       <thead><tr><th></th><th>1st connection</th><th>2nd</th><th>3rd</th><th>&hellip;</th></tr></thead>
-      <tr><td><b>1. <code>Alt-Svc</code> header</b><span>in the HTTP response</span></td><td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
-      <tr><td><b>2. HTTPS DNS record</b><span>in DNS, before connecting</span></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
+      <tr>
+        <td><div class="nm">1. <code>Alt-Svc</code> HTTP header</div><div class="wh">in the HTTP response</div>
+          <div class="ex">Alt-Svc: h3=":443"; ma=86400</div></td>
+        <td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
+      <tr>
+        <td><div class="nm">2. HTTPS DNS record</div><div class="wh">in DNS, before connecting</div>
+          <div class="ex">example.com. 3600 IN HTTPS 1 . alpn="h3,h2"</div></td>
+        <td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
     </table>
-    <pre class="rr sample"><code class="plaintext">example.com.  3600  IN  HTTPS  1 . alpn="h3,h2"</code></pre>
     <aside class="notes"><ul>
       <li>Alt-Svc: the browser only learns about HTTP/3 from the response, so the first connection is HTTP/2. HTTP/3 from the next connection on.</li>
       <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is HTTP/3 too.</li>
