@@ -185,7 +185,7 @@
       <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="cb b new">QUIC</div><div class="cb b new">style.css</div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
       <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="cb b new">style.css</div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
     </div>
-    <figcaption>One box per round trip. 100 ms is about the P95 round-trip time of the previous slide (118 ms). DNS not counted, the same in all three. The second connection starts once <code>index.html</code> has arrived.</figcaption>
+    <figcaption>One box per round trip. 100 ms is about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The second connection starts once <code>index.html</code> has arrived.</figcaption>
     <aside class="notes"><ul>
       <li>Round trips compound: the second server is only known once the HTML is in.</li>
       <li>HTTP/2: 6 round trips. HTTP/3: 4. HTTP/3 with 0-RTT: 2.</li>
