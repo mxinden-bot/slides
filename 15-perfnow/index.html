@@ -83,9 +83,8 @@
   <!-- Cover -->
   <section class="cover" data-background-color="#ffffff">
     <h1>Save a round trip</h1>
-    <p class="subtitle">Optimizing for IETF's Happy Eyeballs v3</p>
+    <p class="subtitle">With HTTP/3 and Happy Eyeballs v3</p>
     <span class="venue"><a href="https://perfnow.nl/">performance.now() 2026</a> &middot; Amsterdam &middot; 20 November 2026 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
-    <aside class="notes"><ul><li>Subtitle taken from the talk title on perfnow.nl. Still a placeholder.</li></ul></aside>
   </section>
 
   <!-- About me -->
@@ -106,6 +105,7 @@
     <h2>1991: plain HTTP over TCP</h2>
     <div class="rp" id="rp-tcp"></div>
     <figcaption>HTTP (1991) over TCP (<a href="https://www.rfc-editor.org/rfc/rfc793">RFC 793</a>, 1981). Round trips until the response arrives, DNS not counted.</figcaption>
+    <aside class="notes"><ul><li>HTTP: Tim Berners-Lee at CERN, first version 1991.</li><li>TCP: Vint Cerf and Bob Kahn, standardised in RFC 793 (1981).</li></ul></aside>
   </section>
 
   <section>
@@ -128,7 +128,7 @@
     <p class="newproto">A new transport protocol: QUIC runs over UDP, not TCP.</p>
     <div class="rp" id="rp-quic"></div>
     <figcaption>QUIC: <a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>, 2021. HTTP/3: <a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114</a>, 2022.</figcaption>
-    <aside class="notes"><ul><li>Stress: a completely new protocol, not another layer on top of TCP.</li><li>That makes the upgrade hard, which is why we need Happy Eyeballs v3 later.</li></ul></aside>
+    <aside class="notes"><ul><li>A new protocol, not a layer on TCP: hard to upgrade, hence Happy Eyeballs v3.</li></ul></aside>
   </section>
 
   <section>
@@ -144,13 +144,9 @@
     <div class="chart" style="height:500px" id="c-rtt"></div>
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
     <aside class="notes"><ul>
-      <li>First explain how to read the chart: for each time on the x-axis, the line shows the share of connections with a round trip that fast or faster. Example: at 25 ms the line is at 50%, so half of all connections have a round trip of 25 ms or less.</li>
-      <li>Distance sets the round trip: 5 to 20 ms within a city, 40 to 80 ms across a country, 150 ms or more across an ocean or on mobile (savearoundtrip.com).</li>
-      <li>25 ms median: a CDN close to the user. The tail is far longer: 43 ms at P75, 118 ms at P95.</li>
-      <li>What people notice (Nielsen, 1993): 0.1 s feels instant, 1 s keeps the flow of thought, 10 s and attention is gone.</li>
-      <li>A handshake costs several round trips: 3 at P95 is already over 0.1 s.</li>
-      <li>It compounds: the round trip is paid before the HTML arrives, and every image, script and style waits for the HTML. So it delays the whole page, not one request.</li>
-      <li>And it is paid again for every new connection: fonts, images, analytics on other origins.</li>
+      <li>How to read: at 25 ms the line is at 50%, so half of connections have a round trip of 25 ms or less.</li>
+      <li>City 5 to 20 ms, country 40 to 80 ms, ocean or mobile 150 ms and more. Under 0.1 s feels instant.</li>
+      <li>Paid before the HTML arrives, and again for every new connection.</li>
     </ul></aside>
   </section>
 
