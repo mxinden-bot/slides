@@ -142,6 +142,7 @@
     <div class="chart" style="height:500px" id="c-rtt"></div>
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
     <aside class="notes"><ul>
+      <li>First explain how to read the chart: for each time on the x-axis, the line shows the share of connections with a round trip that fast or faster. Example: at 25 ms the line is at 50%, so half of all connections have a round trip of 25 ms or less.</li>
       <li>Distance sets the round trip: 5 to 20 ms within a city, 40 to 80 ms across a country, 150 ms or more across an ocean or on mobile (savearoundtrip.com).</li>
       <li>25 ms median: a CDN close to the user. The tail is far longer: 43 ms at P75, 118 ms at P95.</li>
       <li>What people notice (Nielsen, 1993): 0.1 s feels instant, 1 s keeps the flow of thought, 10 s and attention is gone.</li>
