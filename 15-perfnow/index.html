@@ -183,7 +183,7 @@
 
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
-    <h2>One page: the HTML, then three more servers</h2>
+    <h2>Example: one page, then three more servers</h2>
     <p class="small"><code>index.html</code> from one server, then a style sheet, a font and a script from three other servers, in parallel.</p>
     <div class="comp">
       <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="fan"><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">style.css</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">font.woff2</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">app.js</div></div></div><div class="ctot">600 ms</div></div>
@@ -661,7 +661,7 @@
         formatter: (p) => `${p.value > 0 ? '+' : ''}${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex] > 0 ? '+' : ''}${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
   });
   // Change by percentile as a line (P10 to P99), the usual percentiles marked with % and ms.
-  const MARKS = [10, 25, 50, 75, 90, 95, 99];
+  const MARKS = [10, 25, 50, 75, 95, 99];
   const changeLine = (curve) => (el) => chart(el, {
     grid: { left: 80, right: 50, top: 60, bottom: 60 },
     xAxis: { type: 'value', min: 10, max: 99, interval: 10, name: 'percentile', nameLocation: 'middle', nameGap: 36,
@@ -676,7 +676,7 @@
       markLine: { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: INK, width: 1.5, type: 'solid' }, data: [{ yAxis: 0 }] },
       markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: CHG, borderColor: '#fff', borderWidth: 2 },
         data: MARKS.map((q) => { const c = curve.find((x) => x[0] === q); const up = c[1] > 0;
-          const pos = q === 99 ? 'left' : q === 95 ? 'top' : up ? 'right' : 'bottom';
+          const pos = q === 99 ? 'left' : q === 95 ? 'top' : q === 10 ? 'right' : 'bottom';
           return { coord: [c[0], c[1]], label: { position: pos, distance: 10,
             formatter: `P${q}\n${up ? '+' : ''}${c[1].toFixed(1)}%\n(${c[2] > 0 ? '+' : ''}${c[2]} ms)` } }; }),
         label: { show: true, lineHeight: 19, backgroundColor: 'rgba(255,255,255,0.9)', padding: [2, 4], ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } },
