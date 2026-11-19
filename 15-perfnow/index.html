@@ -92,6 +92,7 @@
     .reveal blockquote.quote1 { height: 500px; display: flex; flex-direction: column; justify-content: center; margin: 0; padding: 0; border: 0; box-shadow: none; background: none; width: auto; font-style: normal; }
     .reveal blockquote.quote1 p { font-size: 1.6em; font-weight: 700; line-height: 1.25; margin: 0; }
     .reveal blockquote.quote1 cite { display: block; margin-top: 1em; font-size: 0.6em; font-style: normal; color: var(--ink-muted); }
+    .reveal pre.rr.sample { font-size: 0.6em; width: auto; margin: 0.4em 0 0 14px; box-shadow: none; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -327,6 +328,7 @@
       <tr><td><b>1. <code>Alt-Svc</code> header</b><span>in the HTTP response</span></td><td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
       <tr><td><b>2. HTTPS DNS record</b><span>in DNS, before connecting</span></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
     </table>
+    <pre class="rr sample"><code class="plaintext">example.com.  3600  IN  HTTPS  1 . alpn="h3,h2"</code></pre>
     <aside class="notes"><ul>
       <li>Alt-Svc: the browser only learns about HTTP/3 from the response, so the first connection is HTTP/2. HTTP/3 from the next connection on.</li>
       <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is HTTP/3 too.</li>
