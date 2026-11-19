@@ -415,17 +415,47 @@
 
   // Role play: round trips bracketed and numbered in the left gutter.
   const CS = [{ id: 'C', label: 'Client' }, { id: 'S', label: 'Server' }];
-  const RP = (msgs) => (el) => Seq.render(el, { actors: CS, messages: msgs, scale: 1.7, gutter: 200 });
-  Seq.register('rp-tcp', RP([
+  // Protocol diagrams step through on click: one reveal.js fragment per arrow. Each arrow
+  // (with its label) is one step; a round-trip bracket and its highlight show with the
+  // second arrow of the pair. The PDF shows all arrows (pdfSeparateFragments: false).
+  const seqTag = (el) => {
+    const svg = el.querySelector('svg'); if (!svg) return;
+    const bgs = [...svg.querySelectorAll(':scope > rect')].filter((r) => r.getAttribute('fill') === 'rgba(230,96,0,0.07)');
+    let step = -1, pending = null, hl = 0;
+    [...svg.children].forEach((node) => {
+      if (node.tagName === 'defs' || bgs.includes(node)) return;
+      const next = node.nextElementSibling;
+      if (node.tagName === 'text' && next && next.tagName === 'line' && next.hasAttribute('marker-end')) { pending = node; return; }
+      if (node.tagName === 'line' && node.hasAttribute('marker-end')) {
+        step += 1; node.dataset.step = step; if (pending) { pending.dataset.step = step; pending = null; } return;
+      }
+      if (node.tagName === 'path' || (node.tagName === 'text' && node.getAttribute('text-anchor') === 'end')) {
+        node.dataset.step = step;
+        if (node.tagName === 'path' && node.getAttribute('stroke-width') === '2.5' && bgs[hl]) bgs[hl++].dataset.step = step;
+      }
+    });
+  };
+  const seqApply = (el) => {
+    const sec = el.closest('section'); if (!sec) return;
+    const n = sec.querySelectorAll('.fragment.rp-step.visible').length;
+    el.querySelectorAll('[data-step]').forEach((nd) => { nd.style.visibility = +nd.dataset.step < n ? 'visible' : 'hidden'; });
+  };
+  const RP = (msgs) => (el) => { Seq.render(el, { actors: CS, messages: msgs, scale: 1.7, gutter: 200 }); seqTag(el); seqApply(el); };
+  const regRP = (id, msgs) => {
+    Seq.register(id, RP(msgs));
+    const sec = document.getElementById(id).closest('section');
+    msgs.forEach(() => { const f = document.createElement('span'); f.className = 'fragment rp-step'; sec.appendChild(f); });
+  };
+  regRP('rp-tcp', [
     { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
     { from: 'C', to: 'S', text: 'GET /', hl: true, rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'response', dashed: true },
-  ]));
-  Seq.register('rp-tls12', RP([
+  ]);
+  regRP('rp-tls12', [
     { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
     { from: 'C', to: 'S', text: 'TLS ClientHello', rt: 'round trip 2', rtHl: true }, { from: 'S', to: 'C', text: 'ServerHello, certificate', dashed: true },
     { from: 'C', to: 'S', text: 'key exchange, Finished', rt: 'round trip 3', rtHl: true }, { from: 'S', to: 'C', text: 'Finished', dashed: true },
     { from: 'C', to: 'S', text: 'GET /', hl: true, rt: 'round trip 4' }, { from: 'S', to: 'C', text: 'response', dashed: true },
-  ]));
+  ]);
   // TLS 1.2 -> TLS 1.3: the slide opens on the TLS 1.2 diagram, then round trips 2 and 3
   // merge into one: the key exchange rows slide up into round trip 2 and fade, labels change,
   // the request moves up. Same geometry and style as Seq (scale 1.7, gutter 200).
@@ -502,13 +532,13 @@
     el._raf = requestAnimationFrame(frame);
   };
   Seq.register('rp-tls13', (el) => tlsMorph(el));
-  Seq.register('rp-quic', RP([
+  regRP('rp-quic', [
     { from: 'C', to: 'S', text: 'QUIC Initial: ClientHello', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
     { from: 'C', to: 'S', text: 'Finished + GET /', hl: true, rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'response', dashed: true },
-  ]));
-  Seq.register('rp-0rtt', RP([
+  ]);
+  regRP('rp-0rtt', [
     { from: 'C', to: 'S', text: 'ClientHello + GET /', hl: true, rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'ServerHello ... + response', dashed: true },
-  ]));
+  ]);
 
   const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
   Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, scale: 1.4, messages: [
@@ -780,11 +810,15 @@
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.045,
     hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    pdfSeparateFragments: false,
     plugins: [RevealNotes, RevealHighlight, RevealZoom],
   });
   const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
   Reveal.on('ready', () => setTimeout(render, 0));
   Reveal.on('slidechanged', render);
+  const rpStep = () => document.querySelectorAll('.rp').forEach(seqApply);
+  Reveal.on('fragmentshown', rpStep);
+  Reveal.on('fragmenthidden', rpStep);
   Reveal.on('resize', () => setTimeout(render, 60));
   window.addEventListener('load', () => setTimeout(render, 120));
 </script>
