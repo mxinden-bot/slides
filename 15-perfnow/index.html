@@ -161,6 +161,21 @@
     </ul></aside>
   </section>
 
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>QUIC connects in about half the time</h2>
+    <div class="chart" style="height:500px" id="c-setup"></div>
+    <figcaption>Connection setup time, share of connections at or below each time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
+    <aside class="notes"><ul>
+      <li>Placeholder: redo with a query on sql.telemetry.mozilla.org.</li>
+      <li>Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. With the request it is 3 vs 2.</li>
+      <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
+      <li>Confounder, visible in the curve: about 23% of QUIC connections set up in under 1 ms, likely 0-RTT or resumed. They pull the QUIC median down.</li>
+      <li>Desktop only, page loads only, not served from cache.</li>
+    </ul></aside>
+  </section>
+
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
     <h2>One page, two servers, 100 ms per round trip</h2>
@@ -175,20 +190,6 @@
       <li>Round trips compound: the second server is only known once the HTML is in.</li>
       <li>HTTP/2: 6 round trips. HTTP/3: 4. HTTP/3 with 0-RTT: 2.</li>
       <li>At P95 that is 200 ms saved with HTTP/3, 400 ms with 0-RTT.</li>
-    </ul></aside>
-  </section>
-
-  <section>
-    <p class="part">1 &middot; Protocols evolve</p>
-    <h2>QUIC connects in about half the time</h2>
-    <div class="chart" style="height:500px" id="c-setup"></div>
-    <figcaption>Connection setup time, share of connections at or below each time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
-    <aside class="notes"><ul>
-      <li>Placeholder: redo with a query on sql.telemetry.mozilla.org.</li>
-      <li>Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. With the request it is 3 vs 2.</li>
-      <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
-      <li>Confounder, visible in the curve: about 23% of QUIC connections set up in under 1 ms, likely 0-RTT or resumed. They pull the QUIC median down.</li>
-      <li>Desktop only, page loads only, not served from cache.</li>
     </ul></aside>
   </section>
 
