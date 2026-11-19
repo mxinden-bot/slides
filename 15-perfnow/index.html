@@ -151,7 +151,9 @@
     <p class="newproto">A new transport protocol: QUIC runs over UDP, not TCP.</p>
     <div class="rp" id="rp-quic"></div>
     <figcaption>QUIC: <a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>, 2021. HTTP/3: <a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114</a>, 2022.</figcaption>
-    <aside class="notes"><ul><li>A new protocol, not a layer on TCP: hard to upgrade, hence Happy Eyeballs v3.</li></ul></aside>
+    <aside class="notes"><ul>
+      <li>Hard to upgrade, hence Happy Eyeballs.</li>
+    </ul></aside>
   </section>
 
   <section>
@@ -166,11 +168,6 @@
     <h2>What one round trip costs</h2>
     <div class="chart" style="height:500px" id="c-rtt"></div>
     <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
-    <aside class="notes"><ul>
-      <li>How to read: at 25 ms the line is at 50%, so half of connections have a round trip of 25 ms or less.</li>
-      <li>City 5 to 20 ms, country 40 to 80 ms, ocean or mobile 150 ms and more. Under 0.1 s feels instant.</li>
-      <li>Paid before the HTML arrives, and again for every new connection.</li>
-    </ul></aside>
   </section>
 
 
@@ -180,11 +177,8 @@
     <div class="chart" style="height:500px" id="c-setup"></div>
     <figcaption>Connection setup time, share of connections at or below each time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
     <aside class="notes"><ul>
-      <li>Placeholder: redo with a query on sql.telemetry.mozilla.org.</li>
-      <li>Setup only: TCP + TLS 1.3 is 2 round trips, QUIC is 1, so half is what we expect. With the request it is 3 vs 2.</li>
       <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
-      <li>Confounder, visible in the curve: about 23% of QUIC connections set up in under 1 ms, likely 0-RTT or resumed. They pull the QUIC median down.</li>
-      <li>Desktop only, page loads only, not served from cache.</li>
+      <li>Mention 0-RTT impact.</li>
     </ul></aside>
   </section>
 
@@ -199,9 +193,7 @@
     </div>
     <figcaption>One box per round trip, 100 ms each: about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The other servers are only known once <code>index.html</code> has arrived.</figcaption>
     <aside class="notes"><ul>
-      <li>A median page opens about 10 connections (Web Almanac 2024), mostly in parallel.</li>
-      <li>What adds up is the steps in sequence: first the HTML, then everything it points to.</li>
-      <li>Two steps here: HTTP/2 6 round trips, HTTP/3 4, HTTP/3 with 0-RTT 2. At P95, 200 ms and 400 ms saved.</li>
+      <li>Round trips compound.</li>
     </ul></aside>
   </section>
 
@@ -215,7 +207,6 @@
       <tr><td>Network</td><td>Some networks block UDP. Rare today: QUIC works 97%+ of the time across Meta's apps and sites.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a><br><a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">Meta</a></td></tr>
     </table>
     <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
-    <aside class="notes"><ul><li>VPN resolvers and HTTPS records: from field experience, no public bug to cite.</li></ul></aside>
   </section>
 
   <section>
@@ -225,12 +216,7 @@
     <div class="chart" style="height:450px" id="c-ipv6"></div>
     <figcaption>Share of HTTP connections over IPv6, Firefox Desktop Release, August 2025 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_connection_address_type">networking.connection_address_type</a>). IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
     <aside class="notes"><ul>
-      <li>IPv6 standardised in 1998. Today about a fifth of Firefox connections, up from 18% a year ago.</li>
-      <li>Firefox data only starts in August 2025.</li>
-      <li>Other perspectives: Google says about half of its users reach it over IPv6. That only counts clients reaching a server that supports IPv6.</li>
-      <li>GitHub still has no IPv6 address.</li>
-      <li>There was a transition path, but it was too complex.</li>
-      <li>The internet routed around it: routing moved up to HTTP. A CDN can serve millions of sites from a single IP address.</li>
+      <li>Google servers: about 50%.</li>
     </ul></aside>
   </section>
 
@@ -239,11 +225,6 @@
     <h2>TLS 1.3: standardised in 2018</h2>
     <div class="chart" style="height:490px" id="c-adopt"></div>
     <figcaption>Firefox Desktop Release, October 2024 to November 2026. TLS 1.3 share of TLS handshakes over TCP (QUIC not counted). Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO.</figcaption>
-    <aside class="notes"><ul>
-      <li>Firefox data only goes back to October 2024 (retention limit).</li>
-      <li>TLS 1.3 here is TCP only: QUIC always uses TLS 1.3, so the real share is higher.</li>
-      <li>TLS 1.3: a client offers it, a server that supports it gains right away, everyone else falls back to TLS 1.2.</li>
-    </ul></aside>
   </section>
 
   <section>
@@ -254,10 +235,8 @@
       <cite><a href="https://www.rfc-editor.org/rfc/rfc8170#section-1">RFC 8170</a>, &ldquo;Planning for Protocol Adoption and Subsequent Transitions&rdquo;, Internet Architecture Board, 2017</cite>
     </blockquote>
     <aside class="notes"><ul>
-      <li>IPv6: in most cases no benefit for the one deploying it, so little adoption.</li>
-      <li>RFC 8170 on IPv6: "there was no incremental benefit to deploying locally".</li>
-      <li>TLS 1.3: the TLS handshake goes from 2 round trips to 1. An immediate benefit, high impact.</li>
-      <li>Bridge to QUIC: also 1 round trip for the whole setup. Huge.</li>
+      <li>Enabling QUIC saves round trips.</li>
+      <li>Need to mitigate the risk.</li>
     </ul></aside>
   </section>
 
@@ -266,10 +245,6 @@
     <h2>HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-h3"></div>
     <figcaption>Share of HTTP responses over HTTP/3 (main documents and subresources). Firefox Desktop Release, October 2024 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_http_response_version">networking.http_response_version</a>).</figcaption>
-    <aside class="notes"><ul>
-      <li>From 22% to 29% in two years: growing, but slowly.</li>
-      <li>Unlike IPv6, HTTP/3 has a clear reason: it is faster.</li>
-    </ul></aside>
   </section>
 
   <!-- 3. Clients race -->
@@ -278,7 +253,6 @@
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
     <div class="race-anim" data-sc="a" title="click to replay"></div>
-    <aside class="notes"><ul><li>The browser asks DNS for the HTTPS record, AAAA and A at once.</li><li>Once the answers are in, it sorts the options: QUIC before TCP, alternating IPv6 and IPv4.</li><li>It starts the best one, QUIC over IPv6. Usually that connects, and the race is over.</li><li>Click the diagram to replay.</li></ul></aside>
   </section>
 
   <section data-transition="none">
@@ -286,7 +260,6 @@
     <h2>Happy Eyeballs: race the options</h2>
     <p class="small" style="visibility:hidden" aria-hidden="true">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
     <div class="race-anim" data-sc="b" title="click to replay"></div>
-    <aside class="notes"><ul><li>QUIC gets no answer, for example antivirus drops UDP.</li><li>50 ms later the browser also tries QUIC over IPv4, 150 ms after the first try TCP over IPv6.</li><li>TCP connects first, the rest is cancelled. TCP over IPv4 never starts.</li><li>Order and delays as in Firefox: 0, 50, 150, 350 ms after the first attempt.</li><li>This is the whole strategy: servers advertise, clients race. Servers only need to advertise HTTP/3.</li></ul></aside>
   </section>
 
   <section>
@@ -295,6 +268,7 @@
     <div class="said">
       <p>Network operators call users <strong>eyeballs</strong>.</p>
       <p>They are latency sensitive, often on lossy, bad networks.</p>
+      <p>Optimizing for latency makes eyeballs happy.</p>
     </div>
   </section>
 
@@ -303,7 +277,6 @@
     <h2>With Happy Eyeballs: more page loads over HTTP/3</h2>
     <div class="chart" style="height:490px" id="c-rel-version"></div>
     <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 158 to 160 Release experiment: 98.6M (control) and 102.2M (Happy Eyeballs v3). HTTP/3 goes from <strong>20.1% to 25.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
-    <aside class="notes"><ul><li>All versions of the experiment, Firefox 158 to 160: about 100M page loads per branch.</li><li>Firefox 160 alone gives the same picture: 19.6% to 24.6%.</li><li>This is the client side: one browser, Firefox, racing better.</li><li>The client still needs the server: it can only reach HTTP/3 where the server offers it.</li><li>A server that enables HTTP/3 and publishes an HTTPS record changes it for all its clients at once, so the jump there is likely much larger.</li></ul></aside>
   </section>
 
   <section>
@@ -311,7 +284,9 @@
     <h2>First contentful paint (FCP) is faster at every percentile</h2>
     <div class="chart" style="height:490px" id="c-rel-fcp"></div>
     <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, Firefox 158 and 159 Release experiment: 73.9M (control) and 77.1M (Happy Eyeballs v3). Median <strong>648 ms to 632 ms</strong>, P99 <strong>8.2 s to 7.9 s</strong>. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
-    <aside class="notes"><ul><li>FCP: time from navigation start until the browser paints the first text or image.</li><li>Labels: change in % and in ms, Happy Eyeballs v3 minus control.</li><li>Firefox 158 and 159. P10 to P99 read from the report&#39;s per-percentile charts; confidence intervals only for P50 to P99, all exclude zero.</li></ul></aside>
+    <aside class="notes"><ul>
+      <li>FCP: time from navigation start until the browser paints the first text or image.</li>
+    </ul></aside>
   </section>
 
   <section>
@@ -319,7 +294,11 @@
     <h2>Largest contentful paint (LCP) is faster for most page loads</h2>
     <div class="chart" style="height:490px" id="c-rel-lcp"></div>
     <figcaption>Largest contentful paint at page load (onLoad), Happy Eyeballs v3 vs control, same experiment: 81.8M (control) and 84.9M (Happy Eyeballs v3). Median <strong>875 ms to 865 ms</strong>, P99 <strong>13.3 s to 12.9 s</strong>. Slightly slower below about P18. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
-    <aside class="notes"><ul><li>Stress: this is the client side. Firefox alone moved HTTP/3 up about 5 points, across the whole internet. A server that enables HTTP/3 will likely see a much larger effect: most clients can then use HTTP/3 to it, from 0 to maybe 70% (my estimate).</li><li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li><li>Smaller in percent than FCP, and less time saved at the median: 9 ms for LCP, 16 ms for FCP. Happy Eyeballs saves time in connection setup; LCP adds more after that.</li><li>The fastest page loads (below about P18) get slightly slower: +1.1% (+3 ms) at P10. Possibly the cost of waiting for the HTTPS record; not explained yet.</li><li>Firefox 158 and 159. Confidence intervals only for P50 to P99, all exclude zero.</li></ul></aside>
+    <aside class="notes"><ul>
+      <li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li>
+      <li>Stress: this is the client side, about 5 points more HTTP/3. Enabled on the server: much more than that.</li>
+      <li>Hypothesis for the P10 increase: the Happy Eyeballs delay constants.</li>
+    </ul></aside>
   </section>
 
   <!-- 4. Servers advertise -->
@@ -338,8 +317,6 @@
         <td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
     </table>
     <aside class="notes"><ul>
-      <li>Alt-Svc: the browser only learns about HTTP/3 from the response, so the first connection is HTTP/2. HTTP/3 from the next connection on.</li>
-      <li>HTTPS record: DNS already says the server speaks HTTP/3, so the first connection is HTTP/3 too.</li>
       <li>Do both: the HTTPS record for the first connection, Alt-Svc for browsers that do not look up HTTPS records.</li>
     </ul></aside>
   </section>
@@ -370,6 +347,7 @@
       <li>It is your public-facing server or CDN that needs it, not the application server behind it.</li>
       <li>nginx HTTP/3 is still marked experimental; Apache httpd has none.</li>
       <li>Several are opt-in: Cloudflare, Akamai, CloudFront, Fastly need HTTP/3 turned on.</li>
+      <li>Users: pressure your providers.</li>
     </ul></aside>
   </section>
 
@@ -386,7 +364,11 @@
       </div>
     </div>
     <figcaption>savearoundtrip.com checking perfnow.nl, 19 November 2026.</figcaption>
-    <aside class="notes"><ul><li>Ask the audience which website to test.</li><li>Fallback: perfnow.nl, or savearoundtrip.com itself.</li></ul></aside>
+    <aside class="notes"><ul>
+      <li>Ask the audience which website to test.</li>
+      <li>Fallback: perfnow.nl, or savearoundtrip.com itself.</li>
+      <li>Personal websites: whoever has everything checked (HTTP/3, Alt-Svc, HTTPS record, 0-RTT) gets a 3D-printed fox.</li>
+    </ul></aside>
   </section>
 
   <section>
@@ -398,16 +380,11 @@
       <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
     </ol>
     <p class="mantra">Servers advertise, clients race.</p>
+    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="https://mastodon.social/@mxinden">@mxinden@mastodon.social</a> &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a></p>
     <aside class="notes"><ul>
-      <li>Summary: we are moving to HTTP/3, one round trip less. With 0-RTT the request goes out in the first flight.</li>
-      <li>The problem is the rollout. We don't want to get stuck like IPv6. TLS 1.3 is the better example.</li>
-      <li>For that, servers offer and clients race.</li>
-      <li>Here is what you can do:</li>
-      <li>Q&amp;A: 0-RTT data can be replayed by an attacker.</li><li>Servers accept it only for safe requests such as GET.</li><li>HTTP has a 425 Too Early status for the rest (RFC 8470).</li>
       <li>Ask people to show me their personal website. If it ticks everything on savearoundtrip.com, they get a small 3D-printed Firefox. It has to be their personal website.</li>
       <li>I am working on HTTP priorities in Firefox right now. Input welcome: come talk to me.</li>
     </ul></aside>
-    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="https://mastodon.social/@mxinden">@mxinden@mastodon.social</a> &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a></p>
   </section>
 
 </div>
