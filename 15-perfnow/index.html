@@ -73,17 +73,22 @@
     .reveal .said p { font-size: 1.35em; line-height: 1.3; margin: 0; }
     .reveal .addr { font-size: 0.7em; color: var(--ink-muted); margin: 0 0 0.2em; }
     .reveal .addr code { color: var(--ink); }
-    .reveal .comp { margin-top: 1.2em; display: flex; flex-direction: column; gap: 22px; }
+    .reveal .comp { margin-top: 1.2em; display: flex; flex-direction: column; gap: 28px; }
     .reveal .crow { display: flex; align-items: center; gap: 6px; }
     .reveal .clabel { flex: 0 0 200px; font-size: 0.55em; font-weight: 800; line-height: 1.2; }
     .reveal .clabel span { font-weight: 400; color: var(--ink-muted); }
-    .reveal .cb { flex: 0 0 128px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 0.42em; font-weight: 700; color: #fff; }
+    .reveal .cb { flex: 0 0 128px; height: 102px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 0.5em; font-weight: 700; color: #fff; }
     .reveal .cb.old { background: #a9a9b4; }
     .reveal .cb.old.b { background: #8f8f9d; }
     .reveal .cb.new { background: #2a78d6; }
     .reveal .cb.new.b { background: #1d5fae; }
     .reveal .ctot { padding-left: 14px; font-size: 0.75em; font-weight: 800; white-space: nowrap; }
     .reveal .ctot .sv { display: block; font-size: 0.7em; color: var(--accent); }
+    .reveal .fan { display: flex; flex-direction: column; gap: 4px; }
+    .reveal .fan .lane { display: flex; gap: 6px; }
+    .reveal .cb2 { flex: 0 0 128px; height: 31px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.4em; font-weight: 700; color: #fff; }
+    .reveal .cb2.old { background: #8f8f9d; }
+    .reveal .cb2.new { background: #1d5fae; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
   </style>
 </head>
@@ -178,18 +183,18 @@
 
   <section>
     <p class="part">1 &middot; Protocols evolve</p>
-    <h2>One page, two servers, 100 ms per round trip</h2>
-    <p class="small">The page (<code>index.html</code>) from one server, then a resource it needs from a second server.</p>
+    <h2>One page: the HTML, then three more servers</h2>
+    <p class="small"><code>index.html</code> from one server, then a style sheet, a font and a script from three other servers, in parallel.</p>
     <div class="comp">
-      <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="cb b old">TCP</div><div class="cb b old">TLS</div><div class="cb b old">style.css</div><div class="ctot">600 ms</div></div>
-      <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="cb b new">QUIC</div><div class="cb b new">style.css</div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
-      <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="cb b new">style.css</div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
+      <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="fan"><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">style.css</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">font.woff2</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">app.js</div></div></div><div class="ctot">600 ms</div></div>
+      <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="fan"><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">app.js</div></div></div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
+      <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="fan"><div class="lane"><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">app.js</div></div></div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
     </div>
-    <figcaption>One box per round trip. 100 ms is about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The second connection starts once <code>index.html</code> has arrived.</figcaption>
+    <figcaption>One box per round trip, 100 ms each: about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The other servers are only known once <code>index.html</code> has arrived.</figcaption>
     <aside class="notes"><ul>
-      <li>Round trips compound: the second server is only known once the HTML is in.</li>
-      <li>HTTP/2: 6 round trips. HTTP/3: 4. HTTP/3 with 0-RTT: 2.</li>
-      <li>At P95 that is 200 ms saved with HTTP/3, 400 ms with 0-RTT.</li>
+      <li>A median page opens about 10 connections (Web Almanac 2024), mostly in parallel.</li>
+      <li>What adds up is the steps in sequence: first the HTML, then everything it points to.</li>
+      <li>Two steps here: HTTP/2 6 round trips, HTTP/3 4, HTTP/3 with 0-RTT 2. At P95, 200 ms and 400 ms saved.</li>
     </ul></aside>
   </section>
 
