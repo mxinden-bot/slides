@@ -748,15 +748,18 @@
     return s + '</svg>';
   };
   const printing = /print-pdf/i.test(window.location.search);
+  // Plays the race, holds the final state, then starts over, for as long as the slide is shown.
   const raceRun = (el, final) => {
     const sc = RACE[el.dataset.sc];
     if (el._raf) cancelAnimationFrame(el._raf);
+    if (el._timer) clearTimeout(el._timer);
     if (final) { el.innerHTML = raceSvg(sc, sc.end); return; }
-    const t0 = performance.now(), hold = 400;
+    const t0 = performance.now(), hold = 400, rest = 3000;
     const frame = (now) => {
       const p = Math.max(0, (now - t0 - hold) / sc.ms);
       el.innerHTML = raceSvg(sc, Math.min(1, p) * sc.end);
       if (p < 1) el._raf = requestAnimationFrame(frame);
+      else el._timer = setTimeout(() => { if (el._live) raceRun(el, false); }, rest);
     };
     el._raf = requestAnimationFrame(frame);
   };
