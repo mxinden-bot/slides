@@ -77,16 +77,16 @@
     .reveal .crow { display: flex; align-items: center; gap: 6px; }
     .reveal .clabel { flex: 0 0 200px; font-size: 0.55em; font-weight: 800; line-height: 1.2; }
     .reveal .clabel span { font-weight: 400; color: var(--ink-muted); }
-    .reveal .cb { flex: 0 0 128px; height: 102px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 0.5em; font-weight: 700; color: #fff; }
+    .reveal .cb { flex: none; width: 128px; height: 102px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 0.5em; font-weight: 700; color: #fff; }
     .reveal .cb.old { background: #a9a9b4; }
     .reveal .cb.old.b { background: #8f8f9d; }
     .reveal .cb.new { background: #2a78d6; }
     .reveal .cb.new.b { background: #1d5fae; }
     .reveal .ctot { padding-left: 14px; font-size: 0.75em; font-weight: 800; white-space: nowrap; }
     .reveal .ctot .sv { display: block; font-size: 0.7em; color: var(--accent); }
-    .reveal .fan { display: flex; flex-direction: column; gap: 4px; }
-    .reveal .fan .lane { display: flex; gap: 6px; }
-    .reveal .cb2 { flex: 0 0 128px; height: 31px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.4em; font-weight: 700; color: #fff; }
+    .reveal .fan { flex: none; display: flex; flex-direction: column; gap: 4px; }
+    .reveal .fan .lane { display: flex; gap: 6px; flex: none; }
+    .reveal .cb2 { flex: none; width: 128px; height: 31px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.4em; font-weight: 700; color: #fff; }
     .reveal .cb2.old { background: #8f8f9d; }
     .reveal .cb2.new { background: #1d5fae; }
     .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
@@ -186,9 +186,9 @@
     <h2>Example: one page, then three more servers</h2>
     <p class="small"><code>index.html</code> from one server, then a style sheet, a font and a script from three other servers, in parallel.</p>
     <div class="comp">
-      <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="fan"><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">style.css</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">font.woff2</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">app.js</div></div></div><div class="ctot">600 ms</div></div>
-      <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="fan"><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">app.js</div></div></div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
-      <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="fan"><div class="lane"><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">app.js</div></div></div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
+      <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="fan" style="width:396px"><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">style.css</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">font.woff2</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">app.js</div></div></div><div class="ctot">600 ms</div></div>
+      <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="fan" style="width:262px"><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">app.js</div></div></div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
+      <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="fan" style="width:128px"><div class="lane"><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">app.js</div></div></div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
     </div>
     <figcaption>One box per round trip, 100 ms each: about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The other servers are only known once <code>index.html</code> has arrived.</figcaption>
     <aside class="notes"><ul>
