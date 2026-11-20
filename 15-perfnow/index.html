@@ -368,7 +368,7 @@
   </section>
 
   <section>
-    <h2>How we can save the <s>world</s> a round trip</h2>
+    <h2>How we can save <s>the world</s> a round trip</h2>
     <ol class="steps">
       <li>Serve HTTP/3 and send an <code>Alt-Svc</code> header.</li>
       <li>Publish an HTTPS record with <code>alpn="h3"</code>.</li>
@@ -586,7 +586,7 @@
     const marks = [[50, 'median'], [75, 'P75'], [95, 'P95']].map(([q, name]) => ({ q, name, p: at(q) }));
     return chart(el, {
       grid: { left: 90, right: 60, top: 50, bottom: 60 },
-      xAxis: { type: 'log', min: 1, max: 1000, logBase: 10, name: 'round-trip time', nameLocation: 'middle', nameGap: 36,
+      xAxis: { type: 'value', min: 0, max: 300, interval: 50, name: 'round-trip time', nameLocation: 'middle', nameGap: 36,
         nameTextStyle: txt({ color: MUTED, fontSize: 17 }),
         axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
         splitLine: { lineStyle: { color: HAIR } }, minorTick: { show: false }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
@@ -596,10 +596,10 @@
         axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
       series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3.5 },
         markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
-          data: marks.flatMap((m) => [[{ coord: [1, m.q] }, { coord: [m.p[0], m.q] }], [{ coord: [m.p[0], 0] }, { coord: [m.p[0], m.q] }]]) },
+          data: marks.flatMap((m) => [[{ coord: [0, m.q] }, { coord: [m.p[0], m.q] }], [{ coord: [m.p[0], 0] }, { coord: [m.p[0], m.q] }]]) },
         markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
           data: marks.map((m) => ({ coord: m.p, label: { formatter: `${m.name}: ${m.p[0]} ms` } })),
-          label: { show: true, position: 'left', distance: 10, backgroundColor: '#fff', padding: [2, 6], ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } },
+          label: { show: true, position: 'right', distance: 10, backgroundColor: '#fff', padding: [2, 6], ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } },
       }],
     });
   });
