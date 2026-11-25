@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Save a round trip (FOSDEM 2027)</title>
+  <link rel="stylesheet" href="../lib/reveal/dist/reset.css">
+  <link rel="stylesheet" href="../lib/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="../lib/reveal/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <script>
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    if (window.location.search.match(/print-pdf/gi)) { l.href = '../lib/reveal/css/print/pdf.css'; document.head.appendChild(l); }
+  </script>
+  <style>
+    .reveal .part { font-size: 0.5em; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.2em; }
+    .reveal .rp { width: 940px; margin: 0.3em auto 0; }
+    .reveal .bugs { border-collapse: collapse; width: 100%; }
+    .reveal .bugs td { border-bottom: 1px solid var(--hairline); vertical-align: top; }
+    .reveal .bugs td:first-child { font-weight: 800; white-space: nowrap; }
+    .reveal .bugs td:last-child { white-space: nowrap; text-align: right; }
+    .reveal .cost { display: flex; gap: 30px; align-items: center; }
+    .reveal .cost .stat { flex: 0 0 260px; }
+    .reveal .cost .chart { flex: 1; }
+    .reveal .bigquote { font-size: 1.25em; font-weight: 700; line-height: 1.35; margin: 1.6em 0 0.5em; }
+    .reveal .bigquote .src { display: block; font-size: 0.5em; font-weight: 400; color: var(--ink-muted); margin-top: 0.8em; }
+    .reveal .opts { font-size: 0.95em; line-height: 1.9; }
+    .reveal .opts em { color: var(--ink-faint); font-style: normal; padding: 0 0.3em; }
+    .reveal .shot { display: flex; gap: 40px; align-items: center; }
+    .reveal .shot img { width: 720px; border: 1px solid var(--hairline); border-radius: 8px; margin: 0; }
+    .reveal .shot .big { font-size: 1.15em; font-weight: 800; color: var(--accent); }
+    .reveal .steps { font-size: 1.0em; line-height: 1.6; }
+    .reveal .mantra { font-size: 1.15em; font-weight: 800; margin-top: 1em; }
+    .reveal .newproto { font-size: 0.7em; font-weight: 700; color: var(--accent); margin: -0.2em 0 0; }
+    .reveal table.why { font-size: 0.72em; margin-top: 1.2em; }
+    .reveal table.why td { padding: 0.9em 0.6em; }
+    .reveal .benefit { font-size: 0.7em; font-weight: 700; margin: 0.2em 0 0; }
+    .reveal .flow { width: 1000px; margin: 0.6em auto 0; }
+    .reveal .sup table { border-collapse: collapse; font-size: 0.6em; width: 100%; }
+    .reveal .sup th { text-align: left; color: var(--ink-faint); font-weight: 800; padding: 0.25em 0.5em; border-bottom: 1px solid var(--hairline); }
+    .reveal .sup td { padding: 0.25em 0.5em; border-bottom: 1px solid var(--hairline); }
+    .reveal .sup td:first-child a { color: var(--ink); font-weight: 700; }
+    .reveal .sup .y { color: var(--good); font-weight: 700; }
+    .reveal .sup .o { color: var(--ink); }
+    .reveal .sup .n { color: var(--ink-faint); }
+    .reveal .sup .u { color: var(--ink-faint); }
+    .reveal .sup-dns { font-size: 0.58em; margin-top: 0.9em; }
+    .reveal .race-anim { width: 100%; height: 470px; cursor: pointer; margin-top: 0.2em; }
+    .reveal .race-anim svg { font-family: var(--font-sans); }
+    .reveal .rtrows { margin: 1.6em 0 1.4em; display: flex; flex-direction: column; gap: 1.4em; }
+    .reveal .rtrow { display: flex; align-items: center; gap: 10px; }
+    .reveal .rtlabel { flex: 0 0 250px; font-size: 0.68em; font-weight: 800; }
+    .reveal .rt { flex: 0 0 200px; height: 84px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 6px; font-size: 0.6em; font-weight: 700; }
+    .reveal .rt.dns { background: #e3e3e8; color: var(--ink); }
+    .reveal .rt.old { background: #a9a9b4; color: #fff; }
+    .reveal .rt.new { background: #2a78d6; color: #fff; }
+    .reveal .rt.saved { border: 3px dashed var(--accent); color: var(--accent); background: transparent; }
+    .reveal .rtnote { flex: 1; font-size: 0.55em; color: var(--ink-muted); padding-left: 8px; }
+    .reveal .rtnote.strong { color: var(--ink); font-weight: 800; }
+    .reveal .slides > section { height: 100%; }
+    .reveal .slides > section > figcaption, .reveal .slides .pdf-page > section > figcaption { position: absolute; left: 0; right: 100px; bottom: 6px; margin: 0; }
+    html.print-pdf .reveal .slides .pdf-page > section, html.reveal-print .reveal .slides .pdf-page > section { top: 16px !important; height: 720px !important; }
+    .reveal .said { height: 520px; display: flex; flex-direction: column; justify-content: center; gap: 0.8em; }
+    .reveal .said p { font-size: 1.35em; line-height: 1.3; margin: 0; }
+    .reveal .addr { font-size: 0.7em; color: var(--ink-muted); margin: 0 0 0.2em; }
+    .reveal .addr code { color: var(--ink); }
+    .reveal .comp { margin-top: 1.2em; display: flex; flex-direction: column; gap: 28px; }
+    .reveal .crow { display: flex; align-items: center; gap: 6px; }
+    .reveal .clabel { flex: 0 0 200px; font-size: 0.55em; font-weight: 800; line-height: 1.2; }
+    .reveal .clabel span { font-weight: 400; color: var(--ink-muted); }
+    .reveal .cb { flex: none; width: 128px; height: 102px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 0.5em; font-weight: 700; color: #fff; }
+    .reveal .cb.old { background: #a9a9b4; }
+    .reveal .cb.old.b { background: #8f8f9d; }
+    .reveal .cb.new { background: #2a78d6; }
+    .reveal .cb.new.b { background: #1d5fae; }
+    .reveal .ctot { padding-left: 14px; font-size: 0.75em; font-weight: 800; white-space: nowrap; }
+    .reveal .ctot .sv { display: block; font-size: 0.7em; color: var(--accent); }
+    .reveal .fan { flex: none; display: flex; flex-direction: column; gap: 4px; }
+    .reveal .fan .lane { display: flex; gap: 6px; flex: none; }
+    .reveal .cb2 { flex: none; width: 128px; height: 31px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.4em; font-weight: 700; color: #fff; }
+    .reveal .cb2.old { background: #8f8f9d; }
+    .reveal .cb2.new { background: #1d5fae; }
+    .reveal blockquote.quote1 { height: 500px; display: flex; flex-direction: column; justify-content: center; margin: 0; padding: 0; border: 0; box-shadow: none; background: none; width: auto; font-style: normal; }
+    .reveal blockquote.quote1 p { font-size: 1.6em; font-weight: 700; line-height: 1.25; margin: 0; }
+    .reveal blockquote.quote1 cite { display: block; margin-top: 1em; font-size: 0.6em; font-style: normal; color: var(--ink-muted); }
+    .reveal table.adv { border-collapse: separate; border-spacing: 12px 44px; margin: 1.2em 0 0 -12px; }
+    .reveal table.adv th { color: var(--ink-faint); font-weight: 800; text-align: center; font-size: 0.55em; border: 0; padding: 0; }
+    .reveal table.adv td { border: 0; vertical-align: middle; padding: 0; }
+    .reveal table.adv td:first-child { width: 520px; }
+    .reveal table.adv .nm { font-size: 0.8em; font-weight: 700; }
+    .reveal table.adv .nm code { font-size: 0.95em; }
+    .reveal table.adv .wh { font-size: 0.5em; color: var(--ink-muted); margin-top: 2px; }
+    .reveal table.adv .ex { display: inline-block; margin-top: 10px; padding: 6px 10px; border-radius: 6px; background: #f1f1f4; font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.5em; color: var(--ink); white-space: nowrap; }
+    .reveal table.adv .c { width: 155px; height: 120px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.7em; font-weight: 800; color: #fff; }
+    .reveal table.adv .c.old { background: #a9a9b4; }
+    .reveal table.adv .c.new { background: #2a78d6; }
+    .reveal table.adv .c.more { opacity: 0.45; }
+    .reveal pre.rr { font-size: 0.55em; margin: 0.6em 0; }
+    .reveal .ground2 ul { list-style: none; margin-left: 0; font-size: 0.72em; }
+    .reveal .ground2 li { margin-bottom: 0.9em; }
+    .reveal .ground2 .gd { color: var(--ink-muted); }
+    .reveal .ground2 .gb { font-size: 0.8em; margin-left: 4px; }
+    .reveal .ground2 .st { font-size: 0.62em; font-weight: 700; color: var(--ink-faint); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 9px; margin-left: 6px; vertical-align: middle; }
+    .reveal .ground2 .st.done { color: var(--good); border-color: rgba(1,122,61,0.35); }
+    .reveal .lib { align-items: flex-start; margin-top: 0.4em; }
+    .reveal .lib ul { font-size: 0.66em; }
+    .reveal .lib > ul { flex: 0.85; }
+    .reveal .lib > pre { flex: 1.15; font-size: 0.52em; margin: 0; width: 100%; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- Cover -->
+  <section class="cover" data-background-color="#ffffff">
+    <h1>Save a round trip</h1>
+    <p class="subtitle">With HTTP/3 and Happy Eyeballs v3</p>
+    <span class="venue"><a href="https://fosdem.org/2027/">FOSDEM 2027</a> &middot; Network devroom &middot; Brussels &middot; 30 January 2027 &nbsp;&middot;&nbsp; <a href="https://max-inden.de/">Max Inden</a> &middot; Mozilla</span>
+    <aside class="notes"><ul><li>Ambitious goal.</li></ul></aside>
+  </section>
+
+  <!-- About me -->
+  <section>
+    <h2>Max Inden</h2>
+    <ul>
+      <li>I work on the Firefox networking stack at Mozilla.</li>
+      <li>HTTP/3 and QUIC (<a href="https://github.com/mozilla/neqo">neqo</a>).</li>
+      <li>Happy Eyeballs v3 in Firefox (<a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>).</li>
+      <li><a href="https://max-inden.de/post/fast-udp-io-in-firefox/">Fast UDP I/O for Firefox in Rust</a>.</li>
+      <li>Before: <a href="https://libp2p.io/">libp2p</a>, <a href="https://prometheus.io/">Prometheus</a>, <a href="https://kubernetes.io/">Kubernetes</a>.</li>
+    </ul>
+  </section>
+
+  <!-- 1. Protocols evolve -->
+    <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>1999: add security with TLS</h2>
+    <div class="rp" id="rp-tls12"></div>
+    <figcaption>TLS 1.0 (<a href="https://www.rfc-editor.org/rfc/rfc2246">RFC 2246</a>, 1999) to TLS 1.2 (<a href="https://www.rfc-editor.org/rfc/rfc5246">RFC 5246</a>, 2008): the same round trips.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>2018: TLS 1.3</h2>
+    <div class="rp" id="rp-tls13"></div>
+    <figcaption>TLS 1.3: <a href="https://www.rfc-editor.org/rfc/rfc8446">RFC 8446</a>, 2018.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>2021: QUIC, transport and TLS in one handshake</h2>
+    <p class="newproto">A new transport protocol: QUIC runs over UDP, not TCP.</p>
+    <div class="rp" id="rp-quic"></div>
+    <figcaption>QUIC: <a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>, 2021. HTTP/3: <a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114</a>, 2022.</figcaption>
+    <aside class="notes"><ul>
+      <li>Hard to upgrade, hence Happy Eyeballs.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>2021: QUIC 0-RTT, the request goes in the first packet</h2>
+    <div class="rp" id="rp-0rtt"></div>
+    <figcaption>On a repeat visit to the same server. <a href="https://www.rfc-editor.org/rfc/rfc9001#section-4.6">RFC 9001</a>, 2021. TLS 1.3 over TCP can use 0-RTT too.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>What one round trip costs</h2>
+    <div class="chart" style="height:500px" id="c-rtt"></div>
+    <figcaption>Round-trip time of HTTP/3 connections, share of connections at or below each time, Firefox 159 Release, all platforms. Only servers that support HTTP/3, often large CDNs close to the user, so likely lower than for all servers. Source: <a href="https://glam.telemetry.mozilla.org/fog/probe/networking_http_3_rtt/explore">GLAM: networking.http_3_rtt</a>.</figcaption>
+  </section>
+
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>QUIC connects in about half the time</h2>
+    <div class="chart" style="height:500px" id="c-setup"></div>
+    <figcaption>Connection setup time, share of connections at or below each time, Firefox 159 Release, desktop page loads to servers that support HTTP/3: over HTTP/2 (TCP + TLS) vs over HTTP/3 (QUIC). Source: GLAM: <a href="https://glam.telemetry.mozilla.org/fog/probe/network_sup_http3_tcp_connection/explore">network.sup_http3_tcp_connection</a>, <a href="https://glam.telemetry.mozilla.org/fog/probe/network_http3_tls_handshake/explore">network.http3_tls_handshake</a>.</figcaption>
+    <aside class="notes"><ul>
+      <li>Confounder: same kind of server (all speak HTTP/3), but the HTTP/2 side is mostly first visits before Alt-Svc is known, plus fallbacks.</li>
+      <li>Mention 0-RTT impact.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <p class="part">1 &middot; Protocols evolve</p>
+    <h2>Example: one page, then three more servers</h2>
+    <p class="small"><code>index.html</code> from one server, then a style sheet, a font and a script from three other servers, in parallel.</p>
+    <div class="comp">
+      <div class="crow"><div class="clabel">TCP + TLS 1.3<br><span>HTTP/2</span></div><div class="cb a old">TCP</div><div class="cb a old">TLS</div><div class="cb a old">index.html</div><div class="fan" style="width:396px"><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">style.css</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">font.woff2</div></div><div class="lane"><div class="cb2 old">TCP</div><div class="cb2 old">TLS</div><div class="cb2 old">app.js</div></div></div><div class="ctot">600 ms</div></div>
+      <div class="crow"><div class="clabel">QUIC<br><span>HTTP/3</span></div><div class="cb a new">QUIC</div><div class="cb a new">index.html</div><div class="fan" style="width:262px"><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">QUIC</div><div class="cb2 new">app.js</div></div></div><div class="ctot">400 ms<span class="sv">&minus;200 ms</span></div></div>
+      <div class="crow"><div class="clabel">QUIC 0-RTT<br><span>repeat visit</span></div><div class="cb a new">index.html</div><div class="fan" style="width:128px"><div class="lane"><div class="cb2 new">style.css</div></div><div class="lane"><div class="cb2 new">font.woff2</div></div><div class="lane"><div class="cb2 new">app.js</div></div></div><div class="ctot">200 ms<span class="sv">&minus;400 ms</span></div></div>
+    </div>
+    <figcaption>One box per round trip, 100 ms each: about the P95 round-trip time from two slides back (118 ms). DNS not counted, the same in all three. The other servers are only known once <code>index.html</code> has arrived.</figcaption>
+    <aside class="notes"><ul>
+      <li>Round trips compound.</li>
+    </ul></aside>
+  </section>
+
+  <!-- 2. Rolling out new protocols -->
+  <section>
+    <p class="part">2 &middot; Rolling out new protocols</p>
+    <h2>Why HTTP/3 does not always work</h2>
+    <table class="bugs why">
+      <tr><td>Antivirus</td><td>Inspects HTTP/3 and breaks it, at home and at work.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2034178">bug 2034178</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1919678">bug 1919678</a></td></tr>
+      <tr><td>VPN</td><td>Smaller packets and virtual network interfaces stall HTTP/3. VPN DNS resolvers often do not return HTTPS records.</td><td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1734110">bug 1734110</a><br><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1989895">bug 1989895</a></td></tr>
+      <tr><td>Network</td><td>Some networks block UDP. Rare today: QUIC works 97%+ of the time across Meta's apps and sites.</td><td><a href="https://www.rfc-editor.org/rfc/rfc9308#section-3.1">RFC 9308</a><br><a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">Meta</a></td></tr>
+    </table>
+    <figcaption>Matt Joras (Meta), IETF QUIC mailing list, <a href="https://www.mail-archive.com/quic@ietf.org/msg03313.html">25 June 2024</a>: &ldquo;QUIC successfully operates 97+% of the time across all our enabled surfaces.&rdquo;</figcaption>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; Rolling out new protocols</p>
+    <h2>IPv6: standardised in 1998</h2>
+    <p class="addr">IPv4 <code>192.0.2.1</code> &nbsp;&middot;&nbsp; IPv6 <code>2001:db8:85a3::8a2e:370:7334</code></p>
+    <div class="chart" style="height:450px" id="c-ipv6"></div>
+    <figcaption>Share of HTTP connections over IPv6, Firefox Desktop Release, August 2025 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_connection_address_type">networking.connection_address_type</a>). IPv6: <a href="https://www.rfc-editor.org/rfc/rfc2460">RFC 2460</a> (1998).</figcaption>
+    <aside class="notes"><ul>
+      <li>Google servers: about 50%.</li>
+    </ul></aside>
+  </section>
+
+    <section>
+    <p class="part">2 &middot; Rolling out new protocols</p>
+    <h2>What makes a transition work</h2>
+    <blockquote class="quote1">
+      <p>&ldquo;Transition is easiest when changing only one entity still benefits that entity.&rdquo;</p>
+      <cite><a href="https://www.rfc-editor.org/rfc/rfc8170#section-1">RFC 8170</a>, &ldquo;Planning for Protocol Adoption and Subsequent Transitions&rdquo;, Internet Architecture Board, 2017</cite>
+    </blockquote>
+    <aside class="notes"><ul>
+      <li>Enabling QUIC saves round trips.</li>
+      <li>Need to mitigate the risk.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <p class="part">2 &middot; Rolling out new protocols</p>
+    <h2>HTTP/3</h2>
+    <div class="chart" style="height:490px" id="c-h3"></div>
+    <figcaption>Share of HTTP responses over HTTP/3 (main documents and subresources). Firefox Desktop Release, October 2024 to November 2026. Monthly: first week of each month, 5% client sample. Source: Glean metrics ping via STMO (<a href="https://dictionary.telemetry.mozilla.org/apps/firefox_desktop/metrics/networking_http_response_version">networking.http_response_version</a>).</figcaption>
+  </section>
+
+  <!-- 3. Clients race -->
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>Happy Eyeballs: race the options</h2>
+    <p class="small">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
+    <div class="race-anim" data-sc="a" title="click to replay"></div>
+  </section>
+
+  <section data-transition="none">
+    <p class="part">3 &middot; Clients race</p>
+    <h2>Happy Eyeballs: race the options</h2>
+    <p class="small" style="visibility:hidden" aria-hidden="true">A, AAAA or HTTPS record &nbsp;&middot;&nbsp; IPv4 or IPv6 &nbsp;&middot;&nbsp; TCP + TLS or QUIC &nbsp;&middot;&nbsp; HTTP/1.1, 2 or 3 &nbsp;&middot;&nbsp; with or without ECH</p>
+    <div class="race-anim" data-sc="b" title="click to replay"></div>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>Why &ldquo;Happy Eyeballs&rdquo;?</h2>
+    <div class="said">
+      <p>Network operators call users <strong>eyeballs</strong>.</p>
+      <p>They are latency sensitive, often on lossy, bad networks.</p>
+      <p>Optimizing for latency makes eyeballs happy.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>An open-source Rust library</h2>
+    <div class="cols lib">
+      <ul>
+        <li><a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a>: Happy Eyeballs v3 as a <strong>sans&#8209;I/O state machine</strong>. MIT or Apache-2.0.</li>
+        <li>No sockets, no timers: the caller does all I/O and passes the current time.</li>
+        <li>Deterministic, so every race is a unit test.</li>
+        <li>Firefox drives it from its C++ networking stack.</li>
+        <li>The Firefox delays went back into the IETF draft: 25 ms Resolution Delay, 50 ms attempt delay doubling each time.</li>
+      </ul>
+      <pre><code class="language-rust" data-trim>
+let mut he = HappyEyeballs::new("example.com", 443)?;
+
+while let Some(out) = he.process_output(now) {
+    match out {
+        Output::SendDnsQuery { id, hostname, record_type } =&gt; {
+            // send the DNS query
+        }
+        Output::AttemptConnection { id, endpoint, .. } =&gt; {
+            // open a QUIC or TCP connection
+        }
+        _ =&gt; {}
+    }
+}
+
+// later: feed results back in
+he.process_input(Input::DnsResult { id, result }, now);
+      </code></pre>
+    </div>
+    <figcaption>API from the <a href="https://github.com/mozilla/happy-eyeballs">mozilla/happy-eyeballs</a> README, v2.0.0, simplified. Draft: <a href="https://datatracker.ietf.org/doc/draft-ietf-happy-happyeyeballs-v3/">draft-ietf-happy-happyeyeballs-v3</a>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>With Happy Eyeballs: more page loads over HTTP/3</h2>
+    <div class="chart" style="height:490px" id="c-rel-version"></div>
+    <figcaption>HTTP version of the main document, page loads on a new connection, Firefox 158 to 160 Release experiment: 98.6M (control) and 102.2M (Happy Eyeballs v3). HTTP/3 goes from <strong>20.1% to 25.6%</strong>. Tracking: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1953459">bug 1953459</a>.</figcaption>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>First contentful paint (FCP) is faster at every percentile</h2>
+    <div class="chart" style="height:490px" id="c-rel-fcp"></div>
+    <figcaption>First contentful paint, Happy Eyeballs v3 vs control, page loads on a new connection, Firefox 158 and 159 Release experiment: 73.9M (control) and 77.1M (Happy Eyeballs v3). Median <strong>648 ms to 632 ms</strong>, P99 <strong>8.2 s to 7.9 s</strong>. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul>
+      <li>FCP: time from navigation start until the browser paints the first text or image.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>Largest contentful paint (LCP) is faster for most page loads</h2>
+    <div class="chart" style="height:490px" id="c-rel-lcp"></div>
+    <figcaption>Largest contentful paint at page load (onLoad), Happy Eyeballs v3 vs control, same experiment: 81.8M (control) and 84.9M (Happy Eyeballs v3). Median <strong>875 ms to 865 ms</strong>, P99 <strong>13.3 s to 12.9 s</strong>. Slightly slower below about P18. P50 to P99: every 95% confidence interval excludes zero.</figcaption>
+    <aside class="notes"><ul>
+      <li>LCP: time from navigation start until the largest image or text block is painted. Here measured at page load (onLoad), not the final LCP.</li>
+      <li>Stress: this is the client side, about 5 points more HTTP/3. Enabled on the server: much more than that.</li>
+      <li>Hypothesis for the P10 increase: the Happy Eyeballs delay constants.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <p class="part">3 &middot; Clients race</p>
+    <h2>Racing makes optimistic choices safe</h2>
+    <div class="cols ground2">
+      <div>
+        <h3>DNS</h3>
+        <ul>
+          <li><strong>Optimistic DNS</strong> <span class="st done">done</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060788">bug 2060788</a><br><span class="gd">Race a stale answer, revalidate in parallel.</span></li>
+          <li><strong>Network change</strong> <span class="st">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2091374">bug 2091374</a><br><span class="gd">Mark DNS cache entries stale instead of deleting them.</span></li>
+          <li><strong>Persistent DNS cache</strong> <span class="st">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2087407">bug 2087407</a><br><span class="gd">Keep answers and HTTPS records across restarts.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>HTTP/3</h3>
+        <ul>
+          <li><strong>Optimistic Alt-Svc</strong> <span class="st">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2060496">bug 2060496</a><br><span class="gd">Reuse an expired HTTP/3 Alt-Svc mapping.</span></li>
+          <li><strong>Optimistic HTTP/3</strong> <span class="st">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1914201">bug 1914201</a><br><span class="gd">Race QUIC with no prior HTTP/3 signal.</span></li>
+          <li><strong>Proxies</strong> <span class="st">proposed</span> <a class="gb" href="https://bugzilla.mozilla.org/show_bug.cgi?id=2071358">bug 2071358</a><br><span class="gd">Race HTTP/3 against HTTP/2 through the proxy tunnel.</span></li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>If a guess is wrong, another attempt wins the race. Each one removes a DNS lookup or moves more connections to HTTP/3.</figcaption>
+    <aside class="notes"><ul><li>This is only the beginning.</li></ul></aside>
+  </section>
+
+  <!-- 4. Servers advertise -->
+  <section>
+    <p class="part">4 &middot; Servers advertise</p>
+    <h2>Two ways to advertise HTTP/3</h2>
+    <table class="adv">
+      <thead><tr><th></th><th>1st connection</th><th>2nd</th><th>3rd</th><th>&hellip;</th></tr></thead>
+      <tr>
+        <td><div class="nm">1. <code>Alt-Svc</code> HTTP header</div><div class="wh">in the HTTP response</div>
+          <div class="ex">Alt-Svc: h3=":443"; ma=86400</div></td>
+        <td><div class="c old">HTTP/2</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
+      <tr>
+        <td><div class="nm">2. HTTPS DNS record</div><div class="wh">in DNS, before connecting</div>
+          <div class="ex">example.com. 3600 IN HTTPS 1 . alpn="h3,h2"</div></td>
+        <td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new">HTTP/3</div></td><td><div class="c new more">HTTP/3</div></td></tr>
+    </table>
+    <aside class="notes"><ul>
+      <li>Do both: the HTTPS record for the first connection, Alt-Svc for browsers that do not look up HTTPS records.</li>
+    </ul></aside>
+  </section>
+
+    <section>
+    <p class="part">4 &middot; Servers advertise</p>
+    <h2>Most servers and CDNs already support it</h2>
+    <div class="cols sup" style="gap:40px; align-items:flex-start;">
+      <table><thead><tr><th>Server, proxy</th><th>HTTP/3</th><th>0-RTT</th></tr></thead>
+        <tr><td><a href="https://caddyserver.com/docs/caddyfile/options">Caddy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://docs.litespeedtech.com/lsws/cp/cpanel/quic-http3/">LiteSpeed</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http3">Envoy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://www.haproxy.com/blog/announcing-haproxy-2-8">HAProxy</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://h2o.examp1e.net/configure/http3_directives.html">H2O</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://doc.traefik.io/traefik/reference/install-configuration/entrypoints/">Traefik</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://techcommunity.microsoft.com/blog/networkingblog/enabling-http3-support-on-windows-server-2022/2676880">IIS</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://www.apache.org/dist/httpd/CHANGES_2.4">Apache httpd</a></td><td><span class="n">no</span></td><td><span class="n">no</span></td></tr></table>
+      <table><thead><tr><th>CDN</th><th>HTTP/3</th><th>0-RTT</th><th>HTTPS record</th></tr></thead>
+        <tr><td><a href="https://developers.cloudflare.com/speed/optimization/protocol/http3/">Cloudflare</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://techdocs.akamai.com/property-mgr/docs/http3-support">Akamai</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://aws.amazon.com/about-aws/whats-new/2025/07/amazon-cloudfront-https-dns-records">CloudFront</a></td><td><span class="y">yes</span></td><td><span class="u">?</span></td><td><span class="y">yes</span></td></tr><tr><td><a href="https://cloud.google.com/load-balancing/docs/https">Google Cloud</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="u">?</span></td></tr><tr><td><a href="https://www.fastly.com/documentation/guides/full-site-delivery/performance/enabling-http3-for-fastly-services/">Fastly</a></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="n">no</span></td></tr><tr><td><a href="https://learn.microsoft.com/en-us/azure/frontdoor/front-door-faq">Azure Front Door</a></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td></tr><tr><td><a href="https://community.vercel.com/t/how-do-i-get-http-3-enabled-on-my-site/11723">Vercel</a></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td></tr></table>
+    </div>
+    <figcaption>Surveyed 17 November 2026 from vendor documentation. yes = supported, on by default or as an option; ? = no vendor statement found. Only the server that browsers connect to matters, not the origin behind it.</figcaption>
+    <aside class="notes"><ul>
+      <li>Users: pressure your providers.</li>
+    </ul></aside>
+  </section>
+
+
+  <!-- 5. Check your site -->
+  <section>
+    <p class="part">5 &middot; Check your site</p>
+    <h2>Check your site</h2>
+    <div class="shot">
+      <img src="savearoundtrip-fosdem.png" alt="savearoundtrip.com HTTP/3 checklist for fosdem.org: 0 of 5 done">
+      <div>
+        <p class="big"><a href="https://savearoundtrip.com/">savearoundtrip.com</a></p>
+        <p>A live tester for your website.</p>
+      </div>
+    </div>
+    <figcaption>savearoundtrip.com checking fosdem.org, 25 November 2026.</figcaption>
+    <aside class="notes"><ul>
+      <li>Ask the audience which website to test.</li>
+      <li>Fallback: fosdem.org, or savearoundtrip.com itself.</li>
+      <li>Personal websites: whoever has everything checked (HTTP/3, Alt-Svc, HTTPS record, 0-RTT) gets a 3D-printed fox.</li>
+    </ul></aside>
+  </section>
+
+  <section>
+    <h2>How we can save <s>the world</s> a round trip</h2>
+    <ol class="steps">
+      <li>Serve HTTP/3 and send an <code>Alt-Svc</code> header.</li>
+      <li>Publish an HTTPS record with <code>alpn="h3"</code>.</li>
+      <li>Offer QUIC 0-RTT.</li>
+      <li>Check your site on <a href="https://savearoundtrip.com/">savearoundtrip.com</a>.</li>
+    </ol>
+    <p class="mantra">Servers advertise, clients race.</p>
+    <p class="small" style="margin-top:1.4em;">Max Inden &middot; <a href="https://max-inden.de/">max-inden.de</a> &middot; <a href="https://mastodon.social/@mxinden">@mxinden@mastodon.social</a> &middot; <a href="mailto:mail@max-inden.de">mail@max-inden.de</a></p>
+    <aside class="notes"><ul>
+      <li>Ask people to show me their personal website. If it ticks everything on savearoundtrip.com, they get a small 3D-printed Firefox. It has to be their personal website.</li>
+      <li>I am working on HTTP priorities in Firefox right now. Input welcome: come talk to me.</li>
+      <li>The slides are posted on Mastodon: fetch them there.</li>
+    </ul></aside>
+  </section>
+
+</div>
+</div>
+
+<script src="../lib/reveal/dist/reveal.js"></script>
+<script src="../lib/reveal/plugin/notes/notes.js"></script>
+<script src="../lib/reveal/plugin/highlight/highlight.js"></script>
+<script src="../lib/reveal/plugin/zoom/zoom.js"></script>
+<script src="../lib/echarts/echarts.min.js"></script>
+<script src="../theme/charts.js"></script>
+<script src="../theme/seq.js"></script>
+<script src="data.js?v=20261118b"></script>
+<script>
+  const D = window.DECK_DATA;
+  const ms = (v) => v + ' ms';
+  const pct = (v) => v + '%';
+
+  // Role play: round trips bracketed and numbered in the left gutter.
+  const CS = [{ id: 'C', label: 'Client' }, { id: 'S', label: 'Server' }];
+  // Protocol diagrams step through on click: one reveal.js fragment per arrow. Each arrow
+  // (with its label) is one step; a round-trip bracket and its highlight show with the
+  // second arrow of the pair. The PDF shows all arrows (pdfSeparateFragments: false).
+  const seqTag = (el) => {
+    const svg = el.querySelector('svg'); if (!svg) return;
+    const bgs = [...svg.querySelectorAll(':scope > rect')].filter((r) => r.getAttribute('fill') === 'rgba(230,96,0,0.07)');
+    let step = -1, pending = null, hl = 0;
+    [...svg.children].forEach((node) => {
+      if (node.tagName === 'defs' || bgs.includes(node)) return;
+      const next = node.nextElementSibling;
+      if (node.tagName === 'text' && next && next.tagName === 'line' && next.hasAttribute('marker-end')) { pending = node; return; }
+      if (node.tagName === 'line' && node.hasAttribute('marker-end')) {
+        step += 1; node.dataset.step = step; if (pending) { pending.dataset.step = step; pending = null; } return;
+      }
+      if (node.tagName === 'path' || (node.tagName === 'text' && node.getAttribute('text-anchor') === 'end')) {
+        node.dataset.step = step;
+        if (node.tagName === 'path' && node.getAttribute('stroke-width') === '2.5' && bgs[hl]) bgs[hl++].dataset.step = step;
+      }
+    });
+  };
+  const seqApply = (el) => {
+    const sec = el.closest('section'); if (!sec) return;
+    const n = sec.querySelectorAll('.fragment.rp-step.visible').length;
+    el.querySelectorAll('[data-step]').forEach((nd) => { nd.style.visibility = +nd.dataset.step < n ? 'visible' : 'hidden'; });
+  };
+  const RP = (msgs) => (el) => { Seq.render(el, { actors: CS, messages: msgs, scale: 1.7, gutter: 200 }); seqTag(el); seqApply(el); };
+  const regRP = (id, msgs) => {
+    Seq.register(id, RP(msgs));
+    const sec = document.getElementById(id).closest('section');
+    msgs.forEach(() => { const f = document.createElement('span'); f.className = 'fragment rp-step'; sec.appendChild(f); });
+  };
+  regRP('rp-tls12', [
+    { from: 'C', to: 'S', text: 'TCP SYN', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'SYN-ACK', dashed: true },
+    { from: 'C', to: 'S', text: 'TLS ClientHello', rt: 'round trip 2', rtHl: true }, { from: 'S', to: 'C', text: 'ServerHello, certificate', dashed: true },
+    { from: 'C', to: 'S', text: 'key exchange, Finished', rt: 'round trip 3', rtHl: true }, { from: 'S', to: 'C', text: 'Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'GET /', hl: true, rt: 'round trip 4' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]);
+  // TLS 1.2 -> TLS 1.3: the slide opens on the TLS 1.2 diagram, then round trips 2 and 3
+  // merge into one: the key exchange rows slide up into round trip 2 and fade, labels change,
+  // the request moves up. Same geometry and style as Seq (scale 1.7, gutter 200).
+  const TLS_MORPH = {
+    rows: [
+      { k: 'syn', from: 'C', a: 'TCP SYN', ya: 0, yb: 0 },
+      { k: 'synack', from: 'S', a: 'SYN-ACK', ya: 1, yb: 1, dashed: true },
+      { k: 'ch', from: 'C', a: 'TLS ClientHello', b: 'TLS ClientHello + key share', ya: 2, yb: 2 },
+      { k: 'sh', from: 'S', a: 'ServerHello, certificate', b: 'ServerHello, certificate, Finished', ya: 3, yb: 3, dashed: true },
+      { k: 'kx', from: 'C', a: 'key exchange, Finished', ya: 4, yb: 2, gone: true },
+      { k: 'fin', from: 'S', a: 'Finished', ya: 5, yb: 3, dashed: true, gone: true },
+      { k: 'get', from: 'C', a: 'GET /', b: 'Finished + GET /', ya: 6, yb: 4, hl: true },
+      { k: 'resp', from: 'S', a: 'response', ya: 7, yb: 5, dashed: true },
+    ],
+    rts: [
+      { a: 'round trip 1', ya: 0, yb: 0 },
+      { a: 'round trip 2', ya: 2, yb: 2, hl: true },
+      { a: 'round trip 3', ya: 4, yb: 2, hl: true, gone: true },
+      { a: 'round trip 4', b: 'round trip 3', ya: 6, yb: 4 },
+    ],
+  };
+  const tlsMorphSvg = (el, t) => {
+    const k = 1.7, padX = 16, padL = padX + 200, W = el.clientWidth || 940;
+    const topH = 40 * k, rowH = 34 * k, laneW = (W - padL - padX) / 2, cx = (i) => padL + laneW * (i + 0.5);
+    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const rowY = (r) => topH + 6 + (r.ya + (r.yb - r.ya) * e) * rowH;
+    const H = topH + 6 + 8 * rowH + 14 - (2 * rowH) * e;
+    const ACC = tok('--accent', '#e66000'), GRAY = MUTED, TXT = INK, HAIRC = tok('--hairline', '#d7d7db');
+    let s = `<svg viewBox="0 0 ${W} ${topH + 6 + 8 * rowH + 14}" width="100%" font-family="${FONT}">`;
+    s += `<defs><marker id="tmA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="${GRAY}"/></marker>`
+      + `<marker id="tmB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="${ACC}"/></marker></defs>`;
+    TLS_MORPH.rts.forEach((r) => {
+      if (!r.hl) return;
+      const y1 = rowY({ ya: r.ya, yb: r.yb }) + rowH - 12 * k - 24 * k, y2 = rowY({ ya: r.ya + 1, yb: r.yb + 1 }) + rowH - 12 * k + 8;
+      const op = r.gone ? 1 - e : 1;
+      s += `<rect x="${padL - 12}" y="${y1}" width="${W - padX - padL + 12}" height="${y2 - y1}" rx="6" fill="rgba(230,96,0,0.07)" opacity="${op}"/>`;
+    });
+    ['Client', 'Server'].forEach((lab, i) => {
+      const x = cx(i);
+      s += `<line x1="${x}" y1="${topH}" x2="${x}" y2="${H - 14}" stroke="${HAIRC}" stroke-width="1.5"/>`;
+      s += `<rect x="${x - laneW * 0.44}" y="6" width="${laneW * 0.88}" height="${26 * k}" rx="6" fill="#fff" stroke="${HAIRC}"/>`;
+      s += `<text x="${x}" y="${6 + 17 * k}" text-anchor="middle" font-size="${14 * k}" font-weight="700" fill="${TXT}">${lab}</text>`;
+    });
+    const label = (a, b, xx, yy, attrs) => {
+      if (!b) return `<text x="${xx}" y="${yy}" ${attrs}>${a}</text>`;
+      return `<text x="${xx}" y="${yy}" ${attrs} opacity="${1 - e}">${a}</text><text x="${xx}" y="${yy}" ${attrs} opacity="${e}">${b}</text>`;
+    };
+    TLS_MORPH.rows.forEach((r) => {
+      const y = rowY(r), yy = y + rowH - 12 * k, op = r.gone ? 1 - e : 1;
+      const xa = cx(r.from === 'C' ? 0 : 1), xb = cx(r.from === 'C' ? 1 : 0), dir = xb >= xa ? 1 : -1;
+      s += `<g opacity="${op}">`;
+      s += label(r.a, r.b, (xa + xb) / 2, yy - 6 * k, `text-anchor="middle" font-size="${12.5 * k}" fill="${r.hl ? ACC : TXT}" font-weight="${r.hl ? 700 : 400}"`);
+      s += `<line x1="${xa + dir * 2}" y1="${yy}" x2="${xb - dir * 6}" y2="${yy}" stroke="${r.hl ? ACC : GRAY}" stroke-width="1.6" ${r.dashed ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#${r.hl ? 'tmB' : 'tmA'})"/>`;
+      s += '</g>';
+    });
+    TLS_MORPH.rts.forEach((r) => {
+      const bx = padL - 14, y1 = rowY({ ya: r.ya, yb: r.yb }) + rowH - 12 * k - 10 * k, y2 = rowY({ ya: r.ya + 1, yb: r.yb + 1 }) + rowH - 12 * k + 4;
+      const op = r.gone ? 1 - e : 1, col = r.hl ? ACC : GRAY;
+      s += `<g opacity="${op}"><path d="M${bx + 6},${y1} H${bx} V${y2} H${bx + 6}" fill="none" stroke="${col}" stroke-width="${r.hl ? 2.5 : 1.5}"/>`;
+      s += label(r.a, r.b, bx - 10, (y1 + y2) / 2 + 5 * k, `text-anchor="end" font-size="${13 * k}" font-weight="700" fill="${r.hl ? ACC : TXT}"`);
+      s += '</g>';
+    });
+    return s + '</svg>';
+  };
+  // The merge runs on click: one fragment on the TLS 1.3 slide. Before the click the slide
+  // shows TLS 1.2, after it TLS 1.3; clicking back shows TLS 1.2 again. The PDF shows TLS 1.3.
+  const tlsMorphDone = (el) => !!el.closest('section').querySelector('.fragment.tls-merge.visible');
+  const tlsMorph = (el, animate) => {
+    if (el._raf) cancelAnimationFrame(el._raf);
+    const done = /print-pdf/i.test(window.location.search) || tlsMorphDone(el);
+    if (!animate || !done) { el.innerHTML = tlsMorphSvg(el, done ? 1 : 0); return; }
+    const t0 = performance.now(), dur = 1600;
+    const frame = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      el.innerHTML = tlsMorphSvg(el, p);
+      if (p < 1) el._raf = requestAnimationFrame(frame);
+    };
+    el._raf = requestAnimationFrame(frame);
+  };
+  Seq.register('rp-tls13', (el) => tlsMorph(el, false));
+  (() => { const f = document.createElement('span'); f.className = 'fragment tls-merge';
+    document.getElementById('rp-tls13').closest('section').appendChild(f); })();
+  Reveal.on('fragmentshown', (e) => { if (e.fragment.classList.contains('tls-merge')) tlsMorph(document.getElementById('rp-tls13'), true); });
+  Reveal.on('fragmenthidden', (e) => { if (e.fragment.classList.contains('tls-merge')) tlsMorph(document.getElementById('rp-tls13'), false); });
+  regRP('rp-quic', [
+    { from: 'C', to: 'S', text: 'QUIC Initial: ClientHello', rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'ServerHello, certificate, Finished', dashed: true },
+    { from: 'C', to: 'S', text: 'Finished + GET /', hl: true, rt: 'round trip 2' }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ]);
+  regRP('rp-0rtt', [
+    { from: 'C', to: 'S', text: 'ClientHello + GET /', hl: true, rt: 'round trip 1' }, { from: 'S', to: 'C', text: 'ServerHello ... + response', dashed: true },
+  ]);
+
+  const CDS = [{ id: 'C', label: 'Client' }, { id: 'D', label: 'DNS' }, { id: 'S', label: 'Server' }];
+  Seq.register('up-altsvc', (el) => Seq.render(el, { actors: CDS, scale: 1.4, messages: [
+    { from: 'C', to: 'D', text: 'look up A / AAAA' }, { from: 'D', to: 'C', text: 'IP address', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/2 request (TCP + TLS)' }, { from: 'S', to: 'C', text: 'response + Alt-Svc: h3', dashed: true },
+    { note: 'the browser learns about HTTP/3 only now', over: ['C', 'S'] },
+    { from: 'C', to: 'S', text: 'next connection: QUIC handshake', hl: true }, { from: 'S', to: 'C', text: 'handshake done', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+  Seq.register('up-https', (el) => Seq.render(el, { actors: CDS, scale: 1.4, messages: [
+    { from: 'C', to: 'D', text: 'look up HTTPS record' }, { from: 'D', to: 'C', text: 'alpn=h3 + IP hints', dashed: true },
+    { from: 'C', to: 'S', text: 'QUIC handshake', hl: true }, { from: 'S', to: 'C', text: 'handshake done', dashed: true },
+    { from: 'C', to: 'S', text: 'HTTP/3 request', hl: true }, { from: 'S', to: 'C', text: 'response', dashed: true },
+  ] }));
+
+  // Deck chart style: one accent (blue = new protocol / Happy Eyeballs v3), gray = old /
+  // control. Thin rounded marks, hairline grid, direct labels, no legend boxes.
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n, f) => css.getPropertyValue(n).trim() || f;
+  const NEW = '#2a78d6', OLD = '#a9a9b4';
+  const INK = tok('--ink', '#1c1b22'), MUTED = tok('--ink-muted', '#5b5b66'),
+        FAINT = tok('--ink-faint', '#8f8f9d'), HAIR = tok('--hairline', '#e3e3e8'),
+        FONT = tok('--font-sans', 'Inter, sans-serif');
+  const txt = (o) => Object.assign({ fontFamily: FONT, fontSize: 18, color: MUTED }, o);
+  const chart = (el, opt) => {
+    const prev = echarts.getInstanceByDom(el); if (prev) prev.dispose();
+    const c = echarts.init(el, null, { renderer: 'svg' });
+    c.setOption(Object.assign({ animation: false, textStyle: { fontFamily: FONT } }, opt));
+    return c;
+  };
+  const valueAxis = (o) => Object.assign({
+    type: 'value', axisLine: { show: false }, axisTick: { show: false },
+    splitLine: { lineStyle: { color: HAIR, width: 1 } }, axisLabel: txt({ color: FAINT, fontSize: 16 }),
+  }, o);
+  const catAxis = (data, o) => Object.assign({
+    type: 'category', data, axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+    axisLabel: txt({ color: MUTED }),
+  }, o);
+  const keys = (items, top = 0, left = 0) => ({
+    type: 'group', top, left, children: items.flatMap((it, i) => [
+      { type: 'rect', left: i * 300, top: 6, shape: { width: 14, height: 14, r: 3 }, style: { fill: it.color } },
+      { type: 'text', left: i * 300 + 22, top: 2, style: { text: it.name, fill: MUTED, font: `600 18px ${FONT}` } },
+    ]),
+  });
+
+  // Round-trip time as a cumulative distribution on a log axis; median, P75 and P95 marked
+  // at the first bucket bound where the share reaches the percentile.
+  Charts.register('c-rtt', (el) => {
+    const at = (q) => D.rttCdf.find((p) => p[1] >= q);
+    const marks = [[50, 'median'], [75, 'P75'], [95, 'P95']].map(([q, name]) => ({ q, name, p: at(q) }));
+    return chart(el, {
+      grid: { left: 90, right: 60, top: 50, bottom: 60 },
+      xAxis: { type: 'value', min: 0, max: 300, interval: 50, name: 'round-trip time', nameLocation: 'middle', nameGap: 36,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17 }),
+        axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR } }, minorTick: { show: false }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => (v >= 1000 ? v / 1000 + ' s' : v + ' ms') }) },
+      yAxis: valueAxis({ min: 0, max: 100, interval: 25, name: 'share of connections', nameLocation: 'end', nameGap: 18,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }),
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      series: [{ type: 'line', data: D.rttCdf, showSymbol: false, lineStyle: { color: NEW, width: 3.5 },
+        markLine: { silent: true, symbol: 'none', lineStyle: { color: FAINT, type: 'dashed', width: 1.5 }, label: { show: false },
+          data: marks.flatMap((m) => [[{ coord: [0, m.q] }, { coord: [m.p[0], m.q] }], [{ coord: [m.p[0], 0] }, { coord: [m.p[0], m.q] }]]) },
+        markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: NEW, borderColor: '#fff', borderWidth: 2 },
+          data: marks.map((m) => ({ coord: m.p, label: { formatter: `${m.name}: ${m.p[0]} ms` } })),
+          label: { show: true, position: 'right', distance: 10, backgroundColor: '#fff', padding: [2, 6], ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } },
+      }],
+    });
+  });
+
+  // Connection setup: two cumulative curves on a log axis, medians marked.
+  Charts.register('c-setup', (el) => {
+    const med = (c) => c.find((p) => p[1] >= 50);
+    const curve = (data, name, color, labelPos, offset) => ({ type: 'line', name, data, showSymbol: false,
+      lineStyle: { color, width: 3.5 },
+      endLabel: { show: false },
+      markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
+        data: [{ coord: med(data) }],
+        label: { show: true, position: labelPos, distance: 10, offset: offset || [0, 0], backgroundColor: '#fff', padding: [2, 6],
+          formatter: `${name}: ${Math.round(med(data)[0])} ms`, ...txt({ color: INK, fontWeight: 700, fontSize: 20 }) } } });
+    return chart(el, {
+      grid: { left: 90, right: 60, top: 50, bottom: 60 },
+      xAxis: { type: 'value', min: 0, max: 300, interval: 50, name: 'connection setup time', nameLocation: 'middle', nameGap: 36,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17 }), axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+        splitLine: { lineStyle: { color: HAIR } }, minorSplitLine: { show: true, lineStyle: { color: '#f1f1f4' } },
+        axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => (v >= 1000 ? v / 1000 + ' s' : v + ' ms') }) },
+      yAxis: valueAxis({ min: 0, max: 100, interval: 25, name: 'share of connections', nameLocation: 'end', nameGap: 18,
+        nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }), axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      series: [curve(D.setupCdf.tcp, 'TCP + TLS', '#a9a9b4', 'right'), curve(D.setupCdf.quic, 'QUIC', NEW, 'left', [0, -30])],
+    });
+  });
+
+  // Share over time on a date axis; the end label carries the latest value.
+  const timeAxis = (o) => Object.assign({ type: 'time', axisLine: { lineStyle: { color: HAIR } }, axisTick: { show: false },
+    splitLine: { show: false }, axisLabel: txt({ color: MUTED, fontSize: 16, hideOverlap: true,
+      formatter: { year: '{yyyy}', month: '{MMM} {yyyy}', day: '{MMM} {yyyy}' } }) }, o);
+  const line = (data, name, color, strong) => ({ type: 'line', name, data, showSymbol: false,
+    lineStyle: { color, width: 3, cap: 'round', join: 'round' }, itemStyle: { color },
+    endLabel: { show: true, formatter: (p) => `${name} ${Math.round(p.value[1])}%`, ...txt(strong ? { color: INK, fontWeight: 700, fontSize: 20 } : { fontSize: 18 }), distance: 12 } });
+  const share = (data, name, min) => (el) => chart(el, {
+    grid: { left: 60, right: 170, top: 30, bottom: 40 },
+    xAxis: timeAxis({ min, max: '2026-12-01' }),
+    yAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [Object.assign(line(data, name, NEW, true), { areaStyle: { color: 'rgba(42,120,214,0.10)' } })],
+  });
+  Charts.register('c-ipv6', share(D.ipv6Series, 'IPv6', '2025-07-01'));
+  Charts.register('c-h3', share(D.h3Series, 'HTTP/3', '2024-09-01'));
+
+  Charts.register('c-adopt', share(D.tlsSeries, 'TLS 1.3', '2024-09-01'));
+
+  // Experiment, HTTP version: one 100% bar per branch, HTTP/3 in the accent, and bands
+  // linking each segment from the control bar to the Happy Eyeballs v3 bar.
+  Charts.register('c-rel-version', (el) => {
+    const v = D.release.version, BW = 64;
+    const cols = ['#e3e3e8', '#c9c9d1', NEW], ink = [INK, INK, '#fff'];
+    const seg = (i) => ({ name: v.x[i], type: 'bar', stack: 'v', barWidth: BW, z: 3,
+      data: [v.control[i], v.hev3[i]], itemStyle: { color: cols[i], borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, position: 'inside', formatter: (p) => `${v.x[i]}  ${p.value}%`, ...txt({ color: ink[i], fontWeight: 700, fontSize: 18 }) } });
+    const c = chart(el, {
+      grid: { left: 210, right: 40, top: 20, bottom: 40 },
+      xAxis: valueAxis({ min: 0, max: 100, interval: 25, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+      yAxis: catAxis(['control', 'Happy Eyeballs v3'], { inverse: true, axisLine: { show: false }, axisLabel: txt({ color: INK, fontWeight: 700, fontSize: 20 }) }),
+      series: [0, 1, 2].map(seg),
+    });
+    const edges = (vals) => vals.reduce((a, x) => (a.push(a[a.length - 1] + x), a), [0]);
+    const e0 = edges(v.control), e1 = edges(v.hev3);
+    const px = (x, row) => c.convertToPixel({ xAxisIndex: 0, yAxisIndex: 0 }, [x, row]);
+    const bands = [1, 2].map((i) => {
+      const a0 = px(e0[i], 0), a1 = px(e0[i + 1], 0), b0 = px(e1[i], 1), b1 = px(e1[i + 1], 1);
+      const yTop = a0[1] + BW / 2, yBot = b0[1] - BW / 2;
+      return { type: 'polygon', z: 1, silent: true,
+        shape: { points: [[a0[0], yTop], [a1[0], yTop], [b1[0], yBot], [b0[0], yBot]] },
+        style: i === 2 ? { fill: 'rgba(42,120,214,0.16)', stroke: NEW, lineWidth: 1.5 } : { fill: 'none', stroke: 'none' } };
+    });
+    // The HTTP/1.1 to HTTP/2 boundary as a faint line, so all segments read as linked.
+    const l0 = px(e0[1], 0), l1 = px(e1[1], 1);
+    bands.push({ type: 'line', z: 1, silent: true, shape: { x1: l0[0], y1: l0[1] + BW / 2, x2: l1[0], y2: l1[1] - BW / 2 },
+      style: { stroke: '#a9a9b4', lineWidth: 1.5 } });
+    c.setOption({ graphic: bands });
+    return c;
+  });
+
+  // Paint-time change by percentile: a third colour, since this reads differently (a change,
+  // not a comparison of branches). Every bar labelled with % and ms.
+  const CHG = '#1baf7a';
+  const change = (P, diff, diffMs) => (el) => chart(el, {
+    grid: { left: 70, right: 30, top: 40, bottom: 70 },
+    xAxis: catAxis(P, { position: 'top', axisLabel: txt({ color: INK, fontWeight: 700 }) }),
+    yAxis: valueAxis({ min: -4, max: Math.max(0, Math.ceil(Math.max(...diff))), interval: 1, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{ type: 'bar', barWidth: 30,
+      data: diff.map((v) => ({ value: v, itemStyle: { color: v > 0 ? '#a9a9b4' : CHG, borderRadius: v > 0 ? [4, 4, 0, 0] : [0, 0, 4, 4] },
+        label: { position: v > 0 ? 'top' : 'bottom' } })),
+      label: { show: true, distance: 8, lineHeight: 20,
+        formatter: (p) => `${p.value > 0 ? '+' : ''}${p.value.toFixed(1)}%\n(${diffMs[p.dataIndex] > 0 ? '+' : ''}${diffMs[p.dataIndex]} ms)`, ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } }],
+  });
+  // Change by percentile as a line (P10 to P99), the usual percentiles marked with % and ms.
+  const MARKS = [10, 25, 50, 75, 95, 99];
+  const changeLine = (curve) => (el) => chart(el, {
+    grid: { left: 80, right: 50, top: 60, bottom: 60 },
+    xAxis: { type: 'value', min: 10, max: 99, interval: 10, name: 'percentile', nameLocation: 'middle', nameGap: 36,
+      nameTextStyle: txt({ color: MUTED, fontSize: 17 }), axisLine: { show: false }, axisTick: { show: false },
+      splitLine: { show: false }, axisLabel: txt({ color: FAINT, fontSize: 16, formatter: (v) => 'P' + v }) },
+    yAxis: valueAxis({ min: -4, max: Math.max(0, Math.ceil(Math.max(...curve.map((c) => c[1])))), interval: 1,
+      name: 'change vs control, lower is faster', nameLocation: 'end', nameGap: 18,
+      nameTextStyle: txt({ color: MUTED, fontSize: 17, align: 'left' }), axisLabel: txt({ color: FAINT, fontSize: 16, formatter: pct }) }),
+    series: [{ type: 'line', data: curve.map((c) => [c[0], c[1]]), showSymbol: false, smooth: false,
+      lineStyle: { color: CHG, width: 3.5 },
+      areaStyle: { color: 'rgba(27,175,122,0.10)', origin: 0 },
+      markLine: { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: INK, width: 1.5, type: 'solid' }, data: [{ yAxis: 0 }] },
+      markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: CHG, borderColor: '#fff', borderWidth: 2 },
+        data: MARKS.map((q) => { const c = curve.find((x) => x[0] === q); const up = c[1] > 0;
+          const pos = q === 99 ? 'left' : q === 95 ? 'top' : q === 10 ? 'right' : 'bottom';
+          return { coord: [c[0], c[1]], label: { position: pos, distance: 10,
+            formatter: `P${q}\n${up ? '+' : ''}${c[1].toFixed(1)}%\n(${c[2] > 0 ? '+' : ''}${c[2]} ms)` } }; }),
+        label: { show: true, lineHeight: 19, backgroundColor: 'rgba(255,255,255,0.9)', padding: [2, 4], ...txt({ color: INK, fontWeight: 700, fontSize: 15 }) } },
+    }],
+  });
+  Charts.register('c-rel-fcp', changeLine(D.report.fcpCurve));
+  Charts.register('c-rel-lcp', changeLine(D.report.lcpCurve));
+
+
+  // Happy Eyeballs race, animated. Simplified, but order and delays follow Firefox:
+  // DNS for HTTPS, AAAA and A at once; start once the HTTPS answer is in; endpoints
+  // interleaved QUIC/IPv6, QUIC/IPv4, TCP/IPv6, TCP/IPv4; attempts 0, 50, 150, 350 ms
+  // after the first; the first to connect wins, the rest is cancelled.
+  const RACE = {
+    a: { end: 58, ms: 2600, dns: [['HTTPS record', 28], ['AAAA (IPv6)', 18], ['A (IPv4)', 14]],
+      attempts: [['QUIC over IPv6', 28, 58, 'win'], ['QUIC over IPv4', 78], ['TCP over IPv6', 178], ['TCP over IPv4', 378]],
+      steps: [[0, 'Ask DNS for the HTTPS record, AAAA and A at once.'], [28, 'Answers are in: start the best option, QUIC over IPv6.'], [58, 'QUIC connects. Nothing else to try.']] },
+    b: { end: 223, ms: 6000, dns: [['HTTPS record', 28], ['AAAA (IPv6)', 18], ['A (IPv4)', 14]],
+      attempts: [['QUIC over IPv6', 28, null, 'lose'], ['QUIC over IPv4', 78, null, 'lose'], ['TCP over IPv6', 178, 223, 'win'], ['TCP over IPv4', 378]],
+      steps: [[0, 'Ask DNS for the HTTPS record, AAAA and A at once.'], [28, 'Start the best option: QUIC over IPv6.'],
+        [78, 'No answer after 50 ms: also try QUIC over IPv4.'], [178, 'Still nothing: also try TCP over IPv6.'],
+        [223, 'TCP connects first. The rest is cancelled, the user does not notice.']] },
+  };
+  const raceSvg = (sc, t) => {
+    const W = 1180, X0 = 250, X1 = 1150, TMAX = 300, x = (ms) => X0 + (X1 - X0) * Math.min(ms, TMAX) / TMAX;
+    const LANE = 46, y0 = 30, done = t >= sc.end;
+    let s = `<svg viewBox="0 0 ${W} 470" width="100%" height="100%">`;
+    const text = (tx, ty, str, o = {}) => `<text x="${tx}" y="${ty}" font-size="${o.size || 22}" fill="${o.fill || INK}" font-weight="${o.bold ? 700 : 400}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}>${str}</text>`;
+    // A growing attempt is drawn as separate dashed edges, each anchored at its start, so
+    // the dash pattern stays put while the box grows (a dashed rect would re-lay its dashes).
+    const dashed = (x0, x1, yy, h, closed) => {
+      const st = 'stroke="#a9a9b4" stroke-width="2" stroke-dasharray="6 5"';
+      let g = `<line x1="${x0}" y1="${yy}" x2="${x1}" y2="${yy}" ${st}/>`
+        + `<line x1="${x0}" y1="${yy + h}" x2="${x1}" y2="${yy + h}" ${st}/>`
+        + `<line x1="${x0}" y1="${yy}" x2="${x0}" y2="${yy + h}" ${st}/>`;
+      if (closed) g += `<line x1="${x1}" y1="${yy}" x2="${x1}" y2="${yy + h}" ${st}/>`;
+      return g;
+    };
+    const rows = [...sc.dns.map((d) => ({ kind: 'dns', label: 'DNS: ' + d[0], start: 0, stop: d[1] })),
+      ...sc.attempts.map((a, i) => ({ kind: a[3] || 'never', label: `${i + 1}: ${a[0]}`, start: a[1], stop: a[2] }))];
+    rows.forEach((r, i) => {
+      const yy = y0 + i * LANE + (r.kind === 'dns' ? 0 : 16), mid = yy + 13;
+      const started = t >= r.start, cancelled = done && r.kind === 'lose';
+      s += text(0, mid + 7, r.label, { bold: true, fill: started || r.kind === 'dns' ? INK : FAINT });
+      if (r.kind === 'dns' && t > 0) {
+        s += `<rect x="${x(0)}" y="${yy + 3}" width="${x(Math.min(t, r.stop)) - x(0)}" height="20" rx="4" fill="${t >= r.stop ? NEW : '#c9c9d1'}" opacity="${t >= r.stop ? 0.55 : 1}"/>`;
+      } else if (r.kind === 'win' && started) {
+        if (t >= r.stop) {
+          s += `<rect x="${x(r.start)}" y="${yy}" width="${x(r.stop) - x(r.start)}" height="26" rx="4" fill="${NEW}"/>`;
+          s += text(x(r.stop) + 10, mid + 7, 'connected', { bold: true });
+        } else s += dashed(x(r.start), x(t), yy, 26, false);
+      } else if (r.kind === 'lose' && started) {
+        const w = x(Math.min(t, sc.end)) - x(r.start);
+        s += `<g opacity="${cancelled ? 0.45 : 1}">` + dashed(x(r.start), x(r.start) + w, yy, 26, cancelled);
+        if (w > 140) s += text(x(r.start) + 12, mid + 7, cancelled ? 'no answer, cancelled' : 'no answer', { size: 18, fill: MUTED });
+        s += '</g>';
+      } else if (r.kind === 'never' && done) {
+        s += text(r.start < TMAX ? x(r.start) : X1, mid + 7, 'never started', { size: 18, fill: FAINT, anchor: r.start < TMAX ? null : 'end' });
+      }
+    });
+    const ay = y0 + rows.length * LANE + 30;
+    s += `<line x1="${X0}" y1="${ay}" x2="${X1}" y2="${ay}" stroke="${HAIR}" stroke-width="2"/>`;
+    for (let ms = 0; ms <= TMAX; ms += 50) s += text(x(ms), ay + 26, ms === 0 ? '0 ms' : ms, { size: 16, fill: FAINT, anchor: 'middle' });
+    const cx = x(Math.min(t, sc.end));
+    s += `<line x1="${cx}" y1="${y0 - 6}" x2="${cx}" y2="${ay}" stroke="${tok('--accent', '#e66000')}" stroke-width="2.5"/>`;
+    if (!done) s += text(cx + 8, y0 + 4, Math.round(t) + ' ms', { size: 16, fill: tok('--accent', '#e66000'), bold: true });
+    const step = sc.steps.filter((p) => t >= p[0]).pop();
+    s += text(0, ay + 68, step[1], { size: 26, bold: true });
+    return s + '</svg>';
+  };
+  const printing = /print-pdf/i.test(window.location.search);
+  // Plays the race, holds the final state, then starts over, for as long as the slide is shown.
+  const raceRun = (el, final) => {
+    const sc = RACE[el.dataset.sc];
+    if (el._raf) cancelAnimationFrame(el._raf);
+    if (el._timer) clearTimeout(el._timer);
+    if (final) { el.innerHTML = raceSvg(sc, sc.end); return; }
+    const t0 = performance.now(), hold = 400, rest = 3000;
+    const frame = (now) => {
+      const p = Math.max(0, (now - t0 - hold) / sc.ms);
+      el.innerHTML = raceSvg(sc, Math.min(1, p) * sc.end);
+      if (p < 1) el._raf = requestAnimationFrame(frame);
+      else el._timer = setTimeout(() => { if (el._live) raceRun(el, false); }, rest);
+    };
+    el._raf = requestAnimationFrame(frame);
+  };
+  const raceAll = () => document.querySelectorAll('.race-anim').forEach((el) => {
+    const live = !printing && el.closest('section') === Reveal.getCurrentSlide();
+    if (live && el._live) return;
+    el._live = live;
+    raceRun(el, !live);
+  });
+  document.querySelectorAll('.race-anim').forEach((el) => el.addEventListener('click', () => raceRun(el, false)));
+  Reveal.on('ready', raceAll);
+  Reveal.on('slidechanged', raceAll);
+
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.045,
+    hash: true, slideNumber: 'c/t', zoomKey: 'alt', transition: 'fade', transitionSpeed: 'fast',
+    pdfSeparateFragments: false,
+    plugins: [RevealNotes, RevealHighlight, RevealZoom],
+  });
+  const render = () => { if (window.Charts) Charts.renderAll(); if (window.Seq) Seq.renderAll(); };
+  Reveal.on('ready', () => setTimeout(render, 0));
+  Reveal.on('slidechanged', render);
+  const rpStep = () => document.querySelectorAll('.rp').forEach(seqApply);
+  Reveal.on('fragmentshown', rpStep);
+  Reveal.on('fragmenthidden', rpStep);
+  Reveal.on('resize', () => setTimeout(render, 60));
+  window.addEventListener('load', () => setTimeout(render, 120));
+</script>
+</body>
+</html>
