@@ -25,19 +25,20 @@ with 0-RTT on a repeat visit the request goes out in the very first packet. But
 HTTP/3 does not work everywhere: some networks block UDP, and VPNs and antivirus
 software break QUIC.
 
-Happy Eyeballs v3, currently being standardized at the IETF, changes the
-economics of turning on new protocols. The browser falls back to a working option
-faster and more safely, so you can offer HTTP/3 without paying a connection-setup
-penalty when a path is broken or blocked. Firefox is shipping it, built on an
-open-source, sans-I/O Rust library (https://github.com/mozilla/happy-eyeballs). I
-will show what its performance impact looks like from the vantage point of
-millions of Firefox clients: HTTP/3 went from 20% to 26% of page loads on a new
-connection, and first contentful paint got faster at every percentile.
+Every major browser already races connection options in some way. Happy Eyeballs
+v3, currently being standardized at the IETF, defines how. With it, the browser
+falls back to a working option faster and more safely. So you can enable HTTP/3
+without paying a connection-setup penalty when a path is broken or blocked.
+Firefox ships Happy Eyeballs v3, built on an open-source, sans-I/O Rust library
+(https://github.com/mozilla/happy-eyeballs). I will show its impact on millions of
+Firefox clients: HTTP/3 went from 20% to 26% of page loads on a new connection,
+and first contentful paint got faster at every percentile.
 
-Clients can only race what servers advertise. Enable HTTP/3, advertise it with an
-Alt-Svc header and an HTTPS DNS record, and enable 0-RTT. Finally, you will learn
-how to check your own site with savearoundtrip.com (https://savearoundtrip.com/),
-a small tool I built for exactly this.
+So what do servers need to do to save a round trip? Browsers can only race what
+servers advertise. Enable HTTP/3, advertise it with an Alt-Svc header and an
+HTTPS DNS record, and enable 0-RTT. Finally, you will learn how to check your own
+site with savearoundtrip.com (https://savearoundtrip.com/), a small tool I built
+for exactly this.
 
 ## Submission notes (only the organizers see these)
 
@@ -57,8 +58,7 @@ a small tool I built for exactly this.
 ## Speaker bio
 
 Max is a software developer interested in networking, distributed systems and type
-theory. He
-works on Firefox's networking stack at Mozilla, focusing on HTTP/3, QUIC and Happy
+theory. He works on Firefox's networking stack at Mozilla, focusing on HTTP/3, QUIC and Happy
 Eyeballs v3, and contributes to the IETF. Before Mozilla, he led the peer-to-peer
 networking project libp2p (https://libp2p.io/) and worked on the Prometheus
 monitoring system and its Kubernetes integration. More at https://max-inden.de/
