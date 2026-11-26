@@ -19,26 +19,29 @@ anymore. A browser now races IPv4 against IPv6, HTTP/3 against HTTP/2 and HTTP/1
 and even DNS A and AAAA records against the newer HTTPS records. The number of
 address and protocol combinations keeps growing.
 
-Why bother? Over TCP with TLS 1.3, a browser waits two round trips before it can
-send its first request: one for TCP, one for TLS. QUIC (HTTP/3) needs one, and
-with 0-RTT on a repeat visit the request goes out in the very first packet. But
-HTTP/3 does not work everywhere: some networks block UDP, and VPNs and antivirus
-software break QUIC.
+Why bother? Over TCP with TLS 1.3, a browser needs two round trips before it can
+send its first HTTP request: one for the TCP handshake, one for the TLS handshake.
+QUIC (HTTP/3) combines both into a single round trip, and with 0-RTT on a repeat
+visit the request goes out in the very first packet. But HTTP/3 does not work
+everywhere: some networks block UDP, others break HTTP/3, and some antivirus
+software tampers with it.
 
 Every major browser already races connection options in some way. Happy Eyeballs
-v3, currently being standardized at the IETF, defines how. With it, the browser
-falls back to a working option faster and more safely. So you can enable HTTP/3
-without paying a connection-setup penalty when a path is broken or blocked.
-Firefox ships Happy Eyeballs v3, built on an open-source, sans-I/O Rust library
-(https://github.com/mozilla/happy-eyeballs). I will show its impact on millions of
-Firefox clients: HTTP/3 went from 20% to 26% of page loads on a new connection,
-and first contentful paint got faster at every percentile.
+v3, currently being standardized at the IETF, brings these approaches together in
+one common algorithm, for browsers and any other client. The client races the
+available options, uses the first one that connects, and safely falls back when
+a path is broken or blocked. So website operators can enable HTTP/3 without the
+risk of their site not loading. Firefox is rolling out Happy Eyeballs v3, built
+on an open-source, sans-I/O Rust library
+(https://github.com/mozilla/happy-eyeballs). I will show its impact on millions
+of Firefox clients: HTTP/3 went from 20% to 26% of page loads on a new
+connection, and first contentful paint got faster at every percentile.
 
-So what do servers need to do to save a round trip? Browsers can only race what
-servers advertise. Enable HTTP/3, advertise it with an Alt-Svc header and an
-HTTPS DNS record, and enable 0-RTT. Finally, you will learn how to check your own
-site with savearoundtrip.com (https://savearoundtrip.com/), a small tool I built
-for exactly this.
+So what do servers need to do to save a round trip? Clients can only race what
+servers enable and advertise. Enable HTTP/3, advertise it with an Alt-Svc header
+and an HTTPS DNS record, and enable 0-RTT. Finally, you will learn how to check
+your own site with savearoundtrip.com (https://savearoundtrip.com/), a small tool
+I built for exactly this.
 
 ## Submission notes (only the organizers see these)
 
