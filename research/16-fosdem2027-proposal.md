@@ -14,26 +14,30 @@ Network
 
 ## Abstract
 
-Connecting to a website used to be simple: open a TCP connection, send the
-request. Today a browser chooses between IPv4 and IPv6, HTTP/3 and HTTP/2, A/AAAA
-and HTTPS DNS records, and the combinations keep growing.
+Connecting to a website used to be simple: resolve a name, open a connection. Not
+anymore. A browser now races IPv4 against IPv6, HTTP/3 against HTTP/2 and HTTP/1,
+and even DNS A and AAAA records against the newer HTTPS records. The number of
+address and protocol combinations keeps growing.
 
-The choice matters. Over TCP with TLS 1.3, a browser waits two round trips before
-it can send its first request: one for TCP, one for TLS. QUIC (HTTP/3) needs one,
-and with 0-RTT on a repeat visit the request goes out in the very first packet.
-But HTTP/3 does not work everywhere: some networks block UDP, and VPNs and
-antivirus software break QUIC.
+Why bother? Over TCP with TLS 1.3, a browser waits two round trips before it can
+send its first request: one for TCP, one for TLS. QUIC (HTTP/3) needs one, and
+with 0-RTT on a repeat visit the request goes out in the very first packet. But
+HTTP/3 does not work everywhere: some networks block UDP, and VPNs and antivirus
+software break QUIC.
 
-Happy Eyeballs v3, being standardized at the IETF, lets the browser race all
-options and keep whichever connects first. Firefox is shipping it, built on an
-open-source, sans-I/O Rust library (https://github.com/mozilla/happy-eyeballs).
-Data from millions of Firefox clients: HTTP/3 went from 20% to 26% of page loads
-on a new connection, and first contentful paint got faster at every percentile.
+Happy Eyeballs v3, currently being standardized at the IETF, changes the
+economics of turning on new protocols. The browser falls back to a working option
+faster and more safely, so you can offer HTTP/3 without paying a connection-setup
+penalty when a path is broken or blocked. Firefox is shipping it, built on an
+open-source, sans-I/O Rust library (https://github.com/mozilla/happy-eyeballs). I
+will show what its performance impact looks like from the vantage point of
+millions of Firefox clients: HTTP/3 went from 20% to 26% of page loads on a new
+connection, and first contentful paint got faster at every percentile.
 
-Clients can only race what servers advertise. So the call to action is for server
-operators: enable HTTP/3, advertise it with an Alt-Svc header and an HTTPS DNS
-record, and enable 0-RTT. I will show how to check your own site with
-savearoundtrip.com (https://savearoundtrip.com/), a small tool I built for this.
+Clients can only race what servers advertise. Enable HTTP/3, advertise it with an
+Alt-Svc header and an HTTPS DNS record, and enable 0-RTT. Finally, you will learn
+how to check your own site with savearoundtrip.com (https://savearoundtrip.com/),
+a small tool I built for exactly this.
 
 ## Submission notes (only the organizers see these)
 
@@ -52,7 +56,8 @@ savearoundtrip.com (https://savearoundtrip.com/), a small tool I built for this.
 
 ## Speaker bio
 
-Max is a software developer interested in networking and distributed systems. He
+Max is a software developer interested in networking, distributed systems and type
+theory. He
 works on Firefox's networking stack at Mozilla, focusing on HTTP/3, QUIC and Happy
 Eyeballs v3, and contributes to the IETF. Before Mozilla, he led the peer-to-peer
 networking project libp2p (https://libp2p.io/) and worked on the Prometheus
