@@ -6,7 +6,7 @@ devroom on Saturday 30 January 2027. Short talks are 20 to 25 minutes.
 
 ## Title
 
-Save a round trip: HTTP/3 and Happy Eyeballs v3
+Save a round trip with HTTP/3 and Happy Eyeballs v3
 
 ## Track
 
